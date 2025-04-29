@@ -1,0 +1,6 @@
+-Se crear dentrop de pages Dashboard.jsx
+
+-se configura APP.js para que que el header y el footer siempre esten en el lugar fijo
+evitando que se muevan cuando no hay contenido o hay poco contenido
+
+-se importa a APP.js el dashboard
