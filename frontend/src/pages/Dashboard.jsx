@@ -1,3 +1,4 @@
+import DashboardNavbar from "../componentes/DashboardNavbar";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -18,7 +19,7 @@ const Dashboard = () => {
   const [stats, setStats] = useState({ total: 0, public: 0, private: 0, draft: 0 });
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState("grid"); // 'grid' o 'list'
-  const [filterCategory, setFilterCategory] = useState(null); // null | 'favoritas' | 'guardadas'
+  const [filterCategory, setFilterCategory] = useState(null); // null | 'favoritas' | 'guardadas' | 'Pública' | 'Privada' | 'Borrador'
 
   useEffect(() => {
     // Mock de datos; luego integra con axios
@@ -35,23 +36,30 @@ const Dashboard = () => {
       draft: mockApis.filter(a => a.visibilidad === "Borrador").length,
     });
   }, []);
-
   const handleCategory = (category) => {
-    setFilterCategory(prev => (prev === category ? null : category));
+      setFilterCategory((prev) => (prev === category ? null : category));
   };
-
   const filteredApis = apis.filter(api => {
     const matchesSearch = api.nombre.toLowerCase().includes(searchTerm.toLowerCase());
     if (!matchesSearch) return false;
     if (filterCategory === 'favoritas') return api.favorito;
     if (filterCategory === 'guardadas') return api.guardada;
+    if(filterCategory === 'Pública'){
+      return api.visibilidad === 'Pública';
+    }
+    if(filterCategory === 'Privada'){
+      return api.visibilidad === 'Privada';
+    }
+    if(filterCategory === 'Borrador'){
+      return api.visibilidad === 'Borrador';
+    }
     return true;
   });
-
   const cardClass = (active) =>
     `cursor-pointer rounded-xl shadow p-6 text-center ${active ? "bg-[#0077ba] text-white" : "bg-white"}`;
-
   return (
+    <>
+    <DashboardNavbar/>
     <div className="flex min-h-screen bg-gray-50 pt-2 ">
       {/* Sidebar */}
       <aside className="w-56 bg-white shadow-lg p-4 sticky inset-y-16 left-0 overflow-auto">
@@ -110,7 +118,6 @@ const Dashboard = () => {
           </ul>
         </nav>
       </aside>
-
       {/* Contenido principal */}
       <main className="flex-1 p-8 ml-8">
         <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
@@ -130,27 +137,25 @@ const Dashboard = () => {
             </button>
           </div>
         </div>
-
         {/* Estadísticas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className={cardClass(filterCategory === null)} onClick={() => handleCategory(null)}>
             <h2 className="text-2xl font-semibold">{stats.total}</h2>
             <p className="text-sm">Total de APIs</p>
           </div>
-          <div className={cardClass(false)}>
+          <div className={cardClass(filterCategory === 'Pública')} onClick={()=> handleCategory('Pública')}>
             <h2 className="text-2xl font-semibold">{stats.public}</h2>
             <p className="text-sm">Públicas</p>
           </div>
-          <div className={cardClass(false)}>
+          <div className={cardClass(filterCategory === 'Privada')} onClick={()=> handleCategory('Privada')}>
             <h2 className="text-2xl font-semibold">{stats.private}</h2>
             <p className="text-sm">Privadas</p>
           </div>
-          <div className={cardClass(false)}>
+          <div className={cardClass(filterCategory === 'Borrador')} onClick={()=> handleCategory('Borrador')}>
             <h2 className="text-2xl font-semibold">{stats.draft}</h2>
-            <p className="text-sm">Borradores</p>
+            <p className="text-sm">Borrador</p>
           </div>
         </div>
-
         {/* Vista de APIs */}
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -201,7 +206,7 @@ const Dashboard = () => {
         )}
       </main>
     </div>
+    </>
   );
 };
-
 export default Dashboard;
