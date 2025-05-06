@@ -25,8 +25,9 @@ const CrearApi = () => {
       setVersion("1.0");
       setVisibilidad("Pública");
     } catch (error) {
-      console.error("Error al registrar la API:", error);
-      alert("Error al registrar la API");
+      console.error("Status:", error.response?.status);
+      console.error("Body:", error.response?.data);
+      alert(`Error al registrar la API (code ${error.response?.status})`);
     }
   };
 
