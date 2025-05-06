@@ -17,11 +17,20 @@ def lista_apis(request):
 
 @csrf_exempt
 def crear_api(request):
-    """
-    POST: crea una nueva API a partir de un JSON
-    """
     if request.method == 'POST':
-        data = json.loads(request.body)
+        # Decodifica y registra el BODY tal cual viene
+        raw = request.body.decode('utf-8')
+        print("🔍 RAW REQUEST.BODY:", repr(raw))
+
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            return JsonResponse({
+                "error": "JSON inválido o vacío",
+                "received_body": raw
+            }, status=400)
+
+        # Ahora puedes confiar en data['nombre'], etc.
         nueva_api = Api.objects.create(
             nombre=data['nombre'],
             descripcion=data['descripcion'],

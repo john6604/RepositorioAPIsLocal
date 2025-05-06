@@ -12,7 +12,7 @@ const CrearApi = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const nuevaApi = { nombre, descripcion, version, visibilidad };
-
+    console.log("ENVIANDOOO",nuevaApi);
     try {
       const response = await axios.post(
         `${API_BASE_URL}/crear/`,
