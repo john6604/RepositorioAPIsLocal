@@ -1,7 +1,10 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import Api
+from .models import API
+from rest_framework import viewsets
+from .models import API
+from .serializers import APISerializer
 
 @csrf_exempt
 def lista_apis(request):
@@ -9,7 +12,7 @@ def lista_apis(request):
     GET: devuelve todas las APIs en JSON
     """
     if request.method == 'GET':
-        apis = Api.objects.all().values('id', 'nombre', 'descripcion', 'version', 'visibilidad')
+        apis = API.objects.all().values('id', 'nombre', 'descripcion', 'version', 'visibilidad')
         # convertimos el QuerySet a lista de dicts
         data = list(apis)
         return JsonResponse(data, safe=False)
@@ -39,3 +42,7 @@ def crear_api(request):
         )
         return JsonResponse({'mensaje': 'API creada exitosamente', 'id': nueva_api.id})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+class APIViewSet(viewsets.ModelViewSet):
+    queryset = API.objects.all()
+    serializer_class = APISerializer

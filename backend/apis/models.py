@@ -1,6 +1,6 @@
 from django.db import models
 
-class Api(models.Model):
+class API(models.Model):
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField()
     version = models.CharField(max_length=10)
