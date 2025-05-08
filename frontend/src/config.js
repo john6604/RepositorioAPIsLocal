@@ -1,5 +1,11 @@
 // src/config.js
-export const API_BASE_URL =
+/*export const API_BASE_URL =
   process.env.NODE_ENV === 'production'
-    ? 'https://tu-app.up.railway.app/api'
-    : 'http://127.0.0.1:8000/api';
+    // pónguele https:// y el path /api
+    ? 'https://meticulous-perception-production.up.railway.app/api/'
+    : 'http://127.0.0.1:8000/api';*/
+    // src/config.js
+export const API_BASE_URL =
+/* para test rápido */
+'https://tu-proyecto.up.railway.app/api';
+

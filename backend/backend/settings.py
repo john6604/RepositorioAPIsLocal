@@ -116,3 +116,4 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Auto-field por defecto
 # ------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CORS_ALLOW_CREDENTIALS = True  
