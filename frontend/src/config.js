@@ -7,5 +7,5 @@
     // src/config.js
 export const API_BASE_URL =
 /* para test rápido */
-'https://tu-proyecto.up.railway.app/api';
+'https://meticulous-perception-production.up.railway.app/api';
 

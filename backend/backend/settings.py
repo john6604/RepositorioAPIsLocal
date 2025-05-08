@@ -72,17 +72,24 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 #
 # dj-database-url la parsea automáticamente:
 
-DATABASES = {
-    'default': {
-        'ENGINE':   'django.db.backends.postgresql',
-        'NAME':     'gestorapis_utf8',
-        'USER':     'postgres',
-        'PASSWORD': 'admin',   
-        'HOST':     'localhost',
-        'PORT':     '5432',
-    }
-}
+#DATABASES = {
+#    'default': {
+#       'ENGINE':   'django.db.backends.postgresql',
+ #       'NAME':     'gestorapis_utf8',
+ #       'USER':     'postgres',
+ #       'PASSWORD': 'admin',   
+ #       'HOST':     'localhost',
+ #       'PORT':     '5432',
+ #   }
+#}
 
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv('BD'),  # así obtiene tu env var
+        conn_max_age=600,
+        ssl_require=True,                  # en prod suele ir en True
+    )
+}
 # ------------------------------------------------------------------
 # Validación de contraseñas
 # ------------------------------------------------------------------
