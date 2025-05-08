@@ -83,11 +83,13 @@ WSGI_APPLICATION = 'backend.wsgi.application'
  #   }
 #}
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('BD'),  # así obtiene tu env var
+        default=os.environ.get('BD'),
         conn_max_age=600,
-        ssl_require=True,                  # en prod suele ir en True
+        ssl_require=True,    # en prod con Railway suele ser required
     )
 }
 # ------------------------------------------------------------------
