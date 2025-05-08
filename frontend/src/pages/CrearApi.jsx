@@ -15,7 +15,7 @@ const CrearApi = () => {
     console.log("ENVIANDOOO",nuevaApi);
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/crear/`,
+        `${API_BASE_URL}/apis/`,
         nuevaApi
       );
       alert("API registrada correctamente con ID: " + response.data.id);
