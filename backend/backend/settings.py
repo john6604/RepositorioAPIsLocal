@@ -2,12 +2,13 @@ import os
 from pathlib import Path
 import dj_database_url
 
-# Construye rutas dentro del proyecto
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: mantener en secreto
-SECRET_KEY = 'django-insecure-m#73dlwv)ks+)sd)m&6i3ko0k0lpz112v9=+z-kfhr0@679x#8'
-DEBUG = True
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "admin")
+DEBUG      = os.environ.get("DJANGO_DEBUG", "False") == "True"
+
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
@@ -27,7 +28,7 @@ INSTALLED_APPS = [
 
     # Terceros
     'corsheaders',
-
+    'rest_framework',
     # Tu app
     'apis',
 ]
@@ -83,13 +84,14 @@ WSGI_APPLICATION = 'backend.wsgi.application'
  #   }
 #}
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+
+#DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
         conn_max_age=600,
-        ssl_require=True,    # en prod con Railway suele ser required
+        ssl_require=not DEBUG,
     )
 }
 
