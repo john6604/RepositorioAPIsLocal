@@ -78,3 +78,16 @@ git add .
 git status //ver los archivos que se van a actualizar 
 git commit - m "TITULO"
 git push --force origin main
+
+//Migrar a postgress en railway
+# Sitúate en tu carpeta backend
+cd APIS/gestorAPIs-main/backend
+
+# Asegúrate de estar “linked” al proyecto correcto
+railway link
+
+# Instala deps (por si acaso):
+railway run pip install -r requirements.txt
+
+# Aplica migraciones:
+railway run python manage.py migrate --no-input
