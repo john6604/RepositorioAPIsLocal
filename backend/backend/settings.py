@@ -94,6 +94,16 @@ DATABASES = {
         ssl_require=not DEBUG,
     )
 }
+if os.environ.get("RAILWAY_ENVIRONMENT") == "production":
+    DATABASES['default'] = {
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     os.environ['PGDATABASE'],               # ej. "railway"
+        'USER':     os.environ['PGUSER'],                   # ej. "postgres"
+        'PASSWORD': os.environ['PGPASSWORD'],               # contraseña larga
+        'HOST':     os.environ['RAILWAY_TCP_PROXY_DOMAIN'], # ej. "nozomi.proxy.rlwy.net"
+        'PORT':     os.environ['RAILWAY_TCP_PROXY_PORT'],   # ej. "10812"
+        'OPTIONS':  {'sslmode': 'require'},
+    }
 
 # ------------------------------------------------------------------
 # Validación de contraseñas
