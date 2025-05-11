@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Navbar from "../componentes/Navbar";
+import { Link } from "react-router-dom";
 
 const Registro = () => {
   const [correo, setCorreo] = useState("");
@@ -40,8 +42,10 @@ const Registro = () => {
     }`;
 
   return (
+    <>
+    <Navbar/>
     <div className="max-w-md mx-auto mt-16 p-8 bg-white shadow-xl rounded-xl">
-      <h2 className="text-2xl font-semibold mb-6 text-blue-900">Registro de Usuario</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-[#0077ba]">Registro de Usuario</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm">Correo electrónico</label>
@@ -75,12 +79,19 @@ const Registro = () => {
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-800 hover:bg-blue-900 text-white py-2 rounded-md transition duration-200"
+          className="w-full bg-[#0077ba] hover:bg-[#00509e] text-white py-2 rounded-md transition duration-200"
         >
           Registrarse
         </button>
       </form>
+      <p className="text-sm text-center mt-4">
+        Ya tiene una cuenta.{" "}
+        <Link to="/login" className="text-[#0077ba] underline hover:text-[#00509e]">
+          Iniciar Sesión.
+        </Link>
+      </p>
     </div>
+  </>
   );
 };
 

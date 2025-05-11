@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Navbar from "../componentes/Navbar";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const [correo, setCorreo] = useState("");
@@ -38,7 +39,13 @@ const Login = () => {
     <>
     <Navbar/>
     <div className="max-w-md mx-auto mt-16 p-8 bg-white shadow-xl rounded-xl">
-      <h2 className="text-2xl font-semibold mb-6 text-[#0077ba]">Iniciar Sesión</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-[#0077ba] text-center">Iniciar Sesión</h2>
+      <p className="text-sm text-center mb-4">
+        No tiene una cuenta.{" "}
+        <Link to="/registro" className="text-[#0077ba] underline hover:text-[#00509e]">
+          Regístrate
+        </Link>
+      </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm">Correo electrónico</label>
@@ -67,6 +74,11 @@ const Login = () => {
           Iniciar Sesión
         </button>
       </form>
+      <p className="text-sm text-center mt-4">
+        <Link to="/registro" className="text-[#0077ba] underline hover:text-[#00509e]">
+          Olvidó su contraseña.
+        </Link>
+      </p>
     </div>
   </>
   );

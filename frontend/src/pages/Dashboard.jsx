@@ -1,228 +1,245 @@
+import DashboardNavbar from "../componentes/DashboardNavbar";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import axios from "axios";
+import { API_BASE_URL } from "../config";
+
 import {
-  House,
-  Menu,
-  Bell,
-  Plus,
-  Users,
-  LogOut,
-  User,
   Star,
-  FileText,
-  Settings,
-  Globe,
-  Search,
-  ChevronUp,
+  Eye,
+  User,
+  Home as HomeIcon,
+  Grid,
+  List,
   PlusCircle,
-  Clipboard
+  LogOut,
+  Bookmark,
 } from "lucide-react";
 
-const DashboardNavbar = () => {
-  const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
-  const [menuLateralAbierto, setMenuLateralAbierto] = useState(false);
-  const [busquedaActiva, setBusquedaActiva] = useState(false);
-  const [mostrarBusqueda, setMostrarBusqueda] = useState(false);
 
-  const toggleMenuLateral = () => {
-    setMenuLateralAbierto(!menuLateralAbierto);
+const Dashboard = () => {
+  const [apis, setApis] = useState([]);
+  const [stats, setStats] = useState({ total: 0, public: 0, private: 0, draft: 0 });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState("grid"); // 'grid' o 'list'
+  const [filterCategory, setFilterCategory] = useState(null); // null | 'favoritas' | 'guardadas' | 'Pública' | 'Privada' | 'Borrador'
+
+  // Traer APIs de tu backend
+  const fetchApis = async () => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/apis/`);
+      setApis(data);
+      setStats({
+        total: data.length,
+        public: data.filter(a => a.visibilidad === "Pública").length,
+        private: data.filter(a => a.visibilidad === "Privada").length,
+        draft: data.filter(a => a.visibilidad === "Borrador").length,
+      });
+    } catch (err) {
+      console.error("No se pudieron cargar las APIs:", err);
+    }
   };
+  fetchApis();
 
-  const cerrarSesion = () => {
-    localStorage.clear();
-    window.location.href = '/';
+  //agregar un lading mientras carga
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchApis = async () => {
+      try {
+        const { data } = await axios.get(`${API_BASE_URL}/apis/`);
+        setApis(data);
+        // … stats …
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchApis();
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <DashboardNavbar />
+        <div className="flex justify-center items-center h-screen">
+          <p>Cargando APIs…</p>
+        </div>
+      </>
+    );
+  }
+
+  const handleCategory = (category) => {
+    setFilterCategory((prev) => (prev === category ? null : category));
   };
-
+  const filteredApis = apis.filter(api => {
+    const matchesSearch = api.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!matchesSearch) return false;
+    if (filterCategory === 'favoritas') return api.favorito;
+    if (filterCategory === 'guardadas') return api.guardada;
+    if (filterCategory === 'Pública') {
+      return api.visibilidad === 'Pública';
+    }
+    if (filterCategory === 'Privada') {
+      return api.visibilidad === 'Privada';
+    }
+    if (filterCategory === 'Borrador') {
+      return api.visibilidad === 'Borrador';
+    }
+    return true;
+  });
+  const cardClass = (active) =>
+    `cursor-pointer rounded-xl shadow p-6 text-center ${active ? "bg-[#0077ba] text-white" : "bg-white"}`;
   return (
     <>
-      <header className="bg-[#0077ba] text-white shadow-md w-full top-0 left-0 z-40 relative">
-        <div className="w-full px-4 py-4 md:py-5 flex items-center justify-between">
-          {/* Sección izquierda */}
-          <div className="flex items-center gap-4">
-            <button
-              onClick={toggleMenuLateral}
-              className="border border-[1px] border-white p-1 rounded hover:bg-[#003366] transition"
-            >
-              <Menu size={20} />
-            </button>
-            <Link to="/dashboard" className="mr-8 text-xl font-bold tracking-wide">
-              Dashboard
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4 relative flex-1 justify-end">
-            <div
-              className={`hidden md:flex -m-l-10 items-center bg-white/10 border border-white rounded-lg overflow-hidden px-3 py-1 backdrop-blur transition-all duration-300 ${
-                busquedaActiva ? 'flex-grow bg-black/30 border-white border-[3px] shadow-[0_0_10px_white]' : 'w-40'
-              }`}
-              onClick={() => setBusquedaActiva(true)}
-              onBlur={() => setBusquedaActiva(false)}
-              tabIndex={0}
-              style={{ minWidth: busquedaActiva ? '200px' : 'auto' }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 text-white/70 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z"
-                />
-              </svg>
-              <input
-                type="text"
-                placeholder="Buscar o ir a..."
-                className="bg-transparent outline-none text-md text-white placeholder-white/60 w-full"
-              />
-              <kbd className="ml-2 text-white/50 text-xs border border-white/30 rounded px-1">/</kbd>
-            </div>
-
-            <div className="hidden md:block h-6 w-px bg-white/30 mx-2"></div>
-
-            <button className="p-2 rounded hover:bg-[#003366] transition">
-              <Users size={20} />
-            </button>
-            <Link to="/crear" className="p-2 rounded hover:bg-[#003366] transition flex items-center">
-              <Plus size={20} />
-            </Link>
-            <button className="p-2 rounded hover:bg-[#003366] transition relative">
-              <Bell size={20} />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-
-            <div className="relative">
+      <DashboardNavbar />
+      <div className="flex min-h-screen bg-gray-50 pt-2 ">
+        {/* Sidebar */}
+        <aside className="w-56 bg-white shadow-lg p-4 sticky inset-y-16 left-0 overflow-auto">
+          <input
+            type="text"
+            placeholder="Buscar mi API..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm mb-6 focus:outline-none focus:ring-2 focus:ring-[#0077ba]"
+          />
+          <nav>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                  <HomeIcon className="w-5 h-5 text-gray-600" /> Home
+                </Link>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleCategory(null)}
+                  className={`flex w-full items-center gap-2 px-4 py-2 rounded ${filterCategory === null ? 'bg-gray-100 font-medium' : 'hover:bg-gray-100'}`}
+                >
+                  <List className="w-5 h-5 text-gray-600" /> Mis APIs
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleCategory('favoritas')}
+                  className={`flex w-full items-center gap-2 px-4 py-2 rounded ${filterCategory === 'favoritas' ? 'bg-gray-100 font-medium' : 'hover:bg-gray-100'}`}
+                >
+                  <Star className="w-5 h-5 text-gray-600" /> Favoritas
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleCategory('guardadas')}
+                  className={`flex w-full items-center gap-2 px-4 py-2 rounded ${filterCategory === 'guardadas' ? 'bg-gray-100 font-medium' : 'hover:bg-gray-100'}`}
+                >
+                  <Bookmark className="w-5 h-5 text-gray-600" /> Guardadas
+                </button>
+              </li>
+              <li>
+                <Link to="/crear" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                  <PlusCircle className="w-5 h-5 text-gray-600" /> Crear API
+                </Link>
+              </li>
+              <li className="mt-6">
+                <button
+                  onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
+                  className="flex items-center gap-2 px-4 py-2 w-full rounded hover:bg-gray-100 text-red-600"
+                >
+                  <LogOut className="w-5 h-5" /> Salir
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </aside>
+        {/* Contenido principal */}
+        <main className="flex-1 p-8 ml-8">
+          <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
+            <h1 className="text-3xl font-bold text-[#0077ba]">Dashboard de APIs</h1>
+            <div className="flex gap-2">
               <button
-                onClick={() => setMenuPerfilAbierto(true)}
-                className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden flex items-center justify-center focus:outline-none"
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-[#0077ba] text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
               >
-                <span className="text-sm text-black font-bold">JD</span>
+                <Grid className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded ${viewMode === 'list' ? 'bg-[#0077ba] text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
+              >
+                <List className="w-5 h-5" />
               </button>
             </div>
           </div>
-        </div>
-        {busquedaActiva && (
-          <div
-            className="fixed inset-0 bg-black/40 z-30"
-            onClick={() => setBusquedaActiva(false)}
-          />
-        )}
-      </header>
-
-      {/* Menú lateral */}
-      {menuLateralAbierto && (
-        <div className="fixed inset-0 z-40">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setMenuLateralAbierto(false)}></div>
-
-          <div className="rounded-md fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 p-6 overflow-y-auto animate-slide-in">
-            <h2 className="text-xl font-bold text-[#0077ba] mb-6">Menú</h2>
-            <ul className="space-y-3 text-gray-700 text-sm font-medium">
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition"><House size={18}/><Link to="/" onClick={toggleMenuLateral}>Home</Link></li>
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition"><User size={18}/><Link to="/perfil" onClick={toggleMenuLateral}>Mi Perfil</Link></li>
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition"><Clipboard size={18}/><Link to="/dashboard" onClick={toggleMenuLateral}>Dashboard</Link></li>
-            </ul>
-
-            <hr className="my-4 border-t border-gray-200" />
-
-            <ul className="space-y-3 text-gray-700 text-sm font-medium">
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition"><Settings size={18}/><Link to="/" onClick={toggleMenuLateral}>Configuración</Link></li>
-            </ul>
-
-            <hr className="my-4 border-t border-gray-200" />
-
-            <ul className="space-y-3 text-gray-700 text-sm font-medium">
-              <div className="hover:text-[#0077ba] transition">
-                <div className="flex items-center justify-between cursor-pointer"
-                    onClick={() => setMostrarBusqueda(!mostrarBusqueda)}>
-                  <span>APIs</span>
-                  {mostrarBusqueda ? <ChevronUp size={18} /> : <Search size={18} />}
-                </div>
-
-                {mostrarBusqueda && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder="Buscar APIs..."
-                      className="w-full px-3 py-2 border border-[#0077ba] rounded focus:outline-none focus:ring-2 focus:ring-[#0077ba]/50"
-                    />
+          {/* Estadísticas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className={cardClass(filterCategory === null)} onClick={() => handleCategory(null)}>
+              <h2 className="text-2xl font-semibold">{stats.total}</h2>
+              <p className="text-sm">Total de APIs</p>
+            </div>
+            <div className={cardClass(filterCategory === 'Pública')} onClick={() => handleCategory('Pública')}>
+              <h2 className="text-2xl font-semibold">{stats.public}</h2>
+              <p className="text-sm">Públicas</p>
+            </div>
+            <div className={cardClass(filterCategory === 'Privada')} onClick={() => handleCategory('Privada')}>
+              <h2 className="text-2xl font-semibold">{stats.private}</h2>
+              <p className="text-sm">Privadas</p>
+            </div>
+            <div className={cardClass(filterCategory === 'Borrador')} onClick={() => handleCategory('Borrador')}>
+              <h2 className="text-2xl font-semibold">{stats.draft}</h2>
+              <p className="text-sm">Borrador</p>
+            </div>
+          </div>
+          {/* Vista de APIs */}
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredApis.map(api => (
+                <Link
+                  to={`/api/${api.id}`}
+                  key={api.id}
+                  className="block bg-white rounded-xl shadow hover:shadow-md transition p-6"
+                >
+                  <div className="flex justify-between items-start">
+                    <h2 className="text-xl font-semibold text-[#0077ba]">{api.nombre}</h2>
+                    <span
+                      className={
+                        api.visibilidad === 'Pública'
+                          ? 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs'
+                          : api.visibilidad === 'Privada'
+                            ? 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs'
+                            : 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs'
+                      }
+                    >
+                      {api.visibilidad}
+                    </span>
                   </div>
-                )}
-              </div>
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition"><PlusCircle size={18}/><Link to="/crear" onClick={toggleMenuLateral}>Crear API</Link></li>
+                  <p className="text-gray-600 mt-2 text-sm">{api.descripcion}</p>
+                  <div className="flex items-center justify-between mt-4 text-gray-500 text-sm">
+                    <div className="flex items-center gap-1"><Star className="w-4 h-4" /><span>{api.estrellas}</span></div>
+                    <div className="flex items-center gap-1"><Eye className="w-4 h-4" /><span>{api.vistas}</span></div>
+                    <div className="flex items-center gap-1"><User className="w-4 h-4" /><span className="truncate max-w-[80px]">{api.autor}</span></div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <ul className="space-y-4">
+              {filteredApis.map(api => (
+                <li key={api.id} className="bg-white rounded-xl shadow p-4 flex justify-between items-center">
+                  <Link to={`/api/${api.id}`} className="text-[#0077ba] font-semibold hover:underline">
+                    {api.nombre}
+                  </Link>
+                  <div className="flex items-center gap-4 text-gray-500 text-sm">
+                    <div className="flex items-center gap-1"><Star className="w-4 h-4" /><span>{api.estrellas}</span></div>
+                    <div className="flex items-center gap-1"><Eye className="w-4 h-4" /><span>{api.vistas}</span></div>
+                    <div className="flex items-center gap-1"><User className="w-4 h-4" /><span className="truncate max-w-[80px]">{api.autor}</span></div>
+                  </div>
+                </li>
+              ))}
             </ul>
-          </div>
-        </div>
-      )}
-
-      {/* Menú de perfil */}
-      {menuPerfilAbierto && (
-        <div className="fixed inset-0 z-40">
-          <div
-            className="fixed inset-0 bg-black/50"
-            onClick={() => setMenuPerfilAbierto(false)}
-          ></div>
-
-          <div className="rounded-md fixed top-0 right-0 w-72 h-full bg-white shadow-lg z-50 p-6 overflow-y-auto animate-slide-in-right">
-            <h2 className="text-lg font-semibold text-[#0077ba] mb-4">Estado</h2>
-
-            <ul className="space-y-3 text-gray-700 text-sm font-medium">
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition">
-                <User size={18} />
-                <Link to="/perfil" onClick={() => setMenuPerfilAbierto(false)}>Tu Perfil</Link>
-              </li>
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition">
-                <FileText size={18} />
-                <Link to="/mis-apis" onClick={() => setMenuPerfilAbierto(false)}>Tus APIs</Link>
-              </li>
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition">
-                <Star size={18} />
-                <Link to="/favoritas" onClick={() => setMenuPerfilAbierto(false)}>Tus Favoritas</Link>
-              </li>
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition">
-                <FileText size={18} />
-                <Link to="/borradores" onClick={() => setMenuPerfilAbierto(false)}>Tus Borradores</Link>
-              </li>
-            </ul>
-
-            <hr className="my-4 border-t border-gray-200" />
-
-            <ul className="space-y-3 text-gray-700 text-sm font-medium">
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition">
-                <Settings size={18} />
-                <Link to="/perfilConfig" onClick={() => setMenuPerfilAbierto(false)}>Configuración</Link>
-              </li>
-            </ul>
-
-            <hr className="my-4 border-t border-gray-200" />
-
-            <ul className="space-y-3 text-gray-700 text-sm font-medium">
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition">
-                <Globe size={18} />
-                <a href="/" rel="noopener noreferrer">
-                  Website Gestor APIs
-                </a>
-              </li>
-            </ul>
-
-            <hr className="my-4 border-t border-gray-200" />
-
-            <ul className="space-y-3 text-red-600 text-sm font-medium">
-              <li
-                className="flex items-center gap-2 hover:text-red-700 transition cursor-pointer"
-                onClick={cerrarSesion}
-              >
-                <LogOut size={18} /> Cerrar sesión
-              </li>
-            </ul>
-          </div>
-        </div>
-      )}
+          )}
+        </main>
+      </div>
     </>
   );
 };
-
-export default DashboardNavbar;
+export default Dashboard;
