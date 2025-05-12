@@ -31,7 +31,8 @@ const Registro = () => {
   
     if (Object.keys(erroresDetectados).length === 0) {
       try {
-        const response = await axios.post(`${API_BASE_URL}/api/registraruser/`, {
+        // eslint-disable-next-line
+        const response = await axios.post(`${API_BASE_URL}/registraruser/`, {
           correo,
           contrasena: clave
         });

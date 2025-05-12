@@ -14,7 +14,7 @@ function App() {
           <Routes>
             <Route element={<Layout/>}>
               <Route path="/"         element={<Home      />} />
-              <Route path="/apis"     element={<Apis      />} />
+              <Route path="/apisNo"     element={<Apis      />} />
               <Route path="/crear"    element={<CrearApi   />} />
               <Route path="/login"    element={<Login     />} />
               <Route path="/registro" element={<Registro  />} />
