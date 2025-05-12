@@ -7,6 +7,7 @@ from .models import API
 from .serializers import APISerializer
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
 from .models import Usuario, Rol, Sesion
 import secrets
 
