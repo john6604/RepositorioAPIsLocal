@@ -24,23 +24,6 @@ const Dashboard = () => {
   const [viewMode, setViewMode] = useState("grid"); // 'grid' o 'list'
   const [filterCategory, setFilterCategory] = useState(null); // null | 'favoritas' | 'guardadas' | 'Pública' | 'Privada' | 'Borrador'
 
-  // Traer APIs de tu backend
-  const fetchApis = async () => {
-    try {
-      const { data } = await axios.get(`${API_BASE_URL}/apis/`);
-      setApis(data);
-      setStats({
-        total: data.length,
-        public: data.filter(a => a.visibilidad === "Pública").length,
-        private: data.filter(a => a.visibilidad === "Privada").length,
-        draft: data.filter(a => a.visibilidad === "Borrador").length,
-      });
-    } catch (err) {
-      console.error("No se pudieron cargar las APIs:", err);
-    }
-  };
-  fetchApis();
-
   //agregar un lading mientras carga
   const [loading, setLoading] = useState(true);
 
@@ -69,15 +52,16 @@ const Dashboard = () => {
       <>
         <DashboardNavbar />
         <div className="flex justify-center items-center h-screen">
-          <p>Cargando APIs…</p>
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077ba] mb-4"></div>
+            <p className="text-gray-600 text-sm">Cargando APIs…</p>
+          </div>
         </div>
       </>
     );
   }
 
-  const handleCategory = (category) => {
-    setFilterCategory((prev) => (prev === category ? null : category));
-  };
+  const handleCategory = category => setFilterCategory(prev => prev === category ? null : category);
   const filteredApis = apis.filter(api => {
     const matchesSearch = api.nombre.toLowerCase().includes(searchTerm.toLowerCase());
     if (!matchesSearch) return false;
@@ -161,7 +145,7 @@ const Dashboard = () => {
           <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
             <h1 className="text-3xl font-bold text-[#0077ba]">Dashboard de APIs</h1>
             <div className="flex gap-2">
-              <button
+              <button aria-label="Vista en cuadrícula"
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded ${viewMode === 'grid' ? 'bg-[#0077ba] text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
               >

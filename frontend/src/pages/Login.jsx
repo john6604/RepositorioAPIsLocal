@@ -1,11 +1,14 @@
 import { useState } from "react";
 import Navbar from "../componentes/Navbar";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const Login = () => {
   const [correo, setCorreo] = useState("");
   const [clave, setClave] = useState("");
   const [errores, setErrores] = useState({});
+  const navigate = useNavigate();
 
   const validarFormulario = () => {
     const nuevosErrores = {};
@@ -20,33 +23,42 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const erroresDetectados = validarFormulario();
-    setErrores(erroresDetectados);
-
-    if (Object.keys(erroresDetectados).length === 0) {
-      try {
-        const response = await fetch("http://localhost:8000/api/login/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ correo, clave }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("usuario_id", data.usuario_id);
-          localStorage.setItem("rol", data.rol);
-
-          alert("¡Inicio de sesión exitoso!");
-          window.location.href = "/dashboard"; // o usar useNavigate() si usas React Router
-        } else {
-          alert(data.error || "Error al iniciar sesión");
-        }
-      } catch (err) {
-        console.error("Error al conectar con backend:", err);
-        alert("Error de conexión con el servidor");
+    const nuevosErrores = validarFormulario();
+    setErrores(nuevosErrores);
+  
+    if (Object.keys(nuevosErrores).length > 0) {
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${API_BASE_URL}/login/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          correo,
+          contrasena: clave,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // Guardar token y datos del usuario en localStorage
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("usuario_id", data.usuario_id);
+        localStorage.setItem("nombre_usuario", `${data.nombres} ${data.apellidos}`);
+        localStorage.setItem("rol_id", data.rol_id);
+  
+        alert("Inicio de sesión exitoso");
+        navigate("/dashboard"); // Redirigir al dashboard
+      } else {
+        alert(data.error || "Error al iniciar sesión");
       }
+    } catch (error) {
+      alert("Error de red al intentar iniciar sesión");
+      console.error("Login error:", error);
     }
   };
 

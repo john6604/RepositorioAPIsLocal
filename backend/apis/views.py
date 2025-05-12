@@ -7,7 +7,8 @@ from .models import API
 from .serializers import APISerializer
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
-from .models import Usuario, Rol
+from .models import Usuario, Rol, Sesion
+import secrets
 
 # Create your views here.
 
@@ -43,6 +44,51 @@ def registrar_usuario(request):
     else:
         return JsonResponse({"error": "Método no permitido."}, status=405)
 
+# Login de usuarios, vista
+
+@csrf_exempt
+def login_usuario(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            correo = data.get("correo")
+            clave = data.get("contrasena")
+
+            if not correo or not clave:
+                return JsonResponse({"error": "Datos incompletos."}, status=400)
+
+            try:
+                usuario = Usuario.objects.get(correo=correo)
+            except Usuario.DoesNotExist:
+                return JsonResponse({"error": "Usuario no encontrado."}, status=404)
+
+            if not check_password(clave, usuario.contrasena_hash):
+                return JsonResponse({"error": "Contraseña incorrecta."}, status=401)
+
+            # Generar token de sesión
+            token = secrets.token_hex(32)
+
+            Sesion.objects.create(
+                usuario=usuario,
+                token_sesion=token,
+                creado_en=timezone.now(),
+                expira_en=timezone.now() + timezone.timedelta(days=1),
+                activa=True
+            )
+
+            return JsonResponse({
+                "mensaje": "Inicio de sesión exitoso",
+                "token": token,
+                "usuario_id": usuario.id,
+                "rol_id": usuario.rol_id,
+                "nombres": usuario.nombres,
+                "apellidos": usuario.apellidos
+            })
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=405)
 
 @csrf_exempt
 def lista_apis(request):

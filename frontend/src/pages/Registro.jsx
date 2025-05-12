@@ -3,12 +3,14 @@ import Navbar from "../componentes/Navbar";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
+import { useNavigate } from 'react-router-dom';
 
 const Registro = () => {
   const [correo, setCorreo] = useState("");
   const [clave, setClave] = useState("");
   const [confirmacion, setConfirmacion] = useState("");
   const [errores, setErrores] = useState({});
+  const navigate = useNavigate();
 
   const validarFormulario = () => {
     const nuevosErrores = {};
@@ -41,6 +43,7 @@ const Registro = () => {
           console.log("Respuesta del servidor:", response.data); // Depuración
           alert("¡Registro exitoso!");
           setCorreo(""); setClave(""); setConfirmacion("");
+          navigate("/dashboard");
         } catch (error) {
           console.error("Error:", error); // Agregar más información de error para depuración
           if (error.response?.data?.error) {
