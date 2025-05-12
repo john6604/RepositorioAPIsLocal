@@ -86,16 +86,22 @@ def login_usuario(request):
             if not check_password(clave, usuario.contrasena_hash):
                 return JsonResponse({"error": "Contraseña incorrecta."}, status=401)
 
-            # Generar token de sesión
-            token = secrets.token_hex(32)
+            # Buscar si ya existe una sesión activa
+            sesion = Sesion.objects.filter(usuario=usuario, activa=True).first()
 
-            Sesion.objects.create(
-                usuario=usuario,
-                token_sesion=token,
-                creado_en=timezone.now(),
-                expira_en=timezone.now() + timezone.timedelta(days=1),
-                activa=True
-            )
+            if sesion:
+                # Si ya existe una sesión activa, reutilizamos el token de sesión existente
+                token = sesion.token_sesion
+            else:
+                # Si no existe una sesión activa, creamos una nueva sesión
+                token = secrets.token_hex(32)
+                Sesion.objects.create(
+                    usuario=usuario,
+                    token_sesion=token,
+                    creado_en=timezone.now(),
+                    expira_en=timezone.now() + timezone.timedelta(days=1),
+                    activa=True
+                )
 
             return JsonResponse({
                 "mensaje": "Inicio de sesión exitoso",
