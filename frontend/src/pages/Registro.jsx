@@ -27,32 +27,41 @@ const Registro = () => {
   };
 
   const handleSubmit = async (e) => {
-      e.preventDefault();
-      const erroresDetectados = validarFormulario();
-      setErrores(erroresDetectados);
-
-      console.log("Errores detectados:", erroresDetectados); // Verifica si se están detectando errores correctamente
-
-      if (Object.keys(erroresDetectados).length === 0) {
-        try {
-          console.log("Enviando datos:", { correo, contrasena: clave });
-          const response = await axios.post(`${API_BASE_URL}/registraruser/`, {
-            correo,
-            contrasena: clave
-          });
-          console.log("Respuesta del servidor:", response.data); // Depuración
-          alert("¡Registro exitoso!");
-          setCorreo(""); setClave(""); setConfirmacion("");
-          navigate("/dashboard");
-        } catch (error) {
-          console.error("Error:", error); // Agregar más información de error para depuración
-          if (error.response?.data?.error) {
-            alert("Error: " + error.response.data.error);
-          } else {
-            alert("Error al conectar con el servidor.");
-          }
+    e.preventDefault();
+    const erroresDetectados = validarFormulario();
+    setErrores(erroresDetectados);
+  
+    console.log("Errores detectados:", erroresDetectados); // Verifica si se están detectando errores correctamente
+  
+    if (Object.keys(erroresDetectados).length === 0) {
+      try {
+        console.log("Enviando datos:", { correo, contrasena: clave });
+        const response = await axios.post(`${API_BASE_URL}/registraruser/`, {
+          correo,
+          contrasena: clave
+        });
+  
+        console.log("Respuesta del servidor:", response.data); // Depuración
+        alert("¡Registro exitoso!");
+  
+        // Guardar el token de sesión en el localStorage
+        const tokenSesion = response.data.token_sesion;
+        localStorage.setItem("token_sesion", tokenSesion);  // Guardamos el token
+  
+        setCorreo(""); setClave(""); setConfirmacion("");
+        
+        // Redirigir al dashboard o a cualquier otra página
+        navigate("/dashboard");
+  
+      } catch (error) {
+        console.error("Error:", error); // Agregar más información de error para depuración
+        if (error.response?.data?.error) {
+          alert("Error: " + error.response.data.error);
+        } else {
+          alert("Error al conectar con el servidor.");
         }
       }
+    }
   };
 
   const inputClass = (campo) =>

@@ -18,6 +18,7 @@ import secrets
 def registrar_usuario(request):
     if request.method == "POST":
         try:
+            # Leer datos del request
             data = json.loads(request.body)
             correo = data.get("correo")
             clave = data.get("contrasena")
@@ -25,9 +26,11 @@ def registrar_usuario(request):
             if not correo or not clave:
                 return JsonResponse({"error": "Datos incompletos."}, status=400)
 
+            # Verificar si el correo ya está registrado
             if Usuario.objects.filter(correo=correo).exists():
                 return JsonResponse({"error": "El correo ya está registrado."}, status=409)
 
+            # Crear el usuario
             usuario = Usuario.objects.create(
                 correo=correo,
                 contrasena_hash=make_password(clave),
@@ -39,8 +42,25 @@ def registrar_usuario(request):
                 actualizado_en=timezone.now()
             )
 
-            return JsonResponse({"mensaje": "Usuario registrado con éxito."}, status=201)
+            # Generar un token de sesión para el usuario
+            token_sesion = secrets.token_hex(16)  # Token aleatorio de 32 caracteres hexadecimales
+
+            # Guardar el token en la base de datos en la tabla Sesion
+            Sesion.objects.create(
+                usuario_id=usuario.id,
+                token_sesion=token_sesion,
+                expira_en=timezone.now() + timezone.timedelta(days=1),  # Expira en 1 día
+                activa=True
+            )
+
+            # Responder con el mensaje de éxito y el token
+            return JsonResponse({
+                "mensaje": "Usuario registrado con éxito.",
+                "token_sesion": token_sesion  # Incluir el token en la respuesta
+            }, status=201)
+
         except Exception as e:
+            # Manejo de errores
             return JsonResponse({"error": str(e)}, status=500)
     else:
         return JsonResponse({"error": "Método no permitido."}, status=405)
