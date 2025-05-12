@@ -43,7 +43,7 @@ const PerfilConfiguracion = () => {
   };
   
   const handleLogoutSession = async () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token_sesion");
   
     if (!token) {
       alert("No se encontró el token de sesión.");

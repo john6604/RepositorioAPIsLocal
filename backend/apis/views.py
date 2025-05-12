@@ -97,7 +97,7 @@ def login_usuario(request):
 
             return JsonResponse({
                 "mensaje": "Inicio de sesión exitoso",
-                "token_sesion": token,  # se recomienda usar token_sesion para estandarizar
+                "token": token,  # se recomienda usar token_sesion para estandarizar
                 "usuario_id": usuario.id,
                 "rol_id": usuario.rol_id,
                 "nombres": usuario.nombres,
