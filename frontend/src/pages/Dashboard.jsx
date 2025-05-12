@@ -30,13 +30,15 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchApis = async () => {
       try {
-        const { data } = await axios.get(`${API_BASE_URL}/apis/`);
+        const { data } = await axios.get(`${API_BASE_URL}/listarapis/`, {
+          withCredentials: true,
+        });
         setApis(data);
         setStats({
           total: data.length,
-          public: data.filter(a => a.visibilidad === "Pública").length,
-          private: data.filter(a => a.visibilidad === "Privada").length,
-          draft: data.filter(a => a.visibilidad === "Borrador").length,
+          public: data.filter(a => a.permiso === "publico").length,
+          private: data.filter(a => a.permiso === "privado").length,
+          restricted: data.filter(a => a.permiso === "restringido").length,
         });
       } catch (err) {
         console.error("No se pudieron cargar las APIs:", err);

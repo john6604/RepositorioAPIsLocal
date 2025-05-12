@@ -112,6 +112,20 @@ const Registro = () => {
           Registrarse
         </button>
       </form>
+      <div className="mt-6 border-t pt-4">
+        <p className="text-center text-sm text-gray-500 mb-2">O</p>
+        <button
+          onClick={null}
+          className="w-full flex items-center justify-center border border-gray-300 hover:border-gray-500 py-2 rounded-md transition duration-200"
+        >
+          <img
+            src="https://www.svgrepo.com/show/355037/google.svg"
+            alt="Google"
+            className="w-5 h-5 mr-2"
+          />
+          Regístrate con Google
+        </button>
+      </div>
       <p className="text-sm text-center mt-4">
         Ya tiene una cuenta.{" "}
         <Link to="/login" className="text-[#0077ba] underline hover:text-[#00509e]">
