@@ -12,4 +12,5 @@ urlpatterns = [
     path('sesiones/', views.cerrar_todas_las_sesiones, name='cerrar_sesiones'),
     path('cerrarsesiones/', views.cerrar_todas_las_sesiones_usuario, name='cerrar_sesiones_usuario'),
     path('validar-sesion/', views.validar_sesion, name='validar_sesion'),
+    path('listarapis/', views.apis_por_usuario, name='apis_usuario'),
 ]

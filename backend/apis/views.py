@@ -10,6 +10,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from .models import Usuario, Rol, Sesion
 import secrets
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 # Create your views here.
 
@@ -207,17 +209,25 @@ def validar_sesion(request):
     else:
         return JsonResponse({"error": "Método no permitido."}, status=405)
         
-@csrf_exempt
-def lista_apis(request):
-    """
-    GET: devuelve todas las APIs en JSON
-    """
-    if request.method == 'GET':
-        apis = API.objects.all().values('id', 'nombre', 'descripcion', 'version', 'visibilidad')
-        # convertimos el QuerySet a lista de dicts
-        data = list(apis)
-        return JsonResponse(data, safe=False)
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
+# Filtrar APIs por usuario, vista
+@api_view(['GET'])
+def apis_por_usuario(request):
+    usuario_id = request.session.get('usuario_id')
+    if not usuario_id:
+        return Response({'error': 'Usuario no autenticado'}, status=401)
+
+    apis = API.objects.filter(creado_por_id=usuario_id)
+    data = [
+        {
+            'id': api.id,
+            'nombre': api.nombre,
+            'permiso': api.permiso,
+            'estado': api.estado,
+            'descripcion': api.descripcion,
+        }
+        for api in apis
+    ]
+    return Response(data)
 
 @csrf_exempt
 def crear_api(request):
