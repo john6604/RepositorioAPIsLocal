@@ -213,6 +213,8 @@ def validar_sesion(request):
 @api_view(['GET'])
 def apis_por_usuario(request):
     usuario_id = request.session.get('usuario_id')
+    print("usuario_id desde la sesión:", usuario_id)
+
     if not usuario_id:
         return Response({'error': 'Usuario no autenticado'}, status=401)
 
