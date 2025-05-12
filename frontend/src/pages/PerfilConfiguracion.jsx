@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { User, Settings, Bell, Lock, Upload, Trash2, Eye, EyeOff, ClipboardCopy, Users } from "lucide-react";
 import DashNavbar from "../componentes/DashboardNavbar";
+import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const tabs = [
   { id: "profile", label: "Perfil", icon: User },
@@ -11,6 +13,8 @@ const tabs = [
 ];
 
 const PerfilConfiguracion = () => {
+
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [formData, setFormData] = useState({
     name: "Juan Pérez",
@@ -35,6 +39,38 @@ const PerfilConfiguracion = () => {
     if (window.confirm("¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.")) {
       console.log("Cuenta eliminada");
       alert("Cuenta eliminada permanentemente.");
+    }
+  };
+  
+  const handleLogoutSession = async () => {
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      alert("No se encontró el token de sesión.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${API_BASE_URL}/cerrarsesiones/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token_sesion: token }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        alert("Todas las sesiones han sido cerradas correctamente.");
+        localStorage.clear();
+        navigate("/login");
+      } else {
+        alert(data.error || "Error al cerrar las sesiones.");
+      }
+    } catch (error) {
+      console.error("Error al cerrar sesiones:", error);
+      alert("Error de red al cerrar sesiones.");
     }
   };
 
@@ -327,7 +363,7 @@ const PerfilConfiguracion = () => {
                       <p className="text-sm text-gray-600 mb-2">Cierra sesión en todos los dispositivos si sospechas actividad sospechosa.</p>
                       <button
                         type="button"
-                        onClick={() => alert("Se cerraron todas las sesiones.")}
+                        onClick={handleLogoutSession}
                         className="inline-flex justify-center px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-md shadow-sm hover:bg-red-600"
                       >
                         Cerrar sesión en todos los dispositivos

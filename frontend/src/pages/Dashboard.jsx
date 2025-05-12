@@ -49,22 +49,28 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      // Realizar la solicitud POST para cerrar todas las sesiones en el servidor
+      const tokenSesion = localStorage.getItem("token_sesion");
+  
+      if (!tokenSesion) {
+        console.error("No se encontró el token de sesión en localStorage.");
+        return;
+      }
+  
       const response = await fetch(`${API_BASE_URL}/logout/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ token_sesion: tokenSesion }),
       });
   
       const data = await response.json();
   
       if (response.ok) {
-        // El servidor ha cerrado todas las sesiones correctamente
-        localStorage.clear(); // Eliminar el token del localStorage
-        window.location.href = '/login'; // Redirigir a la página de login
+        localStorage.clear();
+        window.location.href = '/login';
       } else {
-        console.error('Error al cerrar todas las sesiones:', data.error);
+        console.error('Error al cerrar sesión:', data.error);
       }
     } catch (error) {
       console.error('Error de red:', error);

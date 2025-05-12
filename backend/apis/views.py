@@ -66,7 +66,6 @@ def registrar_usuario(request):
         return JsonResponse({"error": "Método no permitido."}, status=405)
 
 # Login de usuarios, vista
-
 @csrf_exempt
 def login_usuario(request):
     if request.method == "POST":
@@ -86,26 +85,19 @@ def login_usuario(request):
             if not check_password(clave, usuario.contrasena_hash):
                 return JsonResponse({"error": "Contraseña incorrecta."}, status=401)
 
-            # Buscar si ya existe una sesión activa
-            sesion = Sesion.objects.filter(usuario=usuario, activa=True).first()
-
-            if sesion:
-                # Si ya existe una sesión activa, reutilizamos el token de sesión existente
-                token = sesion.token_sesion
-            else:
-                # Si no existe una sesión activa, creamos una nueva sesión
-                token = secrets.token_hex(32)
-                Sesion.objects.create(
-                    usuario=usuario,
-                    token_sesion=token,
-                    creado_en=timezone.now(),
-                    expira_en=timezone.now() + timezone.timedelta(days=1),
-                    activa=True
-                )
+            # Crear siempre una nueva sesión
+            token = secrets.token_hex(32)
+            Sesion.objects.create(
+                usuario=usuario,
+                token_sesion=token,
+                creado_en=timezone.now(),
+                expira_en=timezone.now() + timezone.timedelta(days=1),
+                activa=True
+            )
 
             return JsonResponse({
                 "mensaje": "Inicio de sesión exitoso",
-                "token": token,
+                "token_sesion": token,  # se recomienda usar token_sesion para estandarizar
                 "usuario_id": usuario.id,
                 "rol_id": usuario.rol_id,
                 "nombres": usuario.nombres,
@@ -159,6 +151,33 @@ def cerrar_todas_las_sesiones(request):
     else:
         return JsonResponse({"error": "Método no permitido."}, status=405)
         
+# Cerrar todas las sesiones de un usuario, vista
+@csrf_exempt
+def cerrar_todas_las_sesiones_usuario(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            token = data.get("token_sesion")
+
+            if not token:
+                return JsonResponse({"error": "Token de sesión no proporcionado."}, status=400)
+
+            # Verificar la sesión actual
+            sesion_actual = Sesion.objects.filter(token_sesion=token, activa=True).first()
+
+            if not sesion_actual:
+                return JsonResponse({"error": "Sesión no válida o expirada."}, status=401)
+
+            # Cerrar todas las sesiones activas del mismo usuario
+            Sesion.objects.filter(usuario=sesion_actual.usuario, activa=True).update(activa=False)
+
+            return JsonResponse({"mensaje": "Todas las sesiones han sido cerradas correctamente."})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+
 @csrf_exempt
 def lista_apis(request):
     """

@@ -8,18 +8,23 @@ import Login       from "./pages/Login";
 import Registro    from "./pages/Registro";
 import APIDetail   from "./pages/APIDetail";
 import Dashboard   from "./pages/Dashboard";
+import Notificaciones from "./pages/Notificaciones";
+import Configuracion from "./pages/PerfilConfiguracion";
+
 function App() {
   return (
     <Router>
           <Routes>
             <Route element={<Layout/>}>
               <Route path="/"         element={<Home      />} />
-              <Route path="/apisNo"     element={<Apis      />} />
+              <Route path="/apis"     element={<Apis      />} />
               <Route path="/crear"    element={<CrearApi   />} />
               <Route path="/login"    element={<Login     />} />
               <Route path="/registro" element={<Registro  />} />
               <Route path="/api/:id"  element={<APIDetail />} />
               <Route path="/dashboard"element={<Dashboard/>} />
+              <Route path="/notificaciones" element={<Notificaciones />} />
+              <Route path="/perfilConfig" element={<Configuracion />} />
             </Route>
           </Routes>
     </Router>
