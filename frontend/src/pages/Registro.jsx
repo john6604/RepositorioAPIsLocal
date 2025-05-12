@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Navbar from "../componentes/Navbar";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 const Registro = () => {
   const [correo, setCorreo] = useState("");
@@ -22,17 +24,27 @@ const Registro = () => {
     return nuevosErrores;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const erroresDetectados = validarFormulario();
     setErrores(erroresDetectados);
-
+  
     if (Object.keys(erroresDetectados).length === 0) {
-      // Enviar datos al backend
-      console.log("Registrando:", { correo, clave });
-      alert("¡Registro exitoso! (Falta conectar con backend)");
-      // reset form
-      setCorreo(""); setClave(""); setConfirmacion("");
+      try {
+        const response = await axios.post(`${API_BASE_URL}/api/registraruser/`, {
+          correo,
+          contrasena: clave
+        });
+  
+        alert("¡Registro exitoso!");
+        setCorreo(""); setClave(""); setConfirmacion("");
+      } catch (error) {
+        if (error.response?.data?.error) {
+          alert("Error: " + error.response.data.error);
+        } else {
+          alert("Error al conectar con el servidor.");
+        }
+      }
     }
   };
 

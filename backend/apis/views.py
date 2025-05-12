@@ -5,6 +5,44 @@ from .models import API
 from rest_framework import viewsets
 from .models import API
 from .serializers import APISerializer
+from django.utils import timezone
+from django.contrib.auth.hashers import make_password
+from .models import Usuario, Rol
+
+# Create your views here.
+
+# Registro de los Usuarios, Vistas
+@csrf_exempt
+def registrar_usuario(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            correo = data.get("correo")
+            clave = data.get("contrasena")
+
+            if not correo or not clave:
+                return JsonResponse({"error": "Datos incompletos."}, status=400)
+
+            if Usuario.objects.filter(correo=correo).exists():
+                return JsonResponse({"error": "El correo ya está registrado."}, status=409)
+
+            usuario = Usuario.objects.create(
+                correo=correo,
+                contrasena_hash=make_password(clave),
+                nombres=correo.split("@")[0],
+                apellidos=None,
+                estado="activo",
+                rol_id=2,
+                creado_en=timezone.now(),
+                actualizado_en=timezone.now()
+            )
+
+            return JsonResponse({"mensaje": "Usuario registrado con éxito."}, status=201)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+
 
 @csrf_exempt
 def lista_apis(request):
