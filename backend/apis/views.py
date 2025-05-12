@@ -214,24 +214,41 @@ def validar_sesion(request):
 # Filtrar APIs por usuario, vista
 @api_view(['GET'])
 def apis_por_usuario(request):
-    usuario_id = request.session.get('usuario_id')
-    print("usuario_id desde la sesión:", usuario_id)
+    # Obtener el token de sesión desde los parámetros de la solicitud (por ejemplo, en el cuerpo o en las cabeceras)
+    token = request.headers.get('Authorization')  # Asumiendo que el token se pasa en las cabeceras como "Authorization"
+    
+    if not token:
+        return Response({'error': 'Token de sesión no proporcionado'}, status=400)
+    
+    try:
+        # Buscar la sesión activa con el token proporcionado
+        sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
+        
+        if not sesion:
+            return Response({'error': 'Sesión no válida o expirada'}, status=401)
 
-    if not usuario_id:
-        return Response({'error': 'Usuario no autenticado'}, status=401)
-
-    apis = API.objects.filter(creado_por_id=usuario_id)
-    data = [
-        {
-            'id': api.id,
-            'nombre': api.nombre,
-            'permiso': api.permiso,
-            'estado': api.estado,
-            'descripcion': api.descripcion,
-        }
-        for api in apis
-    ]
-    return Response(data)
+        # Obtener el usuario asociado a la sesión
+        usuario_id = sesion.usuario.id
+        
+        # Filtrar las APIs creadas por el usuario
+        apis = API.objects.filter(creado_por_id=usuario_id)
+        
+        # Crear la respuesta con las APIs encontradas
+        data = [
+            {
+                'id': api.id,
+                'nombre': api.nombre,
+                'permiso': api.permiso,
+                'estado': api.estado,
+                'descripcion': api.descripcion,
+            }
+            for api in apis
+        ]
+        
+        return Response(data)
+    
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
 
 @csrf_exempt
 def crear_api(request):

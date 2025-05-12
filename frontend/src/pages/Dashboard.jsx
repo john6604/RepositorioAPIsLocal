@@ -27,12 +27,24 @@ const Dashboard = () => {
   //agregar un lading mientras carga
   const [loading, setLoading] = useState(true);
 
+  const tokenSesion = localStorage.getItem("token_sesion");
+
   useEffect(() => {
     const fetchApis = async () => {
+      if (!tokenSesion) {
+        console.error("Token de sesión no encontrado.");
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data } = await axios.get(`${API_BASE_URL}/listarapis/`, {
+          headers: {
+            'Authorization': `Bearer ${tokenSesion}`,
+          },
           withCredentials: true,
         });
+
         setApis(data);
         setStats({
           total: data.length,
@@ -46,8 +58,9 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
+
     fetchApis();
-  }, []);
+  }, [tokenSesion]);
 
   const handleLogout = async () => {
     try {
