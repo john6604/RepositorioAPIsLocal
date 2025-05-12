@@ -28,7 +28,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchApis = async () => {
+    /*const fetchApis = async () => {
       try {
         const { data } = await axios.get(`${API_BASE_URL}/listarapis/`, {
           withCredentials: true,
@@ -46,7 +46,7 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    fetchApis();
+    fetchApis();*/
   }, []);
 
   const handleLogout = async () => {
