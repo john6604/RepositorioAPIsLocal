@@ -91,13 +91,13 @@ def login_usuario(request):
                 usuario=usuario,
                 token_sesion=token,
                 creado_en=timezone.now(),
-                expira_en=timezone.now() + timezone.timedelta(days=1),
+                expira_en=timezone.now() + timezone.timedelta(days=30),
                 activa=True
             )
 
             return JsonResponse({
                 "mensaje": "Inicio de sesión exitoso",
-                "token": token,  # se recomienda usar token_sesion para estandarizar
+                "token": token, 
                 "usuario_id": usuario.id,
                 "rol_id": usuario.rol_id,
                 "nombres": usuario.nombres,
@@ -178,6 +178,35 @@ def cerrar_todas_las_sesiones_usuario(request):
     else:
         return JsonResponse({"error": "Método no permitido."}, status=405)
 
+# Sesiones activas en un dispoditivo, vista
+@csrf_exempt
+def validar_sesion(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            token = data.get("token_sesion")
+
+            if not token:
+                return JsonResponse({"error": "Token de sesión no proporcionado."}, status=400)
+
+            sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
+
+            if not sesion:
+                return JsonResponse({"valida": False})
+
+            return JsonResponse({
+                "valida": True,
+                "usuario_id": sesion.usuario.id,
+                "rol_id": sesion.usuario.rol_id,
+                "nombres": sesion.usuario.nombres,
+                "apellidos": sesion.usuario.apellidos
+            })
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+        
 @csrf_exempt
 def lista_apis(request):
     """
