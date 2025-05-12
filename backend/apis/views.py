@@ -146,6 +146,7 @@ def logout_usuario(request):
     else:
         return JsonResponse({"error": "Método no permitido."}, status=405)
 
+# Cerrar todas las sesiones, vista
 @csrf_exempt
 def cerrar_todas_las_sesiones(request):
     if request.method == "POST":

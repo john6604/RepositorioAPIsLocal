@@ -47,6 +47,30 @@ const Dashboard = () => {
     fetchApis();
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      // Realizar la solicitud POST para cerrar todas las sesiones en el servidor
+      const response = await fetch(`${API_BASE_URL}/logout/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // El servidor ha cerrado todas las sesiones correctamente
+        localStorage.clear(); // Eliminar el token del localStorage
+        window.location.href = '/login'; // Redirigir a la página de login
+      } else {
+        console.error('Error al cerrar todas las sesiones:', data.error);
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -131,29 +155,7 @@ const Dashboard = () => {
               </li>
               <li className="mt-6">
                 <button
-                  onClick={async () => {
-                    try {
-                      // Realizar la solicitud POST para cerrar todas las sesiones en el servidor
-                      const response = await fetch(`${API_BASE_URL}/sesiones/`, {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                      });
-                  
-                      const data = await response.json();
-                  
-                      if (response.ok) {
-                        // El servidor ha cerrado todas las sesiones correctamente
-                        localStorage.clear(); // Eliminar el token del localStorage
-                        window.location.href = '/login'; // Redirigir a la página de login
-                      } else {
-                        console.error('Error al cerrar todas las sesiones:', data.error);
-                      }
-                    } catch (error) {
-                      console.error('Error de red:', error);
-                    }
-                  }}
+                  onClick={handleLogout}
                   className="flex items-center gap-2 px-4 py-2 w-full rounded hover:bg-gray-100 text-red-600"
                 >
                   <LogOut className="w-5 h-5" /> Salir
