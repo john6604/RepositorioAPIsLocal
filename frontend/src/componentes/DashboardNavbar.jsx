@@ -152,6 +152,17 @@ const DashboardNavbar = () => {
             <hr className="my-4 border-t border-gray-200" />
 
             <ul className="space-y-3 text-gray-700 text-sm font-medium">
+              <li className="flex items-center gap-2 hover:text-[#0077ba] transition">
+                <Globe size={18} />
+                <a href="/" rel="noopener noreferrer">
+                  Website Gestor APIs
+                </a>
+              </li>
+            </ul>
+
+            <hr className="my-4 border-t border-gray-200" />
+
+            <ul className="space-y-3 text-gray-700 text-sm font-medium">
               <div className="hover:text-[#0077ba] transition">
                 <div className="flex items-center justify-between cursor-pointer"
                     onClick={() => setMostrarBusqueda(!mostrarBusqueda)}>
@@ -207,17 +218,6 @@ const DashboardNavbar = () => {
               <li className="flex items-center gap-2 hover:text-[#0077ba] transition">
                 <Settings size={18} />
                 <Link to="/perfilConfig" onClick={() => setMenuPerfilAbierto(false)}>Configuración</Link>
-              </li>
-            </ul>
-
-            <hr className="my-4 border-t border-gray-200" />
-
-            <ul className="space-y-3 text-gray-700 text-sm font-medium">
-              <li className="flex items-center gap-2 hover:text-[#0077ba] transition">
-                <Globe size={18} />
-                <a href="/" rel="noopener noreferrer">
-                  Website Gestor APIs
-                </a>
               </li>
             </ul>
 

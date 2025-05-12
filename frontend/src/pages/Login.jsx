@@ -18,15 +18,35 @@ const Login = () => {
     return nuevosErrores;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const erroresDetectados = validarFormulario();
     setErrores(erroresDetectados);
 
     if (Object.keys(erroresDetectados).length === 0) {
-      console.log("Iniciando sesión:", { correo, clave });
-      alert("¡Inicio de sesión exitoso! (Falta conectar con backend)");
-      setCorreo(""); setClave("");
+      try {
+        const response = await fetch("http://localhost:8000/api/login/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ correo, clave }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("usuario_id", data.usuario_id);
+          localStorage.setItem("rol", data.rol);
+
+          alert("¡Inicio de sesión exitoso!");
+          window.location.href = "/dashboard"; // o usar useNavigate() si usas React Router
+        } else {
+          alert(data.error || "Error al iniciar sesión");
+        }
+      } catch (err) {
+        console.error("Error al conectar con backend:", err);
+        alert("Error de conexión con el servidor");
+      }
     }
   };
 

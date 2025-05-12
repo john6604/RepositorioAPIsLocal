@@ -49,9 +49,14 @@ const Dashboard = () => {
       try {
         const { data } = await axios.get(`${API_BASE_URL}/apis/`);
         setApis(data);
-        // … stats …
+        setStats({
+          total: data.length,
+          public: data.filter(a => a.visibilidad === "Pública").length,
+          private: data.filter(a => a.visibilidad === "Privada").length,
+          draft: data.filter(a => a.visibilidad === "Borrador").length,
+        });
       } catch (err) {
-        console.error(err);
+        console.error("No se pudieron cargar las APIs:", err);
       } finally {
         setLoading(false);
       }

@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-import axios from "axios";
+import { useState } from "react";
 import DashboardNavbar from "../componentes/DashboardNavbar";
-import { API_BASE_URL } from "../config";
 
 const CrearApi = () => {
   const [nombre, setNombre] = useState("");
@@ -13,51 +11,22 @@ const CrearApi = () => {
   const [licencia, setLicencia] = useState("");
   const [archivoApi, setArchivoApi] = useState(null);
   const [ejemploUso, setEjemploUso] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("nombre", nombre);
-    formData.append("descripcion", descripcion);
-    formData.append("version", version);
-    formData.append("visibilidad", visibilidad);
-    formData.append("readme", readme);
-    formData.append("gitignore", gitignore);
-    formData.append("licencia", licencia);
-    if (archivoApi) {
-      formData.append("archivo_api", archivoApi);
-    }
-    formData.append("ejemplo_uso", ejemploUso);
-
-    try {
-      setLoading(true);
-      const response = await axios.post(
-        `${API_BASE_URL}/apis/`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-
-      alert(`API registrada correctamente con ID: ${response.data.id}`);
-      // Reset form
-      setNombre("");
-      setDescripcion("");
-      setVersion("1.0");
-      setVisibilidad("publica");
-      setReadme(false);
-      setGitignore("");
-      setLicencia("");
-      setArchivoApi(null);
-      setEjemploUso("");
-    } catch (error) {
-      console.error(error);
-      const status = error.response?.status;
-      alert(`Error al registrar la API (code ${status})`);
-    } finally {
-      setLoading(false);
-    }
+    const nuevaApi = {
+      nombre,
+      descripcion,
+      version,
+      visibilidad,
+      readme,
+      gitignore,
+      licencia,
+      archivoApi,
+      ejemploUso,
+    };
+    console.log("API creada:", nuevaApi);
+    alert("API registrada (aún no conectado al backend)");
   };
 
   return (
@@ -70,16 +39,31 @@ const CrearApi = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Nombre */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Nombre de la API <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
-              required
-            />
+
+            <div className="flex items-center space-x-2">
+              {/* Autor (no editable) */}
+              <div className="flex items-center space-x-2 px-3 py-2 border rounded-md bg-black/5">
+                <span className="text-sm text-gray-700 font-medium">john6604</span>
+              </div>
+
+              <span className="text-gray-500 mr-1">/</span>
+
+              {/* Campo editable para el nombre */}
+              <div className="flex items-center px-3 py-2 border rounded-md flex-1">
+                <input
+                  type="text"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  className="flex-1 outline-none text-sm"
+                  placeholder="nombre-de-la-api"
+                  required
+                />
+              </div>
+            </div>
+
             <p className="text-xs text-gray-500 mt-1">
               Elige un nombre corto y descriptivo para tu API.
             </p>
@@ -96,6 +80,9 @@ const CrearApi = () => {
               className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
               rows={3}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Explica brevemente qué hace tu API.
+            </p>
           </div>
 
           {/* Versión */}
@@ -117,7 +104,7 @@ const CrearApi = () => {
               Visibilidad
             </label>
             <div className="space-y-2">
-              { ["publica", "privada", "restringida"].map((tipo) => (
+              {["publica", "privada", "restringida"].map((tipo) => (
                 <label key={tipo} className="flex items-center gap-2 text-sm">
                   <input
                     type="radio"
@@ -125,15 +112,27 @@ const CrearApi = () => {
                     checked={visibilidad === tipo}
                     onChange={() => setVisibilidad(tipo)}
                   />
-                  <span>
-                    <strong>{tipo.charAt(0).toUpperCase() + tipo.slice(1)}</strong>
-                  </span>
+                  {tipo === "publica" && (
+                    <span>
+                      <strong>Pública</strong>: Visible para todos.
+                    </span>
+                  )}
+                  {tipo === "privada" && (
+                    <span>
+                      <strong>Privada</strong>: Solo visible para ti.
+                    </span>
+                  )}
+                  {tipo === "restringida" && (
+                    <span>
+                      <strong>Restringida</strong>: Visible solo para usuarios autorizados.
+                    </span>
+                  )}
                 </label>
-              )) }
+              ))}
             </div>
           </div>
 
-          {/* README Checkbox */}
+          {/* Inicialización */}
           <div className="border-t pt-4">
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -143,9 +142,12 @@ const CrearApi = () => {
               />
               Añadir un archivo README
             </label>
+            <p className="text-xs text-gray-500 ml-6">
+              Escribe una descripción larga de tu proyecto más adelante.
+            </p>
           </div>
 
-          {/* .gitignore */}
+          {/* Gitignore */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Plantilla .gitignore
@@ -175,14 +177,17 @@ const CrearApi = () => {
               <option value="">Ninguna</option>
               <option value="MIT">MIT</option>
               <option value="GPL">GPL</option>
-              <option value="Apache-2.0">Apache 2.0</option>
+              <option value="Apache">Apache 2.0</option>
             </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Define los permisos y restricciones de uso de tu código.
+            </p>
           </div>
 
-          {/* Archivo ZIP */}
+          {/* Subir archivo de la API */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Archivo de la API (.zip) <span className="text-red-500">*</span>
+              Archivo de la API (.zip)
             </label>
             <input
               type="file"
@@ -191,6 +196,9 @@ const CrearApi = () => {
               className="mt-1 w-full text-sm"
               required
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Sube un archivo .zip que contenga tu API (código, documentación, etc).
+            </p>
           </div>
 
           {/* Ejemplo de uso */}
@@ -204,16 +212,18 @@ const CrearApi = () => {
               className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
               rows={4}
               placeholder={`curl -X GET https://miapi.com/endpoint\n# o código en JS, Python, etc.`}
-            />
+          />
+            <p className="text-xs text-gray-500 mt-1">
+              Incluye un ejemplo real de cómo consumir tu API.
+            </p>
           </div>
 
-          {/* Botón y estado */}
+          {/* Botón */}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md disabled:opacity-50"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
           >
-            { loading ? "Creando..." : "Crear API" }
+            Crear API
           </button>
         </form>
       </div>

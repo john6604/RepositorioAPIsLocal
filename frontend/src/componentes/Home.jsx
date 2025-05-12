@@ -1,4 +1,4 @@
-import portada from "../assets/celeste.png";
+import portada from "../assets/data-science.png";
 
 const Home = () => {
   return (

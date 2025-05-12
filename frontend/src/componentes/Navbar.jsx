@@ -123,13 +123,6 @@ const Navbar = () => {
 
           {/* Separador visual */}
         <div className="hidden md:block h-6 w-px bg-white/30 mx-2"></div>
-          
-          <Link
-            to="/dashboard"
-            className="border border-[1px] border-white flex items-center gap-1 text-white px-4 py-2 rounded-lg hover:bg-[#00509e] transition"
-          >
-            Dashboard
-          </Link>
           <Link
             to="/login"
             className="flex items-center gap-1 text-white px-4 py-2 rounded-lg hover:bg-[#00509e] transition"
