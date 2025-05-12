@@ -231,7 +231,7 @@ def apis_por_usuario(request):
         usuario_id = sesion.usuario.id
         
         # Filtrar las APIs creadas por el usuario
-        apis = API.objects.filter(creado_por_id=7)
+        apis = API.objects.filter(creado_por=7)
         
         # Crear la respuesta con las APIs encontradas
         data = [
