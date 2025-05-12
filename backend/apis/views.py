@@ -97,6 +97,8 @@ def login_usuario(request):
                 activa=True
             )
 
+            request.session['usuario_id'] = usuario.id
+
             return JsonResponse({
                 "mensaje": "Inicio de sesión exitoso",
                 "token": token, 

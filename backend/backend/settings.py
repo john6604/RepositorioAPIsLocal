@@ -137,3 +137,5 @@ CORS_ALLOW_ALL_ORIGINS = True
 # ------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_CREDENTIALS = True  
+
+SESSION_COOKIE_NAME = 'sessionid'
