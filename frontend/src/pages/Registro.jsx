@@ -25,28 +25,31 @@ const Registro = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const erroresDetectados = validarFormulario();
-    setErrores(erroresDetectados);
-  
-    if (Object.keys(erroresDetectados).length === 0) {
-      try {
-        // eslint-disable-next-line
-        const response = await axios.post(`${API_BASE_URL}/registraruser/`, {
-          correo,
-          contrasena: clave
-        });
-  
-        alert("¡Registro exitoso!");
-        setCorreo(""); setClave(""); setConfirmacion("");
-      } catch (error) {
-        if (error.response?.data?.error) {
-          alert("Error: " + error.response.data.error);
-        } else {
-          alert("Error al conectar con el servidor.");
+      e.preventDefault();
+      const erroresDetectados = validarFormulario();
+      setErrores(erroresDetectados);
+
+      console.log("Errores detectados:", erroresDetectados); // Verifica si se están detectando errores correctamente
+
+      if (Object.keys(erroresDetectados).length === 0) {
+        try {
+          console.log("Enviando datos:", { correo, contrasena: clave });
+          const response = await axios.post(`${API_BASE_URL}/registraruser/`, {
+            correo,
+            contrasena: clave
+          });
+          console.log("Respuesta del servidor:", response.data); // Depuración
+          alert("¡Registro exitoso!");
+          setCorreo(""); setClave(""); setConfirmacion("");
+        } catch (error) {
+          console.error("Error:", error); // Agregar más información de error para depuración
+          if (error.response?.data?.error) {
+            alert("Error: " + error.response.data.error);
+          } else {
+            alert("Error al conectar con el servidor.");
+          }
         }
       }
-    }
   };
 
   const inputClass = (campo) =>
