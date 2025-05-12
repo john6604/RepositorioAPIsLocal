@@ -117,6 +117,47 @@ def login_usuario(request):
     else:
         return JsonResponse({"error": "Método no permitido."}, status=405)
 
+# Cerrar sesiones, vistas
+@csrf_exempt
+def logout_usuario(request):
+    if request.method == "POST":
+        try:
+            # Obtener el token de sesión enviado en la solicitud
+            data = json.loads(request.body)
+            token = data.get("token_sesion")
+
+            if not token:
+                return JsonResponse({"error": "Token de sesión no proporcionado."}, status=400)
+
+            # Buscar la sesión en la base de datos
+            sesion = Sesion.objects.filter(token_sesion=token, activa=True).first()
+
+            if not sesion:
+                return JsonResponse({"error": "Sesión no encontrada o ya está inactiva."}, status=404)
+
+            # Marcar la sesión como inactiva
+            sesion.activa = False
+            sesion.save()
+
+            return JsonResponse({"mensaje": "Sesión cerrada correctamente."})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+
+@csrf_exempt
+def cerrar_todas_las_sesiones(request):
+    if request.method == "POST":
+        try:
+            # Cerrar todas las sesiones activas
+            Sesion.objects.filter(activa=True).update(activa=False)
+            return JsonResponse({"mensaje": "Todas las sesiones han sido cerradas."})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+        
 @csrf_exempt
 def lista_apis(request):
     """
