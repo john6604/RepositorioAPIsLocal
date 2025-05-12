@@ -9,5 +9,5 @@ router.register('apis', APIViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    path("api/registraruser/", views.RegistrarUser.as_view(), name="registraruser"),
+    path('api/', include('apis.urls')),
 ]
