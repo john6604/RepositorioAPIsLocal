@@ -13,6 +13,5 @@ urlpatterns = [
     path('cerrarsesiones/', views.cerrar_todas_las_sesiones_usuario, name='cerrar_sesiones_usuario'),
     path('validar-sesion/', views.validar_sesion, name='validar_sesion'),
     path('listarapis/', views.apis_por_usuario, name='apis_usuario'),
-    path('detalle/<int:id>/', APIDetailView.as_view(), name='api-detalle'),
     path('cuenta/eliminar/', views.DeleteAccountView.as_view(), name='eliminar-cuenta'),
 ]

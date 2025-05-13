@@ -307,8 +307,3 @@ class DeleteAccountView(APIView):
             return Response({"detail": "Cuenta eliminada exitosamente."}, status=status.HTTP_204_NO_CONTENT)
         except Usuario.DoesNotExist:
             return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-
-class APIDetailView(generics.RetrieveAPIView):
-    queryset = API.objects.all()
-    serializer_class = APISerializer
-    lookup_field = 'id'
