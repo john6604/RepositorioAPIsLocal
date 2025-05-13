@@ -7,6 +7,9 @@ import {
   Search,
 } from "lucide-react";
 import DashboardNavbar from "../componentes/DashboardNavbar";
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { API_BASE_URL } from "../config";
 
 const tabs = [
   { id: "api", label: "API", icon: Code2 },
@@ -16,31 +19,26 @@ const tabs = [
 ];
 
 const APIDetail = () => {
+  const { id } = useParams();
+  const [apiData, setApiData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("api");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [apiData, setApiData] = useState({
-    name: "Clasificador de Imágenes",
-    description: "API que clasifica imágenes en categorías.",
-    endpoint: "/api/clasificador",
-    method: "POST",
-    parameters: [
-      {
-        name: "image",
-        type: "file",
-        required: true,
-        description: "Imagen a clasificar",
-      },
-    ],
-    returns: "Categoría de la imagen",
-    example: `POST /api/clasificador\n{ image: <archivo> }`,
-    visibility: "private",
-    collaborators: [
-      { id: 1, name: "Ana López", email: "ana@example.com" },
-      { id: 2, name: "Carlos Pérez", email: "carlos@example.com" },
-      { id: 3, name: "Lucía Gómez", email: "lucia@example.com" },
-    ],
-  });
+  useEffect(() => {
+    const fetchApiDetail = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/detalle/${id}/`);
+        const data = await res.json();
+        setApiData(data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching API detail:", err);
+      }
+    };
+
+    fetchApiDetail();
+  }, [id]);
 
   const handleRemoveCollaborator = (id) => {
     // Aquí iría tu llamada a la API o lógica de actualización
@@ -51,6 +49,10 @@ const APIDetail = () => {
     // Aquí iría la lógica para buscar y añadir colaborador
     console.log("Añadir colaborador:", searchQuery);
   };
+
+  if (loading || !apiData) {
+    return <div className="p-10 text-center">Cargando...</div>;
+  }
 
   const isOwner = true;
 
@@ -87,7 +89,8 @@ const APIDetail = () => {
             <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl font-bold mb-4">{apiData.name}</h2>
               <p className="mb-2">{apiData.description}</p>
-              <div className="bg-white rounded-xl shadow p-4 mb-4">
+              <p className="mb-2">Versión: {apiData.description}</p>
+              {/*<div className="bg-white rounded-xl shadow p-4 mb-4">
                 <h3 className="font-semibold">Endpoint:</h3>
                 <code>{apiData.endpoint}</code>
               </div>
@@ -110,7 +113,7 @@ const APIDetail = () => {
                 <pre className="bg-gray-100 p-2 rounded whitespace-pre-line">
                   {apiData.example}
                 </pre>
-              </div>
+              </div>*/}
             </div>
           )}
 

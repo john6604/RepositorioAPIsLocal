@@ -12,6 +12,9 @@ from .models import Usuario, Rol, Sesion
 import secrets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.views import APIView
 
 # Create your views here.
 
@@ -281,6 +284,31 @@ def crear_api(request):
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
-class APIViewSet(viewsets.ModelViewSet):
+# Obtener una API especifica
+@api_view(["GET"])
+def api_detail(request, api_id):
+    try:
+        api_instance = API.objects.get(id=api_id)
+        serializer = APISerializer(api_instance)
+        return Response(serializer.data)
+    except API.DoesNotExist:
+        return Response({"error": "API not found"}, status=404)
+
+# Eliminación de una cuenta, vista
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+
+        try:
+            usuario = Usuario.objects.get(correo=user.email)
+            usuario.delete()
+            return Response({"detail": "Cuenta eliminada exitosamente."}, status=status.HTTP_204_NO_CONTENT)
+        except Usuario.DoesNotExist:
+            return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+class APIDetailView(generics.RetrieveAPIView):
     queryset = API.objects.all()
     serializer_class = APISerializer
+    lookup_field = 'id'

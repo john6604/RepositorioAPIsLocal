@@ -112,10 +112,10 @@ const Dashboard = () => {
     if (filterCategory === 'favoritas') return api.favorito;
     if (filterCategory === 'guardadas') return api.guardada;
     if (filterCategory === 'Pública') {
-      return api.permiso === 'Pública';
+      return api.permiso === 'público';
     }
     if (filterCategory === 'Privada') {
-      return api.permiso === 'Privada';
+      return api.permiso === 'privado';
     }
     if (filterCategory === 'Borrador') {
       return api.permiso === 'Borrador';
@@ -237,7 +237,7 @@ const Dashboard = () => {
                       className={
                         api.visibilidad === 'Pública'
                           ? 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs'
-                          : api.visibilidad === 'Privada'
+                          : api.visibilidad === 'privado'
                             ? 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs'
                             : 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs'
                       }

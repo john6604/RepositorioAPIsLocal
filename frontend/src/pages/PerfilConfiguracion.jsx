@@ -35,10 +35,29 @@ const PerfilConfiguracion = () => {
     alert("¡Cambios guardados!");
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     if (window.confirm("¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.")) {
-      console.log("Cuenta eliminada");
-      alert("Cuenta eliminada permanentemente.");
+      try {
+        const response = await fetch(`${API_BASE_URL}/cuenta/eliminar`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
+            "Content-Type": "application/json",
+          },
+        });
+  
+        if (response.status === 204) {
+          alert("Cuenta eliminada permanentemente.");
+          localStorage.removeItem("token_sesion");
+          window.location.href = "/login";
+        } else {
+          const data = await response.json();
+          alert("Error al eliminar cuenta: " + data.detail);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error de red o del servidor.");
+      }
     }
   };
   

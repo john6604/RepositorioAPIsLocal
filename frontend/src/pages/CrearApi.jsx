@@ -1,6 +1,7 @@
 import { useState } from "react";
 import DashboardNavbar from "../componentes/DashboardNavbar";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const CrearApi = () => {
   const [nombre, setNombre] = useState("");
@@ -13,7 +14,7 @@ const CrearApi = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const tokenSesion = localStorage.getItem("tokenSesion");
+    const tokenSesion = localStorage.getItem("token_sesion");
     if (!tokenSesion) {
       alert("No se encontró token de sesión");
       return;
