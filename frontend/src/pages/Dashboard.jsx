@@ -36,13 +36,14 @@ const Dashboard = () => {
         setLoading(false);
         return;
       }
-
+    
       try {
-        const { data } = await axios.get(`${API_BASE_URL}/listarapis/`, {
+        const { data } = await axios.post(`${API_BASE_URL}/listarapis/`, {
+          token_sesion: tokenSesion,
+        }, {
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token_sesion: tokenSesion }),
         });
-
+    
         setApis(data);
         setStats({
           total: data.length,

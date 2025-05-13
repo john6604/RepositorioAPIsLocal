@@ -212,32 +212,30 @@ def validar_sesion(request):
         return JsonResponse({"error": "Método no permitido."}, status=405)
         
 # Filtrar APIs por usuario, vista
-@api_view(['GET'])
+@api_view(['POST'])
+@csrf_exempt
 def apis_por_usuario(request):
     print("✅ Vista 'apis_por_usuario' fue llamada.")
-    data = json.loads(request.body)
-    token = data.get("token_sesion")
     
-    if not token:
-        return Response({'error': 'Token de sesión no proporcionado'}, status=400)
-    
-    print("Token Recibido")
-
     try:
-        # Buscar la sesión activa con el token proporcionado
+        data = request.data  # DRF ya lo parsea
+        token = data.get("token_sesion")
+
+        if not token:
+            print("❌ Token no proporcionado")
+            return Response({'error': 'Token de sesión no proporcionado'}, status=400)
+
+        print("✅ Token recibido:", token)
+
         sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
-        
         if not sesion:
+            print("❌ Sesión no válida")
             return Response({'error': 'Sesión no válida o expirada'}, status=401)
 
-        # Obtener el usuario asociado a la sesión
         usuario_id = sesion.usuario.id
-        print("ID del usuario:", usuario_id)
-        
-        # Filtrar las APIs creadas por el usuario
-        apis = API.objects.filter(creado_por_id=7)
-        
-        # Crear la respuesta con las APIs encontradas
+        print("✅ ID del usuario:", usuario_id)
+
+        apis = API.objects.filter(creado_por_id=usuario_id)
         data = [
             {
                 'id': api.id,
@@ -248,10 +246,11 @@ def apis_por_usuario(request):
             }
             for api in apis
         ]
-        
+
         return Response(data)
-    
+
     except Exception as e:
+        print("❌ Error:", str(e))
         return Response({'error': str(e)}, status=500)
 
 @csrf_exempt
