@@ -215,11 +215,14 @@ def validar_sesion(request):
 @api_view(['GET'])
 def apis_por_usuario(request):
     print("✅ Vista 'apis_por_usuario' fue llamada.")
-    token = request.headers.get('Authorization')  # Asumiendo que el token se pasa en las cabeceras como "Authorization"
+    data = json.loads(request.body)
+    token = data.get("token_sesion")
     
     if not token:
         return Response({'error': 'Token de sesión no proporcionado'}, status=400)
     
+    print("Token Recibido")
+
     try:
         # Buscar la sesión activa con el token proporcionado
         sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
@@ -229,7 +232,7 @@ def apis_por_usuario(request):
 
         # Obtener el usuario asociado a la sesión
         usuario_id = sesion.usuario.id
-        print(usuario_id)
+        print("ID del usuario:", usuario_id)
         
         # Filtrar las APIs creadas por el usuario
         apis = API.objects.filter(creado_por_id=7)

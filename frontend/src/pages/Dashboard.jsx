@@ -39,10 +39,8 @@ const Dashboard = () => {
 
       try {
         const { data } = await axios.get(`${API_BASE_URL}/listarapis/`, {
-          headers: {
-            'Authorization': `Bearer ${tokenSesion}`,
-          },
-          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token_sesion: tokenSesion }),
         });
 
         setApis(data);

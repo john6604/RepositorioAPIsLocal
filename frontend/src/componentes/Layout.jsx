@@ -18,7 +18,6 @@ const Layout = () => {
     const validarSesion = async () => {
       const tokenSesion = localStorage.getItem("token_sesion");
 
-      // Si no hay token, continuar normalmente
       if (!tokenSesion) {
         setCargando(false);
         return;
