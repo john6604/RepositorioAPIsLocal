@@ -14,5 +14,5 @@ urlpatterns = [
     path('validar-sesion/', views.validar_sesion, name='validar_sesion'),
     path('listarapis/', views.apis_por_usuario, name='apis_usuario'),
     path('cuenta/eliminar/', views.EliminarCuentaView.as_view(), name='eliminar-cuenta'),
-    path('cuenta/perfil/', views.PerfilUsuarioView.as_view() name='recoger-datos'),
+    path('cuenta/perfil/', views.PerfilUsuarioView.as_view(), name='recoger-datos'),
 ]
