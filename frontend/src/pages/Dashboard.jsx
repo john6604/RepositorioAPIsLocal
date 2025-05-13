@@ -112,13 +112,13 @@ const Dashboard = () => {
     if (filterCategory === 'favoritas') return api.favorito;
     if (filterCategory === 'guardadas') return api.guardada;
     if (filterCategory === 'Pública') {
-      return api.visibilidad === 'Pública';
+      return api.permiso === 'Pública';
     }
     if (filterCategory === 'Privada') {
-      return api.visibilidad === 'Privada';
+      return api.permiso === 'Privada';
     }
     if (filterCategory === 'Borrador') {
-      return api.visibilidad === 'Borrador';
+      return api.permiso === 'Borrador';
     }
     return true;
   });

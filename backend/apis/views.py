@@ -215,25 +215,20 @@ def validar_sesion(request):
 @api_view(['POST'])
 @csrf_exempt
 def apis_por_usuario(request):
-    print("✅ Vista 'apis_por_usuario' fue llamada.")
     
     try:
-        data = request.data  # DRF ya lo parsea
+        data = request.data 
         token = data.get("token_sesion")
 
         if not token:
-            print("❌ Token no proporcionado")
             return Response({'error': 'Token de sesión no proporcionado'}, status=400)
 
-        print("✅ Token recibido:", token)
 
         sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
         if not sesion:
-            print("❌ Sesión no válida")
             return Response({'error': 'Sesión no válida o expirada'}, status=401)
 
         usuario_id = sesion.usuario.id
-        print("✅ ID del usuario:", usuario_id)
 
         apis = API.objects.filter(creado_por_id=usuario_id)
         data = [
@@ -250,33 +245,41 @@ def apis_por_usuario(request):
         return Response(data)
 
     except Exception as e:
-        print("❌ Error:", str(e))
+        print("Error:", str(e))
         return Response({'error': str(e)}, status=500)
 
-@csrf_exempt
+# Vista para crear APIs
+@api_view(['POST'])
 def crear_api(request):
-    if request.method == 'POST':
-        # Decodifica y registra el BODY tal cual viene
-        raw = request.body.decode('utf-8')
-        print("🔍 RAW REQUEST.BODY:", repr(raw))
+    try:
+        data = request.data
+        token = data.get("token_sesion")
 
-        try:
-            data = json.loads(raw)
-        except json.JSONDecodeError:
-            return JsonResponse({
-                "error": "JSON inválido o vacío",
-                "received_body": raw
-            }, status=400)
+        if not token:
+            return Response({"error": "Token de sesión no proporcionado"}, status=400)
 
-        # Ahora puedes confiar en data['nombre'], etc.
-        nueva_api = Api.objects.create(
-            nombre=data['nombre'],
-            descripcion=data['descripcion'],
-            version=data['version'],
-            visibilidad=data['visibilidad']
+        sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
+        if not sesion:
+            return Response({"error": "Sesión no válida o expirada"}, status=401)
+
+        usuario = sesion.usuario
+
+        nueva_api = API.objects.create(
+            nombre=data.get("nombre"),
+            descripcion=data.get("descripcion"),
+            detalles_tecnicos=data.get("ejemploUso"),
+            documentacion=data.get("version"),
+            creado_por=usuario,
+            permiso="privado",
         )
-        return JsonResponse({'mensaje': 'API creada exitosamente', 'id': nueva_api.id})
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+        return Response({
+            "mensaje": "API creada exitosamente",
+            "id_api": nueva_api.id
+        }, status=201)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
 
 class APIViewSet(viewsets.ModelViewSet):
     queryset = API.objects.all()

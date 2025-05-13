@@ -1,32 +1,56 @@
 import { useState } from "react";
 import DashboardNavbar from "../componentes/DashboardNavbar";
+import { useNavigate } from "react-router-dom";
 
 const CrearApi = () => {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [version, setVersion] = useState("1.0");
   const [visibilidad, setVisibilidad] = useState("publica");
-  const [readme, setReadme] = useState(false);
-  const [gitignore, setGitignore] = useState("");
-  const [licencia, setLicencia] = useState("");
-  const [archivoApi, setArchivoApi] = useState(null);
   const [ejemploUso, setEjemploUso] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    const tokenSesion = localStorage.getItem("tokenSesion");
+    if (!tokenSesion) {
+      alert("No se encontró token de sesión");
+      return;
+    }
+  
     const nuevaApi = {
       nombre,
       descripcion,
-      version,
-      visibilidad,
-      readme,
-      gitignore,
-      licencia,
-      archivoApi,
-      ejemploUso,
+      version, // se guardará en documentacion
+      permiso: visibilidad, // aquí mapeamos directamente visibilidad -> permiso
+      ejemploUso, // se guarda en detalles_tecnicos
+      token_sesion: tokenSesion,
     };
-    console.log("API creada:", nuevaApi);
-    alert("API registrada (aún no conectado al backend)");
+  
+    try {
+      const response = await fetch(`${API_BASE_URL}/crearapi/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(nuevaApi),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        alert("API creada correctamente");
+        console.log("Resultado:", data);
+        navigate("/dashboard");
+      } else {
+        alert("Error al crear la API: " + data.error);
+      }
+  
+    } catch (error) {
+      console.error("Error de red:", error);
+      alert("Error al enviar la solicitud");
+    }
   };
 
   return (
@@ -88,7 +112,7 @@ const CrearApi = () => {
           {/* Versión */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Versión inicial
+              Versión inicial <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -132,79 +156,10 @@ const CrearApi = () => {
             </div>
           </div>
 
-          {/* Inicialización */}
-          <div className="border-t pt-4">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={readme}
-                onChange={(e) => setReadme(e.target.checked)}
-              />
-              Añadir un archivo README
-            </label>
-            <p className="text-xs text-gray-500 ml-6">
-              Escribe una descripción larga de tu proyecto más adelante.
-            </p>
-          </div>
-
-          {/* Gitignore */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Plantilla .gitignore
-            </label>
-            <select
-              value={gitignore}
-              onChange={(e) => setGitignore(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
-            >
-              <option value="">Ninguna</option>
-              <option value="Node">Node</option>
-              <option value="Python">Python</option>
-              <option value="Java">Java</option>
-            </select>
-          </div>
-
-          {/* Licencia */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Licencia
-            </label>
-            <select
-              value={licencia}
-              onChange={(e) => setLicencia(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
-            >
-              <option value="">Ninguna</option>
-              <option value="MIT">MIT</option>
-              <option value="GPL">GPL</option>
-              <option value="Apache">Apache 2.0</option>
-            </select>
-            <p className="text-xs text-gray-500 mt-1">
-              Define los permisos y restricciones de uso de tu código.
-            </p>
-          </div>
-
-          {/* Subir archivo de la API */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Archivo de la API (.zip)
-            </label>
-            <input
-              type="file"
-              accept=".zip"
-              onChange={(e) => setArchivoApi(e.target.files[0])}
-              className="mt-1 w-full text-sm"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Sube un archivo .zip que contenga tu API (código, documentación, etc).
-            </p>
-          </div>
-
           {/* Ejemplo de uso */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Ejemplo de uso
+              Código de la API
             </label>
             <textarea
               value={ejemploUso}
@@ -214,7 +169,7 @@ const CrearApi = () => {
               placeholder={`curl -X GET https://miapi.com/endpoint\n# o código en JS, Python, etc.`}
           />
             <p className="text-xs text-gray-500 mt-1">
-              Incluye un ejemplo real de cómo consumir tu API.
+              Incluye tu código de la API.
             </p>
           </div>
 
