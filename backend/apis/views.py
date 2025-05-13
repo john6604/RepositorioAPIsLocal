@@ -214,7 +214,7 @@ def validar_sesion(request):
 # Filtrar APIs por usuario, vista
 @api_view(['GET'])
 def apis_por_usuario(request):
-    # Obtener el token de sesión desde los parámetros de la solicitud (por ejemplo, en el cuerpo o en las cabeceras)
+    print("✅ Vista 'apis_por_usuario' fue llamada.")
     token = request.headers.get('Authorization')  # Asumiendo que el token se pasa en las cabeceras como "Authorization"
     
     if not token:
@@ -229,9 +229,10 @@ def apis_por_usuario(request):
 
         # Obtener el usuario asociado a la sesión
         usuario_id = sesion.usuario.id
+        print(usuario_id)
         
         # Filtrar las APIs creadas por el usuario
-        apis = API.objects.filter(creado_por=7)
+        apis = API.objects.filter(creado_por_id=7)
         
         # Crear la respuesta con las APIs encontradas
         data = [
