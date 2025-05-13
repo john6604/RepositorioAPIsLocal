@@ -58,7 +58,11 @@ const PerfilConfiguracion = () => {
   }, []);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -92,6 +96,36 @@ const PerfilConfiguracion = () => {
       }
     }
   };
+
+  const handleUpdateUser = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/cuenta/actualizar/`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombres: formData.name,
+          apellidos: formData.lastName,
+          correo: formData.email,
+          estado: formData.estado,
+        }),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        alert("Datos actualizados correctamente.");
+      } else {
+        alert("Error: " + result.detail);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error de red o servidor.");
+    }
+  };
+  
   
   const handleLogoutSession = async () => {
     const token = localStorage.getItem("token_sesion");
@@ -197,7 +231,7 @@ const PerfilConfiguracion = () => {
                     <label className="block text-sm font-medium">Apellidos</label>
                     <input
                       type="text"
-                      name="name"
+                      name="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
                       className="mt-1 block w-full border rounded-md px-3 py-2 text-sm shadow-sm focus:ring focus:ring-blue-200"
@@ -228,10 +262,10 @@ const PerfilConfiguracion = () => {
 
                   <div className="flex justify-end">
                     <button
-                      type="submit"
-                      className="px-5 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                      onClick={handleUpdateUser}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
                     >
-                      Guardar Cambios
+                      Guardar cambios
                     </button>
                   </div>
                 </form>
@@ -252,7 +286,7 @@ const PerfilConfiguracion = () => {
                           <input
                             type="text"
                             name="username"
-                            value="juanperez"
+                            value={`${formData.name} ${formData.lastName}`.trim()}
                             disabled
                             className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100 shadow-sm"
                           />
@@ -275,9 +309,14 @@ const PerfilConfiguracion = () => {
                           <label className="block text-sm font-medium text-gray-700">
                             Estado de la cuenta
                           </label>
-                          <select className="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                            <option>Activo</option>
-                            <option>Desactivado</option>
+                          <select
+                            name="estado"
+                            value={formData.bio}
+                            onChange={handleChange}
+                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                          >
+                            <option value="Activo">Activo</option>
+                            <option value="Desactivado">Desactivado</option>
                           </select>
                         </div>
                       </div>
@@ -413,7 +452,13 @@ const PerfilConfiguracion = () => {
                       <h4 className="text-md font-semibold mb-2">Recuperación de cuenta</h4>
                       <p className="text-sm text-gray-600 mb-2">Correo de recuperación configurado:</p>
                       <div className="flex items-center justify-between bg-gray-100 p-3 rounded">
-                        <span className="text-sm">juan@example.com</span>
+                          <input
+                            type="text"
+                            name="username"
+                            value={formData.email}
+                            disabled
+                            className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100 shadow-sm"
+                          />
                         <button className="text-blue-500 text-sm hover:underline">Cambiar</button>
                       </div>
                     </div>

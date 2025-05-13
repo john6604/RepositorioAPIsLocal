@@ -346,6 +346,40 @@ class PerfilUsuarioView(APIView):
         }
 
         return Response(datos, status=status.HTTP_200_OK)
-        
+
+# Actualización de Datos del Usuario, vista
+class ActualizarUsuarioView(APIView):
+    def put(self, request):
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return JsonResponse({"detail": "Token no proporcionado."}, status=401)
+
+        token_sesion = auth_header.split(" ")[1]
+
+        try:
+            sesion = Sesion.objects.get(token_sesion=token_sesion)
+            usuario = sesion.usuario
+        except Sesion.DoesNotExist:
+            return JsonResponse({"detail": "Sesión inválida."}, status=401)
+
+        data = request.data
+        try:
+            # Actualizar los campos de usuario si están presentes en los datos
+            if "nombres" in data:
+                usuario.nombres = data["nombres"]
+            if "apellidos" in data:
+                usuario.apellidos = data["apellidos"]
+            if "correo" in data:
+                usuario.correo = data["correo"]
+            if "estado" in data:
+                usuario.estado = data["estado"]
+
+            usuario.save()
+
+            return JsonResponse({"detail": "Datos actualizados correctamente."}, status=200)
+
+        except Exception as e:
+            return JsonResponse({"detail": f"Error al actualizar los datos: {str(e)}"}, status=400)
+
 class APIViewSet(viewsets.ModelViewSet):
     queryset = API.objects.all()

@@ -15,4 +15,5 @@ urlpatterns = [
     path('listarapis/', views.apis_por_usuario, name='apis_usuario'),
     path('cuenta/eliminar/', views.EliminarCuentaView.as_view(), name='eliminar-cuenta'),
     path('cuenta/perfil/', views.PerfilUsuarioView.as_view(), name='recoger-datos'),
+    path('cuenta/actualizar/', views.ActualizarUsuarioView.as_view(), name='actualizar_usuario'),
 ]
