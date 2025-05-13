@@ -295,18 +295,30 @@ def api_detail(request, api_id):
         return Response({"error": "API not found"}, status=404)
 
 # Eliminación de una cuenta, vista
-class DeleteAccountView(APIView):
-    permission_classes = [IsAuthenticated]
-
+class EliminarCuentaView(APIView):
     def delete(self, request):
-        user = request.user
+        print("iniciado")
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return JsonResponse({"detail": "Token no proporcionado."}, status=401)
+
+        print("Token obtenido.")
+
+        token_sesion = auth_header.split(" ")[1]
 
         try:
-            usuario = Usuario.objects.get(correo=user.email)
-            usuario.delete()
-            return Response({"detail": "Cuenta eliminada exitosamente."}, status=status.HTTP_204_NO_CONTENT)
-        except Usuario.DoesNotExist:
-            return Response({"detail": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+            sesion = Sesion.objects.get(token_sesion=token_sesion)
+            usuario = sesion.usuario
+        except Sesion.DoesNotExist:
+            return JsonResponse({"detail": "Sesión inválida."}, status=401)
+
+        print("Proceder a eliminar")
+        # Eliminar usuario y la sesión asociada
+        usuario.delete()
+        sesion.delete()  # opcional, porque el usuario se elimina en cascada si está relacionado
+
+        print("Eliminado")
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class APIViewSet(viewsets.ModelViewSet):
     queryset = API.objects.all()
