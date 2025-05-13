@@ -16,6 +16,7 @@ import {
   PlusCircle,
   Clipboard
 } from "lucide-react";
+import { API_BASE_URL } from "../config";
 
 const DashboardNavbar = () => {
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
@@ -46,9 +47,34 @@ const DashboardNavbar = () => {
     setMenuLateralAbierto(!menuLateralAbierto);
   };
 
-  const cerrarSesion = () => {
-    localStorage.clear();
-    window.location.href = '/';
+  const handleLogout = async () => {
+    try {
+      const tokenSesion = localStorage.getItem("token_sesion");
+  
+      if (!tokenSesion) {
+        console.error("No se encontró el token de sesión en localStorage.");
+        return;
+      }
+  
+      const response = await fetch(`${API_BASE_URL}/logout/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token_sesion: tokenSesion }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        localStorage.clear();
+        window.location.href = '/login';
+      } else {
+        console.error('Error al cerrar sesión:', data.error);
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+    }
   };
 
   return (
@@ -226,7 +252,7 @@ const DashboardNavbar = () => {
             <ul className="space-y-3 text-red-600 text-sm font-medium">
               <li
                 className="flex items-center gap-2 hover:text-red-700 transition cursor-pointer"
-                onClick={cerrarSesion}
+                onClick={handleLogout}
               >
                 <LogOut size={18} /> Cerrar sesión
               </li>

@@ -320,5 +320,32 @@ class EliminarCuentaView(APIView):
         print("Eliminado")
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+# Getter de informacion del usuario, vista
+class PerfilUsuarioView(APIView):
+    def get(self, request):
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return JsonResponse({"detail": "Token no proporcionado."}, status=401)
+
+        token_sesion = auth_header.split(" ")[1]
+
+        try:
+            sesion = Sesion.objects.get(token_sesion=token_sesion)
+            usuario = sesion.usuario
+        except Sesion.DoesNotExist:
+            return JsonResponse({"detail": "Sesión inválida."}, status=401)
+
+        datos = {
+            "correo": usuario.correo,
+            "nombres": usuario.nombres,
+            "apellidos": usuario.apellidos,
+            "rol": usuario.rol.id if usuario.rol else None,
+            "estado": usuario.estado,
+            "creado_en": usuario.creado_en,
+            "actualizado_en": usuario.actualizado_en,
+        }
+
+        return Response(datos, status=status.HTTP_200_OK)
+        
 class APIViewSet(viewsets.ModelViewSet):
     queryset = API.objects.all()

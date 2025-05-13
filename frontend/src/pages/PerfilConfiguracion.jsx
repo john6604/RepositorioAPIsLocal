@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Settings, Bell, Lock, Upload, Trash2, Eye, EyeOff, ClipboardCopy, Users } from "lucide-react";
 import DashNavbar from "../componentes/DashboardNavbar";
 import { useNavigate } from "react-router-dom";
@@ -17,13 +17,45 @@ const PerfilConfiguracion = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [formData, setFormData] = useState({
-    name: "Juan Pérez",
-    email: "juan@example.com",
-    bio: "Desarrollador apasionado por las APIs.",
+    name: "",
+    lastName: "",
+    email: "",
+    bio: "",
   });
   const [currentPassword, setCurrentPassword] = useState("MiContraseñaSegura123");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
 
+  useEffect(() => {
+    const fetchPerfil = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/cuenta/perfil/`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
+            "Content-Type": "application/json",
+          },
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          setFormData({
+            name: data.nombres || "",
+            lastName: data.apellidos || "",
+            email: data.correo || "",
+            bio: data.estado || "",
+          });
+        } else {
+          const err = await response.json();
+          alert("Error al obtener perfil: " + err.detail);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("No se pudo cargar el perfil.");
+      }
+    };
+  
+    fetchPerfil();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,7 +70,7 @@ const PerfilConfiguracion = () => {
   const handleDeleteAccount = async () => {
     if (window.confirm("¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.")) {
       try {
-        const response = await fetch(`${API_BASE_URL}/cuenta/eliminar`, {
+        const response = await fetch(`${API_BASE_URL}/cuenta/eliminar/`, {
           method: "DELETE",
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
@@ -152,11 +184,21 @@ const PerfilConfiguracion = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium">Full name</label>
+                    <label className="block text-sm font-medium">Nombres</label>
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
+                      onChange={handleChange}
+                      className="mt-1 block w-full border rounded-md px-3 py-2 text-sm shadow-sm focus:ring focus:ring-blue-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium">Apellidos</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.lastName}
                       onChange={handleChange}
                       className="mt-1 block w-full border rounded-md px-3 py-2 text-sm shadow-sm focus:ring focus:ring-blue-200"
                     />
