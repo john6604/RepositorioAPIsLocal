@@ -16,4 +16,5 @@ urlpatterns = [
     path('cuenta/eliminar/', views.EliminarCuentaView.as_view(), name='eliminar-cuenta'),
     path('cuenta/perfil/', views.PerfilUsuarioView.as_view(), name='recoger-datos'),
     path('cuenta/actualizar/', views.ActualizarUsuarioView.as_view(), name='actualizar_usuario'),
+    path('apis/<int:api_id>/', views.DetalleAPIView.as_view(), name='detalle_api'),
 ]

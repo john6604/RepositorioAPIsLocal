@@ -285,14 +285,28 @@ def crear_api(request):
         return Response({"error": str(e)}, status=500)
 
 # Obtener una API especifica
-@api_view(["GET"])
-def api_detail(request, api_id):
-    try:
-        api_instance = API.objects.get(id=api_id)
-        serializer = APISerializer(api_instance)
-        return Response(serializer.data)
-    except API.DoesNotExist:
-        return Response({"error": "API not found"}, status=404)
+class DetalleAPIView(APIView):
+    def get(self, request, api_id):
+        print("Ejecucion")
+        try:
+            api = API.objects.get(id=api_id)
+        except API.DoesNotExist:
+            return JsonResponse({"detail": "API no encontrada."}, status=404)
+
+        data = {
+            "id": api.id,
+            "nombre": api.nombre,
+            "descripcion": api.descripcion,
+            "detalles_tecnicos": api.detalles_tecnicos,
+            "documentacion": api.documentacion,
+            "creado_por": api.creado_por.id if api.creado_por else None,
+            "permiso": api.permiso,
+            "estado": api.estado,
+            "creado_en": api.creado_en,
+            "actualizado_en": api.actualizado_en,
+        }
+
+        return JsonResponse(data, status=200)
 
 # Eliminación de una cuenta, vista
 class EliminarCuentaView(APIView):

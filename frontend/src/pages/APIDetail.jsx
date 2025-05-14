@@ -7,9 +7,9 @@ import {
   Search,
 } from "lucide-react";
 import DashboardNavbar from "../componentes/DashboardNavbar";
-import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { API_BASE_URL } from "../config";
+import { useParams } from "react-router-dom";
 
 const tabs = [
   { id: "api", label: "API", icon: Code2 },
@@ -19,35 +19,38 @@ const tabs = [
 ];
 
 const APIDetail = () => {
-  const { id } = useParams();
-  const [apiData, setApiData] = useState(null);
+  const { apiId } = useParams();
+  const [apiData, setApiData] = useState({
+    nombre: "",
+    descripcion: "",
+    detalles_tecnicos: "",
+    documentacion: "",
+    permiso: "",
+    estado: "",
+    creado_en: "",
+    actualizado_en: "",
+  });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("api");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const fetchApiDetail = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/detalle/${id}/`);
-        const data = await res.json();
+    obtenerDetalleAPI(apiId);
+  }, [apiId]);
+
+  const obtenerDetalleAPI = async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/apis/${id}/`);
+      const data = await response.json();
+      if (response.ok) {
         setApiData(data);
         setLoading(false);
-      } catch (err) {
-        console.error("Error fetching API detail:", err);
+      } else {
+        console.error("Error:", data.detail);
       }
-    };
-
-    fetchApiDetail();
-  }, [id]);
-
-  const handleRemoveCollaborator = (id) => {
-    // Aquí iría tu llamada a la API o lógica de actualización
-    console.log("Eliminar colaborador:", id);
-  };
-  
-  const handleAddCollaborator = () => {
-    // Aquí iría la lógica para buscar y añadir colaborador
-    console.log("Añadir colaborador:", searchQuery);
+    } catch (error) {
+      console.error("Error al obtener los datos de la API:", error);
+    }
   };
 
   if (loading || !apiData) {
@@ -87,9 +90,9 @@ const APIDetail = () => {
         <main className="flex-1 p-10">
           {activeTab === "api" && (
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-2xl font-bold mb-4">{apiData.name}</h2>
-              <p className="mb-2">{apiData.description}</p>
-              <p className="mb-2">Versión: {apiData.description}</p>
+              <h2 className="text-2xl font-bold mb-4">{apiData.nombre}</h2>
+              <p className="mb-2">{apiData.descripcion}</p>
+              <p className="mb-2">Versión: {apiData.documentacion}</p>
               {/*<div className="bg-white rounded-xl shadow p-4 mb-4">
                 <h3 className="font-semibold">Endpoint:</h3>
                 <code>{apiData.endpoint}</code>
