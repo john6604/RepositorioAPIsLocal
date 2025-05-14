@@ -33,6 +33,41 @@ const APIDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("api");
   const [searchQuery, setSearchQuery] = useState("");
+  
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setApiData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleGuardarCambios = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const response = await fetch(`${API_BASE_URL}/listarapis/${apiData.id}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiData),
+      });
+  
+      if (response.ok) {
+        const updatedData = await response.json();
+        setApiData(updatedData);
+        alert("Cambios guardados correctamente.");
+      } else {
+        const error = await response.json();
+        console.error("Error al guardar cambios:", error);
+        alert("Hubo un error al guardar los cambios.");
+      }
+    } catch (err) {
+      console.error("Error al enviar solicitud:", err);
+      alert("No se pudo conectar con el servidor.");
+    }
+  };
 
   useEffect(() => {
     obtenerDetalleAPI(apiId);
@@ -41,16 +76,7 @@ const APIDetail = () => {
   const obtenerDetalleAPI = async (apiId) => {
     try {
       const url = `${API_BASE_URL}/listarapis/${apiId}/`;
-      console.log("Fetching from:", url);
       const response = await fetch(url);
-      const contentType = response.headers.get("Content-Type");
-      console.log("Content-Type:", contentType);
-
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text();
-        console.error("La respuesta no es JSON:", text);
-        return;
-      }
 
       const data = await response.json();
       if (response.ok) {
@@ -65,9 +91,20 @@ const APIDetail = () => {
   };
 
   if (loading || !apiData) {
-    return <div className="p-10 text-center">Cargando...</div>;
+    return (
+      <>
+        <DashboardNavbar />
+        <div className="flex justify-center items-center h-screen">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077ba] mb-4"></div>
+            <p className="text-gray-600 text-sm">Cargando APIs…</p>
+          </div>
+        </div>
+      </>
+    );
   }
 
+  // eslint-disable-next-line
   const isOwner = true;
 
   return (
@@ -104,30 +141,23 @@ const APIDetail = () => {
               <h2 className="text-2xl font-bold mb-4">{apiData.nombre}</h2>
               <p className="mb-2">{apiData.descripcion}</p>
               <p className="mb-2">Versión: {apiData.documentacion}</p>
-              {/*<div className="bg-white rounded-xl shadow p-4 mb-4">
+              <div className="bg-white rounded-xl shadow p-4 mb-4">
                 <h3 className="font-semibold">Endpoint:</h3>
-                <code>{apiData.endpoint}</code>
+                
               </div>
               <div className="bg-white rounded-xl shadow p-4 mb-4">
                 <h3 className="font-semibold">Parámetros:</h3>
-                <ul className="list-disc ml-5">
-                  {apiData.parameters.map((param, index) => (
-                    <li key={index}>
-                      <strong>{param.name}</strong> ({param.type}) – {param.description}
-                    </li>
-                  ))}
-                </ul>
               </div>
               <div className="bg-white rounded-xl shadow p-4 mb-4">
                 <h3 className="font-semibold">Retorna:</h3>
-                <p>{apiData.returns}</p>
+                
               </div>
               <div className="bg-white rounded-xl shadow p-4">
                 <h3 className="font-semibold">Ejemplo de uso:</h3>
                 <pre className="bg-gray-100 p-2 rounded whitespace-pre-line">
-                  {apiData.example}
+                  
                 </pre>
-              </div>*/}
+              </div>
             </div>
           )}
 
@@ -139,21 +169,32 @@ const APIDetail = () => {
                   <Settings className="w-5 h-5" />
                   Configuración de la API
                 </h3>
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleGuardarCambios}>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Nombre</label>
                     <input
                       type="text"
-                      defaultValue={apiData.name}
+                      value={apiData.nombre}
+                      onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Descripción</label>
                     <textarea
-                      defaultValue={apiData.description}
+                      value={apiData.descripcion}
+                      onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Versión</label>
+                    <input
+                      type="text"
+                      value={apiData.documentacion}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -161,7 +202,7 @@ const APIDetail = () => {
                       <label className="block text-sm font-medium text-gray-700">Endpoint</label>
                       <input
                         type="text"
-                        defaultValue={apiData.endpoint}
+                        defaultValue=""
                         readOnly
                         className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 sm:text-sm"
                       />
@@ -169,7 +210,7 @@ const APIDetail = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Método</label>
                       <select
-                        defaultValue={apiData.method}
+                        defaultValue=""
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       >
                         <option>GET</option>
@@ -209,7 +250,7 @@ const APIDetail = () => {
             
               {/* Lista de colaboradores */}
               <div className="space-y-4">
-                {apiData.collaborators.map((collab) => (
+                {/*{apiData.collaborators.map((collab) => (
                   <div
                     key={collab.id}
                     className="flex items-center justify-between bg-gray-50 border rounded-md p-3"
@@ -233,7 +274,7 @@ const APIDetail = () => {
                       </button>
                     )}
                   </div>
-                ))}
+                ))}*/}
               </div>
             
               {/* Añadir colaborador */}
@@ -277,7 +318,7 @@ const APIDetail = () => {
                     id="public"
                     name="visibility"
                     value="public"
-                    checked={apiData.visibility === "public"}
+                    checked={apiData.permiso === "public0"}
                     onChange={(e) =>
                       setApiData({ ...apiData, visibility: e.target.value })
                     }
@@ -293,7 +334,7 @@ const APIDetail = () => {
                     id="private"
                     name="visibility"
                     value="private"
-                    checked={apiData.visibility === "private"}
+                    checked={apiData.permiso === "privado"}
                     onChange={(e) =>
                       setApiData({ ...apiData, visibility: e.target.value })
                     }
@@ -309,7 +350,7 @@ const APIDetail = () => {
                     id="restricted"
                     name="visibility"
                     value="restricted"
-                    checked={apiData.visibility === "restricted"}
+                    checked={apiData.permiso === "restringido"}
                     onChange={(e) =>
                       setApiData({ ...apiData, visibility: e.target.value })
                     }

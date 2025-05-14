@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.views import APIView
+from django.utils.decorators import method_decorator
 
 # Create your views here.
 
@@ -285,9 +286,9 @@ def crear_api(request):
         return Response({"error": str(e)}, status=500)
 
 # Obtener una API especifica
+@method_decorator(csrf_exempt, name='dispatch')
 class DetalleAPIView(APIView):
     def get(self, request, api_id):
-        print("Ejecucion")
         try:
             api = API.objects.get(id=api_id)
         except API.DoesNotExist:
@@ -305,8 +306,24 @@ class DetalleAPIView(APIView):
             "creado_en": api.creado_en,
             "actualizado_en": api.actualizado_en,
         }
-
         return JsonResponse(data, status=200)
+
+    def put(self, request, api_id):
+        try:
+            api = API.objects.get(id=api_id)
+        except API.DoesNotExist:
+            return JsonResponse({"detail": "API no encontrada."}, status=404)
+
+        data = json.loads(request.body)
+
+        # Solo actualizamos los campos relevantes
+        api.nombre = data.get("nombre", api.nombre)
+        api.descripcion = data.get("descripcion", api.descripcion)
+        api.documentacion = data.get("documentacion", api.documentacion)
+
+        api.save()
+
+        return JsonResponse({"detail": "API actualizada correctamente."}, status=200)
 
 # Eliminación de una cuenta, vista
 class EliminarCuentaView(APIView):
