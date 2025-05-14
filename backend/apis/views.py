@@ -324,6 +324,29 @@ class DetalleAPIView(APIView):
         api.save()
 
         return JsonResponse({"detail": "API actualizada correctamente."}, status=200)
+    
+    def delete(self, request, api_id):
+        token = request.headers.get("X-Session-Token")
+
+        if not token:
+            return JsonResponse({"detail": "Token de sesión no proporcionado."}, status=400)
+
+        try:
+            sesion = Sesion.objects.get(token=token)
+            usuario_actual = sesion.usuario  # o sesion.usuario_id según cómo esté tu modelo
+        except Sesion.DoesNotExist:
+            return JsonResponse({"detail": "Token inválido o sesión no encontrada."}, status=401)
+
+        try:
+            api = API.objects.get(id=api_id)
+        except API.DoesNotExist:
+            return JsonResponse({"detail": "API no encontrada."}, status=404)
+
+        if api.creado_por_id != usuario_actual.id:
+            return JsonResponse({"detail": "No tienes permiso para eliminar esta API."}, status=403)
+
+        api.delete()
+        return JsonResponse({"detail": "API eliminada correctamente."}, status=204)
 
 # Eliminación de una cuenta, vista
 class EliminarCuentaView(APIView):

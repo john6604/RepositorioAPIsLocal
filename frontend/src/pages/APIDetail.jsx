@@ -69,6 +69,40 @@ const APIDetail = () => {
     }
   };
 
+  const handleEliminarAPI = async () => {
+    const tokenSesion = localStorage.getItem("token_sesion");
+
+    if (!tokenSesion) {
+      alert("No hay token de sesión. Inicia sesión primero.");
+      return;
+    }
+
+    const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar esta API? Esta acción no se puede deshacer.");
+    if (!confirmacion) return;
+  
+    try {
+      const response = await fetch(`${API_BASE_URL}/listarapis/${apiId}/`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Session-Token": tokenSesion,
+        },
+      });
+  
+      if (response.status === 204) {
+        alert("API eliminada con éxito.");
+        // redirigir o actualizar
+      } else {
+        const data = await response.json();
+        alert(`Error al eliminar API: ${data.detail}`);
+      }
+    } catch (error) {
+      console.error("Error al eliminar API:", error);
+      alert("Error al eliminar la API.");
+    }
+  };
+  
+
   useEffect(() => {
     obtenerDetalleAPI(apiId);
   }, [apiId]);
@@ -174,6 +208,7 @@ const APIDetail = () => {
                     <label className="block text-sm font-medium text-gray-700">Nombre</label>
                     <input
                       type="text"
+                      name="nombre"
                       value={apiData.nombre}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -182,6 +217,7 @@ const APIDetail = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Descripción</label>
                     <textarea
+                      name="descripcion"
                       value={apiData.descripcion}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -192,6 +228,7 @@ const APIDetail = () => {
                     <label className="block text-sm font-medium text-gray-700">Versión</label>
                     <input
                       type="text"
+                      name="documentacion"
                       value={apiData.documentacion}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -237,7 +274,10 @@ const APIDetail = () => {
                 <p className="text-sm text-gray-700 mb-4">
                   Esta acción eliminará permanentemente esta API del sistema. Esta operación no se puede deshacer.
                 </p>
-                <button className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                <button
+                  onClick={handleEliminarAPI}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                >
                   Eliminar API
                 </button>
               </div>
