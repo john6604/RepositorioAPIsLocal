@@ -327,16 +327,19 @@ class DetalleAPIView(APIView):
         return JsonResponse({"detail": "API actualizada correctamente."}, status=200)
     
 # Eliminación de una API, vista
-class EliminarAPIView(View):
+class EliminarAPIView(APIView):
     def delete(self, request, api_id):
-        token = request.headers.get("X-Session-Token")
-        if not token:
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
             return JsonResponse({"detail": "Token no proporcionado"}, status=400)
 
+        token_sesion = auth_header.split(" ")[1]
+
         try:
-            usuario = Sesion.objects.get(token=token).usuario
+            sesion = Sesion.objects.get(token_sesion=token_sesion)
+            usuario = sesion.usuario
         except Sesion.DoesNotExist:
-            return JsonResponse({"detail": "Token inválido"}, status=401)
+            return JsonResponse({"detail": "Sesión inválida"}, status=401)
 
         try:
             api = API.objects.get(id=api_id)
@@ -352,12 +355,10 @@ class EliminarAPIView(View):
 # Eliminación de una cuenta, vista
 class EliminarCuentaView(APIView):
     def delete(self, request):
-        print("iniciado")
         auth_header = request.headers.get("Authorization", "")
         if not auth_header.startswith("Bearer "):
             return JsonResponse({"detail": "Token no proporcionado."}, status=401)
 
-        print("Token obtenido.")
 
         token_sesion = auth_header.split(" ")[1]
 
@@ -367,8 +368,6 @@ class EliminarCuentaView(APIView):
         except Sesion.DoesNotExist:
             return JsonResponse({"detail": "Sesión inválida."}, status=401)
 
-        print("Proceder a eliminar")
-        # Eliminar usuario y la sesión asociada
         usuario.delete()
         sesion.delete()  # opcional, porque el usuario se elimina en cascada si está relacionado
 
