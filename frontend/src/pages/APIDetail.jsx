@@ -9,7 +9,7 @@ import {
 import DashboardNavbar from "../componentes/DashboardNavbar";
 import { useEffect } from "react";
 import { API_BASE_URL } from "../config";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const tabs = [
   { id: "api", label: "API", icon: Code2 },
@@ -20,6 +20,7 @@ const tabs = [
 
 const APIDetail = () => {
   const { apiId } = useParams();
+  const navigate = useNavigate();
   const [apiData, setApiData] = useState({
     nombre: "",
     descripcion: "",
@@ -81,7 +82,7 @@ const APIDetail = () => {
     if (!confirmacion) return;
   
     try {
-      const response = await fetch(`${API_BASE_URL}/listarapis/${apiId}/`, {
+      const response = await fetch(`${API_BASE_URL}/eliminarapi/${apiId}/`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +92,7 @@ const APIDetail = () => {
   
       if (response.status === 204) {
         alert("API eliminada con éxito.");
-        // redirigir o actualizar
+        navigate("/dashboard")
       } else {
         const data = await response.json();
         alert(`Error al eliminar API: ${data.detail}`);
