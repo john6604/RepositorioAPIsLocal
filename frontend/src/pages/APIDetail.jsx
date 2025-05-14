@@ -38,9 +38,20 @@ const APIDetail = () => {
     obtenerDetalleAPI(apiId);
   }, [apiId]);
 
-  const obtenerDetalleAPI = async (id) => {
+  const obtenerDetalleAPI = async (apiId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/apis/${id}/`);
+      const url = `${API_BASE_URL}/listarapis/${apiId}/`;
+      console.log("Fetching from:", url);
+      const response = await fetch(url);
+      const contentType = response.headers.get("Content-Type");
+      console.log("Content-Type:", contentType);
+
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("La respuesta no es JSON:", text);
+        return;
+      }
+
       const data = await response.json();
       if (response.ok) {
         setApiData(data);
@@ -214,7 +225,7 @@ const APIDetail = () => {
                     </div>
                     {isOwner && (
                       <button
-                        onClick={() => handleRemoveCollaborator(collab.id)}
+                        onClick={null}
                         className="text-red-600 hover:text-red-800"
                         title="Eliminar colaborador"
                       >
@@ -243,7 +254,7 @@ const APIDetail = () => {
                   </span>
                 </div>
                 <button
-                  onClick={handleAddCollaborator}
+                  onClick={null}
                   className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 >
                   Añadir

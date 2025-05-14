@@ -21,7 +21,7 @@ function App() {
               <Route path="/crear"    element={<CrearApi   />} />
               <Route path="/login"    element={<Login     />} />
               <Route path="/registro" element={<Registro  />} />
-              <Route path="/api/:id"  element={<APIDetail />} />
+              <Route path="/api/:apiId"  element={<APIDetail />} />
               <Route path="/dashboard"element={<Dashboard/>} />
               <Route path="/notificaciones" element={<Notificaciones />} />
               <Route path="/perfilConfig" element={<Configuracion />} />
