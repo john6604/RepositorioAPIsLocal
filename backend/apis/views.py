@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.views import APIView
 from django.utils.decorators import method_decorator
+from django.views import View
 
 # Create your views here.
 
