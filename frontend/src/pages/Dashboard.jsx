@@ -82,7 +82,7 @@ const Dashboard = () => {
     if (filterCategory === 'favoritas') return api.favorito;
     if (filterCategory === 'guardadas') return api.guardada;
     if (filterCategory === 'Pública') {
-      return api.permiso === 'público';
+      return api.permiso === 'publico';
     }
     if (filterCategory === 'Privada') {
       return api.permiso === 'privado';

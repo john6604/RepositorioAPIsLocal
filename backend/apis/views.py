@@ -468,6 +468,7 @@ def buscar_apis_publicas(request):
             "nombre": api.nombre,
             "descripcion": api.descripcion,
             "documentacion": api.documentacion,
+            "permiso": api.permiso, 
             "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
         }
         for api in apis
