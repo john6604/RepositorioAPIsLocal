@@ -245,7 +245,6 @@ def apis_por_usuario(request):
                 'estado': api.estado,
                 'descripcion': api.descripcion,
                 "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
-                "creador": api.creado_por,
             }
             for api in apis
         ]
