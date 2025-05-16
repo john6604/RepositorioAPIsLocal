@@ -483,7 +483,7 @@ def buscar_apis_publicas(request):
         Q(descripcion__icontains=query) |
         Q(documentacion__icontains=query) |
         Q(creado_por__nombres__icontains=query)
-    ).select_related('creado_por')  # optimización para acceder al autor
+    ).select_related('creado_por') 
 
     resultados = [
         {

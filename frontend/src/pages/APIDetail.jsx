@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import { useNavigate, useParams } from "react-router-dom";
 
-  const APIDetail = () => {
+const APIDetail = () => {
     const { apiId } = useParams();
     const navigate = useNavigate();
     const [apiData, setApiData] = useState({
@@ -64,7 +64,8 @@ import { useNavigate, useParams } from "react-router-dom";
           const data = await response.json();
           setUsuarioActualId(data.usuario_id);
         } else {
-          console.error("No se pudo obtener el usuario actual");
+          console.warn("Token inválido o usuario no autenticado");
+          setUsuarioActualId(null);
         }
       } catch (error) {
         console.error("Error en obtenerUsuarioActual:", error);
@@ -132,7 +133,15 @@ import { useNavigate, useParams } from "react-router-dom";
     };
     
     useEffect(() => {
-      obtenerUsuarioActual();
+      const token = localStorage.getItem("token_sesion");
+      if (token) 
+        {
+        obtenerUsuarioActual();
+      } 
+      else 
+      {
+        setUsuarioActualId(null);
+      }
       obtenerDetalleAPI(apiId);
     }, [apiId]);
 
@@ -154,8 +163,10 @@ import { useNavigate, useParams } from "react-router-dom";
     };
 
     useEffect(() => {
-      if (usuarioActualId && apiData && apiData.creado_por) {
+      if (usuarioActualId && apiData?.creado_por) {
         setIsOwner(usuarioActualId === apiData.creado_por);
+      } else {
+        setIsOwner(false); 
       }
     }, [usuarioActualId, apiData]);
 
@@ -318,7 +329,7 @@ import { useNavigate, useParams } from "react-router-dom";
           )}
 
           {activeTab === "colaborators" && (
-              <div className="bg-white p-6 rounded-xl shadow border space-y-6">
+            <div className="mx-auto max-w-6xl bg-white p-6 rounded-lg shadow border space-y-6">
               <h3 className="text-lg font-semibold text-gray-800">Colaboradores</h3>
             
               {/* Lista de colaboradores */}

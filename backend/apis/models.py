@@ -13,9 +13,11 @@ class Rol(models.Model):
 
 class Usuario(models.Model):
     correo           = models.EmailField(max_length=100, unique=True)
+    username         = models.CharField(max_length=150, unique=True)
     contrasena_hash  = models.TextField()
     nombres          = models.CharField(max_length=100, blank=True, null=True)
     apellidos        = models.CharField(max_length=100, blank=True, null=True)
+    biografia        = models.TextField(blank=True, null=True)
     rol              = models.ForeignKey(Rol, on_delete=models.CASCADE, db_column="rol_id", null=True, blank=True)
     estado           = models.CharField(max_length=50, blank=True, null=True)
     creado_en        = models.DateTimeField(auto_now_add=True, null=True)

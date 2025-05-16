@@ -47,7 +47,16 @@ const Layout = () => {
   }, [location.pathname, navigate]);
 
   if (cargando) {
-    return <div>Cargando...</div>;
+    return (
+      <>
+        <div className="flex justify-center items-center h-screen">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077ba] mb-4"></div>
+            <p className="text-gray-600 text-sm">Cargando APIs…</p>
+          </div>
+        </div>
+      </>
+    );
   }
 
   return (
