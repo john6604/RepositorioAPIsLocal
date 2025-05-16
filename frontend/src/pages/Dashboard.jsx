@@ -197,14 +197,14 @@ const Dashboard = () => {
                     <h2 className="text-xl font-semibold text-[#0077ba]">{api.nombre}</h2>
                     <span
                       className={
-                        api.visibilidad === 'Pública'
+                        api.permiso === 'publico'
                           ? 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs'
-                          : api.visibilidad === 'privado'
+                          : api.permiso === 'privado'
                             ? 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs'
                             : 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs'
                       }
                     >
-                      {api.visibilidad}
+                      {api.permiso}
                     </span>
                   </div>
                   <p className="text-gray-600 mt-2 text-sm">{api.descripcion}</p>
