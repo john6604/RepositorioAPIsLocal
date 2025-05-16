@@ -49,6 +49,9 @@ class API(models.Model):
     class Meta:
         db_table = "apis"
         indexes = [models.Index(fields=["nombre"], name="idx_api_nombre")]
+        constraints = [
+            models.UniqueConstraint(fields=["nombre", "creado_por"], name="unique_api_por_usuario")
+        ]
 
     def __str__(self):
         return self.nombre

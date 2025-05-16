@@ -12,7 +12,6 @@ import {
   Grid,
   List,
   PlusCircle,
-  LogOut,
   Bookmark,
 } from "lucide-react";
 
@@ -50,6 +49,7 @@ const Dashboard = () => {
           public: data.filter(a => a.permiso === "publico").length,
           private: data.filter(a => a.permiso === "privado").length,
           restricted: data.filter(a => a.permiso === "restringido").length,
+          draft: data.filter(a => a.permiso === "borrador").length
         });
       } catch (err) {
         console.error("No se pudieron cargar las APIs:", err);
@@ -60,36 +60,6 @@ const Dashboard = () => {
 
     fetchApis();
   }, [tokenSesion]);
-
-  const handleLogout = async () => {
-    try {
-      const tokenSesion = localStorage.getItem("token_sesion");
-  
-      if (!tokenSesion) {
-        console.error("No se encontró el token de sesión en localStorage.");
-        return;
-      }
-  
-      const response = await fetch(`${API_BASE_URL}/logout/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token_sesion: tokenSesion }),
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        localStorage.clear();
-        window.location.href = '/login';
-      } else {
-        console.error('Error al cerrar sesión:', data.error);
-      }
-    } catch (error) {
-      console.error('Error de red:', error);
-    }
-  };
 
   if (loading) {
     return (
@@ -172,14 +142,6 @@ const Dashboard = () => {
                 <Link to="/crear" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
                   <PlusCircle className="w-5 h-5 text-gray-600" /> Crear API
                 </Link>
-              </li>
-              <li className="mt-6">
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 w-full rounded hover:bg-gray-100 text-red-600"
-                >
-                  <LogOut className="w-5 h-5" /> Salir
-                </button>
               </li>
             </ul>
           </nav>

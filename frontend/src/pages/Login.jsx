@@ -49,10 +49,9 @@ const Login = () => {
         localStorage.setItem("token_sesion", data.token);
         localStorage.setItem("usuario_id", data.usuario_id);
         localStorage.setItem("nombre_usuario", `${data.nombres} ${data.apellidos}`);
-        localStorage.setItem("rol_id", data.rol_id);
   
         alert("Inicio de sesión exitoso");
-        navigate("/dashboard"); // Redirigir al dashboard
+        navigate("/dashboard");
       } else {
         alert(data.error || "Error al iniciar sesión");
       }

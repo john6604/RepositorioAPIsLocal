@@ -92,7 +92,6 @@ const APIDetail = () => {
   
       if (response.status === 204) {
         alert("API eliminada con éxito.");
-        localStorage.removeItem("token_sesion")
         navigate("/dashboard")
       } else {
         const data = await response.json();

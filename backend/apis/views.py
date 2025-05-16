@@ -268,11 +268,19 @@ def crear_api(request):
             return Response({"error": "Sesión no válida o expirada"}, status=401)
 
         usuario = sesion.usuario
+        nombre_api = data.get("nombre")
+
+        if not nombre_api:
+            return Response({"error": "El nombre de la API es obligatorio"}, status=400)
+
+        # Verificar que el nombre de la API no exista para este usuario
+        if API.objects.filter(nombre=nombre_api, creado_por=usuario).exists():
+            return Response({"error": "Ya tienes una API con ese nombre"}, status=409)
 
         nueva_api = API.objects.create(
-            nombre=data.get("nombre"),
+            nombre=nombre_api,
             descripcion=data.get("descripcion"),
-            detalles_tecnicos=data.get("ejemploUso"),
+            detalles_tecnicos=data.get("ejemploUso"),  # asegúrate que estas claves vengan bien desde el frontend
             documentacion=data.get("version"),
             creado_por=usuario,
             permiso="privado",
