@@ -11,148 +11,180 @@ import { useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import { useNavigate, useParams } from "react-router-dom";
 
-const tabs = [
-  { id: "api", label: "API", icon: Code2 },
-  { id: "settings", label: "Configuración", icon: Settings },
-  { id: "colaborators", label: "Colaboradores", icon: Users },
-  { id: "permissions", label: "Permisos", icon: Lock },
-];
+  const APIDetail = () => {
+    const { apiId } = useParams();
+    const navigate = useNavigate();
+    const [apiData, setApiData] = useState({
+      nombre: "",
+      descripcion: "",
+      detalles_tecnicos: "",
+      documentacion: "",
+      permiso: "",
+      estado: "",
+      creado_en: "",
+      actualizado_en: "",
+    });
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState("api");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [usuarioActualId, setUsuarioActualId] = useState(null);
+    const [isOwner, setIsOwner] = useState(false);
+    const allTabs = [
+      { id: "api", label: "API", icon: Code2 },
+      { id: "settings", label: "Configuración", icon: Settings },
+      { id: "colaborators", label: "Colaboradores", icon: Users },
+      { id: "permissions", label: "Permisos", icon: Lock },
+    ];
+    
+    const visibleTabs = isOwner
+      ? allTabs
+      : allTabs.filter((tab) => tab.id === "api");
+    
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+      setApiData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    };
 
-const APIDetail = () => {
-  const { apiId } = useParams();
-  const navigate = useNavigate();
-  const [apiData, setApiData] = useState({
-    nombre: "",
-    descripcion: "",
-    detalles_tecnicos: "",
-    documentacion: "",
-    permiso: "",
-    estado: "",
-    creado_en: "",
-    actualizado_en: "",
-  });
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("api");
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setApiData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleGuardarCambios = async (e) => {
-    e.preventDefault();
-  
-    try {
-      const response = await fetch(`${API_BASE_URL}/listarapis/${apiData.id}/`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(apiData),
-      });
-  
-      if (response.ok) {
-        const updatedData = await response.json();
-        setApiData(updatedData);
-        alert("Cambios guardados correctamente.");
-      } else {
-        const error = await response.json();
-        console.error("Error al guardar cambios:", error);
-        alert("Hubo un error al guardar los cambios.");
+    const obtenerUsuarioActual = async () => {
+      try {
+        const tokenSesion = localStorage.getItem("token_sesion");
+    
+        const response = await fetch(`${API_BASE_URL}/usuario_actual/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token_sesion: tokenSesion }),
+        });
+    
+        if (response.ok) {
+          const data = await response.json();
+          setUsuarioActualId(data.usuario_id);
+        } else {
+          console.error("No se pudo obtener el usuario actual");
+        }
+      } catch (error) {
+        console.error("Error en obtenerUsuarioActual:", error);
       }
-    } catch (err) {
-      console.error("Error al enviar solicitud:", err);
-      alert("No se pudo conectar con el servidor.");
-    }
-  };
+    };
 
-  const handleEliminarAPI = async () => {
-    const tokenSesion = localStorage.getItem("token_sesion");
+    const handleGuardarCambios = async (e) => {
+      e.preventDefault();
+    
+      try {
+        const response = await fetch(`${API_BASE_URL}/listarapis/${apiData.id}/`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apiData),
+        });
+    
+        if (response.ok) {
+          const updatedData = await response.json();
+          setApiData(updatedData);
+          alert("Cambios guardados correctamente.");
+        } else {
+          const error = await response.json();
+          console.error("Error al guardar cambios:", error);
+          alert("Hubo un error al guardar los cambios.");
+        }
+      } catch (err) {
+        console.error("Error al enviar solicitud:", err);
+        alert("No se pudo conectar con el servidor.");
+      }
+    };
 
-    if (!tokenSesion) {
-      alert("No hay token de sesión. Inicia sesión primero.");
-      return;
-    }
+    const handleEliminarAPI = async () => {
+      const tokenSesion = localStorage.getItem("token_sesion");
 
-    const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar esta API? Esta acción no se puede deshacer.");
-    if (!confirmacion) return;
-  
-    try {
-      const response = await fetch(`${API_BASE_URL}/eliminarapi/${apiId}/`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
-          "Content-Type": "application/json",
-        },
-      });
-  
-      if (response.status === 204) {
-        alert("API eliminada con éxito.");
-        navigate("/dashboard")
-      } else {
+      if (!tokenSesion) {
+        alert("No hay token de sesión. Inicia sesión primero.");
+        return;
+      }
+
+      const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar esta API? Esta acción no se puede deshacer.");
+      if (!confirmacion) return;
+    
+      try {
+        const response = await fetch(`${API_BASE_URL}/eliminarapi/${apiId}/`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
+            "Content-Type": "application/json",
+          },
+        });
+    
+        if (response.status === 204) {
+          alert("API eliminada con éxito.");
+          navigate("/dashboard")
+        } else {
+          const data = await response.json();
+          alert(`Error al eliminar API: ${data.detail}`);
+        }
+      } catch (error) {
+        console.error("Error al eliminar API:", error);
+        alert("Error al eliminar la API.");
+      }
+    };
+    
+    useEffect(() => {
+      obtenerUsuarioActual();
+      obtenerDetalleAPI(apiId);
+    }, [apiId]);
+
+    const obtenerDetalleAPI = async (apiId) => {
+      try {
+        const url = `${API_BASE_URL}/listarapis/${apiId}/`;
+        const response = await fetch(url);
+
         const data = await response.json();
-        alert(`Error al eliminar API: ${data.detail}`);
+        if (response.ok) {
+          setApiData(data);
+          setLoading(false);
+        } else {
+          console.error("Error:", data.detail);
+        }
+      } catch (error) {
+        console.error("Error al obtener los datos de la API:", error);
       }
-    } catch (error) {
-      console.error("Error al eliminar API:", error);
-      alert("Error al eliminar la API.");
-    }
-  };
-  
+    };
 
-  useEffect(() => {
-    obtenerDetalleAPI(apiId);
-  }, [apiId]);
-
-  const obtenerDetalleAPI = async (apiId) => {
-    try {
-      const url = `${API_BASE_URL}/listarapis/${apiId}/`;
-      const response = await fetch(url);
-
-      const data = await response.json();
-      if (response.ok) {
-        setApiData(data);
-        setLoading(false);
-      } else {
-        console.error("Error:", data.detail);
+    useEffect(() => {
+      if (usuarioActualId && apiData && apiData.creado_por) {
+        setIsOwner(usuarioActualId === apiData.creado_por);
       }
-    } catch (error) {
-      console.error("Error al obtener los datos de la API:", error);
-    }
-  };
+    }, [usuarioActualId, apiData]);
 
-  if (loading || !apiData) {
+    if (loading || !apiData) {
+      return (
+        <>
+          <DashboardNavbar />
+          <div className="flex justify-center items-center h-screen">
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077ba] mb-4"></div>
+              <p className="text-gray-600 text-sm">Cargando APIs…</p>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+
     return (
       <>
         <DashboardNavbar />
-        <div className="flex justify-center items-center h-screen">
-          <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077ba] mb-4"></div>
-            <p className="text-gray-600 text-sm">Cargando APIs…</p>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  // eslint-disable-next-line
-  const isOwner = true;
-
-  return (
-    <>
-      <DashboardNavbar />
-      <div className="flex min-h-screen bg-gray-100">
-        {/* Sidebar */}
-        <aside className="w-72 bg-white border-r">
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold">Menú</h2>
-          </div>
-          <nav className="flex flex-col">
-            {tabs.map((tab) => (
+        <div className="flex min-h-screen bg-gray-100">
+          {/* Sidebar */}
+          <aside className="w-72 bg-white border-r">
+            <div className="p-6 border-b">
+              <h2 className="text-lg font-semibold">Menú</h2>
+            </div>
+            <nav className="flex flex-col">
+            {visibleTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -166,64 +198,64 @@ const APIDetail = () => {
                 {tab.label}
               </button>
             ))}
-          </nav>
-        </aside>
+            </nav>
+          </aside>
 
-        {/* Main content */}
-        <main className="flex-1 p-10">
-          {activeTab === "api" && (
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-2xl font-bold mb-4">{apiData.nombre}</h2>
-              <p className="mb-2">{apiData.descripcion}</p>
-              <p className="mb-2">Versión: {apiData.documentacion}</p>
-              <div className="bg-white rounded-xl shadow p-4 mb-4">
-                <h3 className="font-semibold">Endpoint:</h3>
-                
-              </div>
-              <div className="bg-white rounded-xl shadow p-4 mb-4">
-                <h3 className="font-semibold">Parámetros:</h3>
-              </div>
-              <div className="bg-white rounded-xl shadow p-4 mb-4">
-                <h3 className="font-semibold">Retorna:</h3>
-                
-              </div>
-              <div className="bg-white rounded-xl shadow p-4">
-                <h3 className="font-semibold">Ejemplo de uso:</h3>
-                <pre className="bg-gray-100 p-2 rounded whitespace-pre-line">
+          {/* Main content */}
+          <main className="flex-1 p-10">
+            {activeTab === "api" && (
+              <div className="max-w-4xl mx-auto">
+                <h2 className="text-2xl font-bold mb-4">{apiData.nombre}</h2>
+                <p className="mb-2">{apiData.descripcion}</p>
+                <p className="mb-2">Versión: {apiData.documentacion}</p>
+                <div className="bg-white rounded-xl shadow p-4 mb-4">
+                  <h3 className="font-semibold">Endpoint:</h3>
                   
-                </pre>
+                </div>
+                <div className="bg-white rounded-xl shadow p-4 mb-4">
+                  <h3 className="font-semibold">Parámetros:</h3>
+                </div>
+                <div className="bg-white rounded-xl shadow p-4 mb-4">
+                  <h3 className="font-semibold">Retorna:</h3>
+                  
+                </div>
+                <div className="bg-white rounded-xl shadow p-4">
+                  <h3 className="font-semibold">Ejemplo de uso:</h3>
+                  <pre className="bg-gray-100 p-2 rounded whitespace-pre-line">
+                    
+                  </pre>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {activeTab === "settings" && (
-            <div className="max-w-3xl mx-auto space-y-8">
-              {/* Configuración General */}
-              <div className="bg-white p-6 rounded-xl shadow">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
-                  Configuración de la API
-                </h3>
-                <form className="space-y-4" onSubmit={handleGuardarCambios}>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                    <input
-                      type="text"
-                      name="nombre"
-                      value={apiData.nombre}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Descripción</label>
-                    <textarea
-                      name="descripcion"
-                      value={apiData.descripcion}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      rows={3}
-                    />
+            {activeTab === "settings" && (
+              <div className="max-w-3xl mx-auto space-y-8">
+                {/* Configuración General */}
+                <div className="bg-white p-6 rounded-xl shadow">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Configuración de la API
+                  </h3>
+                  <form className="space-y-4" onSubmit={handleGuardarCambios}>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                      <input
+                        type="text"
+                        name="nombre"
+                        value={apiData.nombre}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Descripción</label>
+                      <textarea
+                        name="descripcion"
+                        value={apiData.descripcion}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        rows={3}
+                      />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Versión</label>

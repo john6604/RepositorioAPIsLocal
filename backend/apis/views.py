@@ -245,6 +245,7 @@ def apis_por_usuario(request):
                 'estado': api.estado,
                 'descripcion': api.descripcion,
                 "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
+                "creador": api.creado_por,
             }
             for api in apis
         ]
@@ -253,6 +254,28 @@ def apis_por_usuario(request):
 
     except Exception as e:
         print("Error:", str(e))
+        return Response({'error': str(e)}, status=500)
+
+# Obtener el Usuario id de la sesion actual, vista
+@api_view(['POST'])
+@csrf_exempt
+def obtener_usuario_actual(request):
+    try:
+        data = request.data 
+        token = data.get("token_sesion")
+
+        if not token:
+            return Response({'error': 'Token no proporcionado'}, status=400)
+
+        sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
+        if not sesion:
+            return Response({'error': 'Sesión inválida o expirada'}, status=401)
+
+        usuario = sesion.usuario
+
+        return Response({'usuario_id': usuario.id})
+    
+    except Exception as e:
         return Response({'error': str(e)}, status=500)
 
 # Vista para crear APIs

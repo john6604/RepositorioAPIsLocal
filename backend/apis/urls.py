@@ -19,4 +19,5 @@ urlpatterns = [
     path('listarapis/<int:api_id>/', views.DetalleAPIView.as_view(), name='detalle_api'),
     path("eliminarapi/<int:api_id>/", views.EliminarAPIView.as_view(), name='eliminar_api'),
     path('buscar-apis-publicas', views.buscar_apis_publicas, name='buscar_apis_publicas'),
+    path('usuario_actual/', views.obtener_usuario_actual, name='usuario_actual'),
 ]
