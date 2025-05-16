@@ -17,8 +17,11 @@ import {
   Clipboard
 } from "lucide-react";
 import { API_BASE_URL } from "../config";
+import { useNavigate } from "react-router-dom";
 
 const DashboardNavbar = () => {
+  const navigate = useNavigate();
+  const [busqueda, setBusqueda] = useState("");
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
   const [menuLateralAbierto, setMenuLateralAbierto] = useState(false);
   const [busquedaActiva, setBusquedaActiva] = useState(false);
@@ -45,6 +48,12 @@ const DashboardNavbar = () => {
 
   const toggleMenuLateral = () => {
     setMenuLateralAbierto(!menuLateralAbierto);
+  };
+
+  const manejarBusqueda = (e) => {
+    if (e.key === "Enter" && busqueda.trim() !== "") {
+      navigate(`/resultados-busqueda?q=${encodeURIComponent(busqueda.trim())}`);
+    }
   };
 
   const handleLogout = async () => {
@@ -121,6 +130,9 @@ const DashboardNavbar = () => {
               <input
                 type="text"
                 placeholder="Buscar o ir a..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                onKeyDown={manejarBusqueda}
                 className="bg-transparent outline-none text-md text-white placeholder-white/60 w-full"
               />
               <kbd className="ml-2 text-white/50 text-xs border border-white/30 rounded px-1">/</kbd>

@@ -17,6 +17,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.db.models import Q
 
 # Create your views here.
 
@@ -442,6 +443,37 @@ class ActualizarUsuarioView(APIView):
 
         except Exception as e:
             return JsonResponse({"detail": f"Error al actualizar los datos: {str(e)}"}, status=400)
+
+# Vista para buscar APIs globalmente
+@api_view(['GET'])
+def buscar_apis_publicas(request):
+    query = request.GET.get('q', '').strip().lower()
+
+    if not query:
+        return Response({"resultados": []})
+
+    # Filtra solo APIs públicas que coincidan por nombre, descripción, documentación o autor
+    apis = API.objects.filter(
+        permiso='publico'
+    ).filter(
+        Q(nombre__icontains=query) |
+        Q(descripcion__icontains=query) |
+        Q(documentacion__icontains=query) |
+        Q(creado_por__nombres__icontains=query)
+    ).select_related('creado_por')  # optimización para acceder al autor
+
+    resultados = [
+        {
+            "id": api.id,
+            "nombre": api.nombre,
+            "descripcion": api.descripcion,
+            "documentacion": api.documentacion,
+            "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
+        }
+        for api in apis
+    ]
+
+    return Response({"resultados": resultados})
 
 class APIViewSet(viewsets.ModelViewSet):
     queryset = API.objects.all()
