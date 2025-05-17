@@ -30,36 +30,34 @@ const Registro = () => {
     e.preventDefault();
     const erroresDetectados = validarFormulario();
     setErrores(erroresDetectados);
-  
-    console.log("Errores detectados:", erroresDetectados); // Verifica si se están detectando errores correctamente
-  
+
     if (Object.keys(erroresDetectados).length === 0) {
       try {
-        console.log("Enviando datos:", { correo, contrasena: clave });
-        const response = await axios.post(`${API_BASE_URL}/registraruser/`, {
+        // Generar username automáticamente a partir del correo
+        const username = correo.split('@')[0];
+        const payload = {
           correo,
-          contrasena: clave
-        });
-  
-        console.log("Respuesta del servidor:", response.data); // Depuración
+          contrasena: clave,
+          username
+        };
+        console.log("Enviando payload de registro:", payload); // Verificar que username esté incluido
+
+        const response = await axios.post(`${API_BASE_URL}/registraruser/`, payload);
+        console.log("Respuesta del servidor al registrar usuario:", response.data);
+
         alert("¡Registro exitoso!");
-  
-        // Guardar el token de sesión en el localStorage
-        const tokenSesion = response.data.token_sesion;
-        localStorage.setItem("token_sesion", tokenSesion);  // Guardamos el token
-  
-        setCorreo(""); setClave(""); setConfirmacion("");
-        
-        // Redirigir al dashboard o a cualquier otra página
+        localStorage.setItem("token_sesion", response.data.token_sesion);
+
+        // Reset campos
+        setCorreo("");
+        setClave("");
+        setConfirmacion("");
+        setErrores({});
         navigate("/dashboard");
-  
       } catch (error) {
-        console.error("Error:", error); // Agregar más información de error para depuración
-        if (error.response?.data?.error) {
-          alert("Error: " + error.response.data.error);
-        } else {
-          alert("Error al conectar con el servidor.");
-        }
+        console.error("Error en registro:", error.response || error.message);
+        const message = error.response?.data?.error || 'Error al conectar con el servidor.';
+        setErrores(prev => ({ ...prev, api: message }));
       }
     }
   };
@@ -71,69 +69,75 @@ const Registro = () => {
 
   return (
     <>
-    <Navbar/>
-    <div className="max-w-md mx-auto mt-16 p-8 bg-white shadow-xl rounded-xl">
-      <h2 className="text-2xl font-semibold mb-6 text-[#0077ba]">Registro de Usuario</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm">Correo electrónico</label>
-          <input
-            type="email"
-            className={inputClass("correo")}
-            value={correo}
-            onChange={(e) => setCorreo(e.target.value)}
-          />
-          {errores.correo && <p className="text-sm text-red-600 mt-1">{errores.correo}</p>}
+      <Navbar />
+      <div className="max-w-md mx-auto mt-16 p-8 bg-white shadow-xl rounded-xl">
+        <h2 className="text-2xl font-semibold mb-6 text-[#0077ba]">Registro de Usuario</h2>
+        {errores.api && <p className="text-center text-red-600 mb-4">{errores.api}</p>}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm">Correo electrónico</label>
+            <input
+              type="email"
+              className={inputClass("correo")}
+              value={correo}
+              onChange={(e) => setCorreo(e.target.value)}
+            />
+            {errores.correo && <p className="text-sm text-red-600 mt-1">{errores.correo}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm">Contraseña</label>
+            <input
+              type="password"
+              className={inputClass("clave")}
+              value={clave}
+              onChange={(e) => setClave(e.target.value)}
+            />
+            {errores.clave && <p className="text-sm text-red-600 mt-1">{errores.clave}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm">Confirmar contraseña</label>
+            <input
+              type="password"
+              className={inputClass("confirmacion")}
+              value={confirmacion}
+              onChange={(e) => setConfirmacion(e.target.value)}
+            />
+            {errores.confirmacion && <p className="text-sm text-red-600 mt-1">{errores.confirmacion}</p>}
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-[#0077ba] hover:bg-[#00509e] text-white py-2 rounded-md transition duration-200"
+          >
+            Registrarse
+          </button>
+        </form>
+
+        <div className="mt-6 border-t pt-4">
+          <p className="text-center text-sm text-gray-500 mb-2">O</p>
+          <button
+            onClick={null}
+            className="w-full flex items-center justify-center border border-gray-300 hover:border-gray-500 py-2 rounded-md transition duration-200"
+          >
+            <img
+              src="https://www.svgrepo.com/show/355037/google.svg"
+              alt="Google"
+              className="w-5 h-5 mr-2"
+            />
+            Regístrate con Google
+          </button>
         </div>
-        <div>
-          <label className="block text-sm">Contraseña</label>
-          <input
-            type="password"
-            className={inputClass("clave")}
-            value={clave}
-            onChange={(e) => setClave(e.target.value)}
-          />
-          {errores.clave && <p className="text-sm text-red-600 mt-1">{errores.clave}</p>}
-        </div>
-        <div>
-          <label className="block text-sm">Confirmar contraseña</label>
-          <input
-            type="password"
-            className={inputClass("confirmacion")}
-            value={confirmacion}
-            onChange={(e) => setConfirmacion(e.target.value)}
-          />
-          {errores.confirmacion && <p className="text-sm text-red-600 mt-1">{errores.confirmacion}</p>}
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-[#0077ba] hover:bg-[#00509e] text-white py-2 rounded-md transition duration-200"
-        >
-          Registrarse
-        </button>
-      </form>
-      <div className="mt-6 border-t pt-4">
-        <p className="text-center text-sm text-gray-500 mb-2">O</p>
-        <button
-          onClick={null}
-          className="w-full flex items-center justify-center border border-gray-300 hover:border-gray-500 py-2 rounded-md transition duration-200"
-        >
-          <img
-            src="https://www.svgrepo.com/show/355037/google.svg"
-            alt="Google"
-            className="w-5 h-5 mr-2"
-          />
-          Regístrate con Google
-        </button>
+
+        <p className="text-sm text-center mt-4">
+          Ya tiene una cuenta.{' '}
+          <Link to="/login" className="text-[#0077ba] underline hover:text-[#00509e]">
+            Iniciar Sesión.
+          </Link>
+        </p>
       </div>
-      <p className="text-sm text-center mt-4">
-        Ya tiene una cuenta.{" "}
-        <Link to="/login" className="text-[#0077ba] underline hover:text-[#00509e]">
-          Iniciar Sesión.
-        </Link>
-      </p>
-    </div>
-  </>
+    </>
   );
 };
 

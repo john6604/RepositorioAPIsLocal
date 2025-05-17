@@ -17,22 +17,24 @@ const Layout = () => {
   useEffect(() => {
     const validarSesion = async () => {
       const tokenSesion = localStorage.getItem("token_sesion");
-
+  
       if (!tokenSesion) {
         setCargando(false);
         return;
       }
-
+  
       try {
         const response = await fetch(`${API_BASE_URL}/validar-sesion/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token_sesion: tokenSesion }),
         });
-
+  
         const data = await response.json();
-
-        if (data.valida && location.pathname === "/") {
+  
+        const vieneDeLogin = performance.navigation.type === 0 || performance.getEntriesByType("navigation")[0]?.type === "navigate";
+  
+        if (data.valida && location.pathname === "/" && vieneDeLogin) {
           navigate("/dashboard");
         }
       } catch (error) {
@@ -42,7 +44,7 @@ const Layout = () => {
         setCargando(false);
       }
     };
-
+  
     validarSesion();
   }, [location.pathname, navigate]);
 

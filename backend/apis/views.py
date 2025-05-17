@@ -26,52 +26,48 @@ from django.db.models import Q
 def registrar_usuario(request):
     if request.method == "POST":
         try:
-            # Leer datos del request
             data = json.loads(request.body)
             correo = data.get("correo")
-            clave = data.get("contrasena")
+            clave  = data.get("contrasena")
 
             if not correo or not clave:
                 return JsonResponse({"error": "Datos incompletos."}, status=400)
 
-            # Verificar si el correo ya está registrado
             if Usuario.objects.filter(correo=correo).exists():
                 return JsonResponse({"error": "El correo ya está registrado."}, status=409)
 
-            # Crear el usuario
+            # Genera el username a partir del correo
+            username_generado = correo.split("@")[0]
+
             usuario = Usuario.objects.create(
-                correo=correo,
-                contrasena_hash=make_password(clave),
-                nombres=correo.split("@")[0],
-                apellidos=None,
-                estado="activo",
-                rol_id=2,
-                creado_en=timezone.now(),
-                actualizado_en=timezone.now()
+                correo          = correo,
+                username        = username_generado,        # ← aquí
+                contrasena_hash = make_password(clave),
+                # si no quieres guardar nombres/apellidos ahora, déjalos en blanco o null:
+                nombres         = None,
+                apellidos       = None,
+                estado          = "activo",
+                rol_id          = 2,
+                creado_en       = timezone.now(),
+                actualizado_en  = timezone.now()
             )
 
-            # Generar un token de sesión para el usuario
-            token_sesion = secrets.token_hex(16)  # Token aleatorio de 32 caracteres hexadecimales
-
-            # Guardar el token en la base de datos en la tabla Sesion
+            token_sesion = secrets.token_hex(16)
             Sesion.objects.create(
-                usuario_id=usuario.id,
-                token_sesion=token_sesion,
-                expira_en=timezone.now() + timezone.timedelta(days=1),  # Expira en 1 día
-                activa=True
+                usuario_id  = usuario.id,
+                token_sesion = token_sesion,
+                expira_en   = timezone.now() + timezone.timedelta(days=1),
+                activa      = True
             )
 
-            # Responder con el mensaje de éxito y el token
             return JsonResponse({
                 "mensaje": "Usuario registrado con éxito.",
-                "token_sesion": token_sesion  # Incluir el token en la respuesta
+                "token_sesion": token_sesion
             }, status=201)
 
         except Exception as e:
-            # Manejo de errores
             return JsonResponse({"error": str(e)}, status=500)
-    else:
-        return JsonResponse({"error": "Método no permitido."}, status=405)
+    return JsonResponse({"error": "Método no permitido."}, status=405)
 
 # Login de usuarios, vista
 @csrf_exempt
