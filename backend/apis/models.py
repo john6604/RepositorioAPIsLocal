@@ -14,7 +14,7 @@ class Rol(models.Model):
 class Usuario(models.Model):
     correo           = models.EmailField(max_length=100, unique=True)
     username         = models.CharField(max_length=160, 
-                                        #unique=True
+                                        unique=True
                                         )
     contrasena_hash  = models.TextField()
     nombres          = models.CharField(max_length=100, blank=True, null=True)
