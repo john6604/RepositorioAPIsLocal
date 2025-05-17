@@ -83,7 +83,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
  #       'PORT':     '5432',
  #   }
 #}
+import os, sys
 
+# Debug: ¿qué está leyendo Django realmente?
+print(">>> DEBUG: repr(DATABASE_URL) =", repr(os.environ.get("DATABASE_URL")))
+sys.stdout.flush()
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 IS_PRODUCTION = os.environ.get("RAILWAY_ENVIRONMENT") == "production"
@@ -137,5 +141,3 @@ CORS_ALLOW_ALL_ORIGINS = True
 # ------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_CREDENTIALS = True  
-
-SESSION_COOKIE_NAME = 'sessionid'
