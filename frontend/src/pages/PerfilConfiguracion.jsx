@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { User, Settings, Bell, Lock, Upload, Trash2, Eye, EyeOff, ClipboardCopy, Users } from "lucide-react";
 import DashNavbar from "../componentes/DashboardNavbar";
-import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../config";
 
 const tabs = [
   { id: "profile", label: "Perfil", icon: User },
@@ -13,56 +11,18 @@ const tabs = [
 ];
 
 const PerfilConfiguracion = () => {
-
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [formData, setFormData] = useState({
-    name: "",
-    lastName: "",
-    email: "",
-    bio: "",
+    name: "Juan Pérez",
+    email: "juan@example.com",
+    bio: "Desarrollador apasionado por las APIs.",
   });
   const [currentPassword, setCurrentPassword] = useState("MiContraseñaSegura123");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
 
-  useEffect(() => {
-    const fetchPerfil = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/cuenta/perfil/`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
-            "Content-Type": "application/json",
-          },
-        });
-  
-        if (response.ok) {
-          const data = await response.json();
-          setFormData({
-            name: data.nombres || "",
-            lastName: data.apellidos || "",
-            email: data.correo || "",
-            bio: data.estado || "",
-          });
-        } else {
-          const err = await response.json();
-          alert("Error al obtener perfil: " + err.detail);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        alert("No se pudo cargar el perfil.");
-      }
-    };
-  
-    fetchPerfil();
-  }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e) => {
@@ -71,91 +31,10 @@ const PerfilConfiguracion = () => {
     alert("¡Cambios guardados!");
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     if (window.confirm("¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.")) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/cuenta/eliminar/`, {
-          method: "DELETE",
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
-            "Content-Type": "application/json",
-          },
-        });
-  
-        if (response.status === 204) {
-          alert("Cuenta eliminada permanentemente.");
-          localStorage.removeItem("token_sesion");
-          window.location.href = "/login";
-        } else {
-          const data = await response.json();
-          alert("Error al eliminar cuenta: " + data.detail);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        alert("Error de red o del servidor.");
-      }
-    }
-  };
-
-  const handleUpdateUser = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/cuenta/actualizar/`, {
-        method: "PUT",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nombres: formData.name,
-          apellidos: formData.lastName,
-          correo: formData.email,
-          estado: formData.estado,
-        }),
-      });
-  
-      const result = await response.json();
-  
-      if (response.ok) {
-        alert("Datos actualizados correctamente.");
-      } else {
-        alert("Error: " + result.detail);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Error de red o servidor.");
-    }
-  };
-  
-  
-  const handleLogoutSession = async () => {
-    const token = localStorage.getItem("token_sesion");
-  
-    if (!token) {
-      alert("No se encontró el token de sesión.");
-      return;
-    }
-  
-    try {
-      const response = await fetch(`${API_BASE_URL}/cerrarsesiones/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token_sesion: token }),
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        alert("Todas las sesiones han sido cerradas correctamente.");
-        localStorage.clear();
-        navigate("/login");
-      } else {
-        alert(data.error || "Error al cerrar las sesiones.");
-      }
-    } catch (error) {
-      console.error("Error al cerrar sesiones:", error);
-      alert("Error de red al cerrar sesiones.");
+      console.log("Cuenta eliminada");
+      alert("Cuenta eliminada permanentemente.");
     }
   };
 
@@ -218,21 +97,11 @@ const PerfilConfiguracion = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium">Nombres</label>
+                    <label className="block text-sm font-medium">Full name</label>
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
-                      onChange={handleChange}
-                      className="mt-1 block w-full border rounded-md px-3 py-2 text-sm shadow-sm focus:ring focus:ring-blue-200"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium">Apellidos</label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
                       onChange={handleChange}
                       className="mt-1 block w-full border rounded-md px-3 py-2 text-sm shadow-sm focus:ring focus:ring-blue-200"
                     />
@@ -262,10 +131,10 @@ const PerfilConfiguracion = () => {
 
                   <div className="flex justify-end">
                     <button
-                      onClick={handleUpdateUser}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                      type="submit"
+                      className="px-5 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
                     >
-                      Guardar cambios
+                      Guardar Cambios
                     </button>
                   </div>
                 </form>
@@ -286,7 +155,7 @@ const PerfilConfiguracion = () => {
                           <input
                             type="text"
                             name="username"
-                            value={`${formData.name} ${formData.lastName}`.trim()}
+                            value="juanperez"
                             disabled
                             className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100 shadow-sm"
                           />
@@ -309,14 +178,9 @@ const PerfilConfiguracion = () => {
                           <label className="block text-sm font-medium text-gray-700">
                             Estado de la cuenta
                           </label>
-                          <select
-                            name="estado"
-                            value={formData.bio}
-                            onChange={handleChange}
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                          >
-                            <option value="Activo">Activo</option>
-                            <option value="Desactivado">Desactivado</option>
+                          <select className="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            <option>Activo</option>
+                            <option>Desactivado</option>
                           </select>
                         </div>
                       </div>
@@ -452,13 +316,7 @@ const PerfilConfiguracion = () => {
                       <h4 className="text-md font-semibold mb-2">Recuperación de cuenta</h4>
                       <p className="text-sm text-gray-600 mb-2">Correo de recuperación configurado:</p>
                       <div className="flex items-center justify-between bg-gray-100 p-3 rounded">
-                          <input
-                            type="text"
-                            name="username"
-                            value={formData.email}
-                            disabled
-                            className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100 shadow-sm"
-                          />
+                        <span className="text-sm">juan@example.com</span>
                         <button className="text-blue-500 text-sm hover:underline">Cambiar</button>
                       </div>
                     </div>
@@ -469,7 +327,7 @@ const PerfilConfiguracion = () => {
                       <p className="text-sm text-gray-600 mb-2">Cierra sesión en todos los dispositivos si sospechas actividad sospechosa.</p>
                       <button
                         type="button"
-                        onClick={handleLogoutSession}
+                        onClick={() => alert("Se cerraron todas las sesiones.")}
                         className="inline-flex justify-center px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-md shadow-sm hover:bg-red-600"
                       >
                         Cerrar sesión en todos los dispositivos

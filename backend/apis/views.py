@@ -419,6 +419,7 @@ class PerfilUsuarioView(APIView):
 
         datos = {
             "correo": usuario.correo,
+            "username": usuario.username,
             "nombres": usuario.nombres,
             "apellidos": usuario.apellidos,
             "rol": usuario.rol.id if usuario.rol else None,
