@@ -15,10 +15,5 @@ class Migration(migrations.Migration):
             name='biografia',
             field=models.TextField(blank=True, null=True),
         ),
-        migrations.AddField(
-            model_name='usuario',
-            name='username',
-            field=models.CharField(default='', max_length=160),
-            preserve_default=False,
-        ),
+       
     ]
