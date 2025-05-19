@@ -1,27 +1,3 @@
-<<<<<<< HEAD
-# Python
-venv/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-db.sqlite3
-
-# Django static files
-staticfiles/
-
-# Node / React
-node_modules/
-build/
-dist/
-
-# VSCode settings
-.vscode/
-
-# Otros
-.env
-.DS_Store
-=======
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -45,4 +21,3 @@ dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
->>>>>>> 8dd0413 (URLS changed)

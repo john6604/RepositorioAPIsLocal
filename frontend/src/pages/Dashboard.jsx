@@ -12,7 +12,6 @@ import {
   Grid,
   List,
   PlusCircle,
-  LogOut,
   Bookmark,
 } from "lucide-react";
 
@@ -24,36 +23,33 @@ const Dashboard = () => {
   const [viewMode, setViewMode] = useState("grid"); // 'grid' o 'list'
   const [filterCategory, setFilterCategory] = useState(null); // null | 'favoritas' | 'guardadas' | 'Pública' | 'Privada' | 'Borrador'
 
-  // Traer APIs de tu backend
-  const fetchApis = async () => {
-    try {
-      const { data } = await axios.get(`${API_BASE_URL}/apis/`);
-      setApis(data);
-      setStats({
-        total: data.length,
-        public: data.filter(a => a.visibilidad === "Pública").length,
-        private: data.filter(a => a.visibilidad === "Privada").length,
-        draft: data.filter(a => a.visibilidad === "Borrador").length,
-      });
-    } catch (err) {
-      console.error("No se pudieron cargar las APIs:", err);
-    }
-  };
-  fetchApis();
-
   //agregar un lading mientras carga
   const [loading, setLoading] = useState(true);
 
+  const tokenSesion = localStorage.getItem("token_sesion");
+
   useEffect(() => {
     const fetchApis = async () => {
+      if (!tokenSesion) {
+        console.error("Token de sesión no encontrado.");
+        setLoading(false);
+        return;
+      }
+    
       try {
-        const { data } = await axios.get(`${API_BASE_URL}/apis/`);
+        const { data } = await axios.post(`${API_BASE_URL}/listarapis/`, {
+          token_sesion: tokenSesion,
+        }, {
+          headers: { "Content-Type": "application/json" },
+        });
+    
         setApis(data);
         setStats({
           total: data.length,
-          public: data.filter(a => a.visibilidad === "Pública").length,
-          private: data.filter(a => a.visibilidad === "Privada").length,
-          draft: data.filter(a => a.visibilidad === "Borrador").length,
+          public: data.filter(a => a.permiso === "publico").length,
+          private: data.filter(a => a.permiso === "privado").length,
+          restricted: data.filter(a => a.permiso === "restringido").length,
+          draft: data.filter(a => a.permiso === "borrador").length
         });
       } catch (err) {
         console.error("No se pudieron cargar las APIs:", err);
@@ -61,36 +57,38 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
+
     fetchApis();
-  }, []);
+  }, [tokenSesion]);
 
   if (loading) {
     return (
       <>
         <DashboardNavbar />
         <div className="flex justify-center items-center h-screen">
-          <p>Cargando APIs…</p>
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077ba] mb-4"></div>
+            <p className="text-gray-600 text-sm">Cargando APIs…</p>
+          </div>
         </div>
       </>
     );
   }
 
-  const handleCategory = (category) => {
-    setFilterCategory((prev) => (prev === category ? null : category));
-  };
+  const handleCategory = category => setFilterCategory(prev => prev === category ? null : category);
   const filteredApis = apis.filter(api => {
     const matchesSearch = api.nombre.toLowerCase().includes(searchTerm.toLowerCase());
     if (!matchesSearch) return false;
     if (filterCategory === 'favoritas') return api.favorito;
     if (filterCategory === 'guardadas') return api.guardada;
     if (filterCategory === 'Pública') {
-      return api.visibilidad === 'Pública';
+      return api.permiso === 'publico';
     }
     if (filterCategory === 'Privada') {
-      return api.visibilidad === 'Privada';
+      return api.permiso === 'privado';
     }
     if (filterCategory === 'Borrador') {
-      return api.visibilidad === 'Borrador';
+      return api.permiso === 'Borrador';
     }
     return true;
   });
@@ -145,14 +143,6 @@ const Dashboard = () => {
                   <PlusCircle className="w-5 h-5 text-gray-600" /> Crear API
                 </Link>
               </li>
-              <li className="mt-6">
-                <button
-                  onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
-                  className="flex items-center gap-2 px-4 py-2 w-full rounded hover:bg-gray-100 text-red-600"
-                >
-                  <LogOut className="w-5 h-5" /> Salir
-                </button>
-              </li>
             </ul>
           </nav>
         </aside>
@@ -161,7 +151,7 @@ const Dashboard = () => {
           <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
             <h1 className="text-3xl font-bold text-[#0077ba]">Dashboard de APIs</h1>
             <div className="flex gap-2">
-              <button
+              <button aria-label="Vista en cuadrícula"
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded ${viewMode === 'grid' ? 'bg-[#0077ba] text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
               >
@@ -207,14 +197,14 @@ const Dashboard = () => {
                     <h2 className="text-xl font-semibold text-[#0077ba]">{api.nombre}</h2>
                     <span
                       className={
-                        api.visibilidad === 'Pública'
+                        api.permiso === 'publico'
                           ? 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs'
-                          : api.visibilidad === 'Privada'
+                          : api.permiso === 'privado'
                             ? 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs'
                             : 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs'
                       }
                     >
-                      {api.visibilidad}
+                      {api.permiso}
                     </span>
                   </div>
                   <p className="text-gray-600 mt-2 text-sm">{api.descripcion}</p>
