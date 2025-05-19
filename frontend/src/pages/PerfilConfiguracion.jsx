@@ -109,7 +109,7 @@ const PerfilConfiguracion = () => {
           nombres: formData.name,
           apellidos: formData.lastName,
           correo: formData.email,
-          estado: formData.estado,
+          biografia: formData.bio,
         }),
       });
   

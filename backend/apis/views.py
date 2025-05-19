@@ -453,8 +453,8 @@ class ActualizarUsuarioView(APIView):
                 usuario.apellidos = data["apellidos"]
             if "correo" in data:
                 usuario.correo = data["correo"]
-            if "estado" in data:
-                usuario.estado = data["estado"]
+            if "biografia" in data:
+                usuario.biografia = data["biografia"]
 
             usuario.save()
 
