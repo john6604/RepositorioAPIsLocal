@@ -194,7 +194,7 @@ const Dashboard = () => {
                   className="block bg-white rounded-xl shadow hover:shadow-md transition p-6"
                 >
                   <div className="flex justify-between items-start">
-                    <h2 className="text-xl font-semibold text-[#0077ba]">{api.username}</h2>
+                    <h2 className="text-xl font-semibold text-[#0077ba]">{api.nombre}</h2>
                     <span
                       className={
                         api.permiso === 'publico'
@@ -211,7 +211,7 @@ const Dashboard = () => {
                   <div className="flex items-center justify-between mt-4 text-gray-500 text-sm">
                     <div className="flex items-center gap-1"><Star className="w-4 h-4" /><span>{api.estrellas}</span></div>
                     <div className="flex items-center gap-1"><Eye className="w-4 h-4" /><span>{api.vistas}</span></div>
-                    <div className="flex items-center gap-1"><User className="w-4 h-4" /><span className="truncate max-w-[80px]">{api.autor}</span></div>
+                    <div className="flex items-center gap-1"><User className="w-4 h-4" /><span className="truncate max-w-[80px]">{api.username}</span></div>
                   </div>
                 </Link>
               ))}
@@ -226,7 +226,7 @@ const Dashboard = () => {
                   <div className="flex items-center gap-4 text-gray-500 text-sm">
                     <div className="flex items-center gap-1"><Star className="w-4 h-4" /><span>{api.estrellas}</span></div>
                     <div className="flex items-center gap-1"><Eye className="w-4 h-4" /><span>{api.vistas}</span></div>
-                    <div className="flex items-center gap-1"><User className="w-4 h-4" /><span className="truncate max-w-[80px]">{api.autor}</span></div>
+                    <div className="flex items-center gap-1"><User className="w-4 h-4" /><span className="truncate max-w-[80px]">{api.username}</span></div>
                   </div>
                 </li>
               ))}

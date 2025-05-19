@@ -7,7 +7,6 @@ const CrearApi = () => {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [version, setVersion] = useState("1.0");
-  const [visibilidad, setVisibilidad] = useState("publica");
   const [ejemploUso, setEjemploUso] = useState("");
   const navigate = useNavigate();
 
@@ -24,7 +23,6 @@ const CrearApi = () => {
       nombre,
       descripcion,
       version, // se guardará en documentacion
-      permiso: visibilidad, // aquí mapeamos directamente visibilidad -> permiso
       ejemploUso, // se guarda en detalles_tecnicos
       token_sesion: tokenSesion,
     };
@@ -121,40 +119,6 @@ const CrearApi = () => {
               onChange={(e) => setVersion(e.target.value)}
               className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
             />
-          </div>
-
-          {/* Visibilidad */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Visibilidad
-            </label>
-            <div className="space-y-2">
-              {["publica", "privada", "restringida"].map((tipo) => (
-                <label key={tipo} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="radio"
-                    value={tipo}
-                    checked={visibilidad === tipo}
-                    onChange={() => setVisibilidad(tipo)}
-                  />
-                  {tipo === "publica" && (
-                    <span>
-                      <strong>Pública</strong>: Visible para todos.
-                    </span>
-                  )}
-                  {tipo === "privada" && (
-                    <span>
-                      <strong>Privada</strong>: Solo visible para ti.
-                    </span>
-                  )}
-                  {tipo === "restringida" && (
-                    <span>
-                      <strong>Restringida</strong>: Visible solo para usuarios autorizados.
-                    </span>
-                  )}
-                </label>
-              ))}
-            </div>
           </div>
 
           {/* Ejemplo de uso */}

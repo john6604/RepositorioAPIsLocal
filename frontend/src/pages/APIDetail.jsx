@@ -99,6 +99,14 @@ const APIDetail = () => {
       }
     };
 
+    const handlePublicarAPI = async () => {
+      const nuevaApiData = { ...apiData, permiso: "publico" };
+      setApiData(nuevaApiData);
+    
+      const fakeEvent = { preventDefault: () => {} };
+      await handleGuardarCambios(fakeEvent);
+    };
+
     const handleEliminarAPI = async () => {
       const tokenSesion = localStorage.getItem("token_sesion");
 
@@ -399,38 +407,6 @@ const APIDetail = () => {
                 <div className="flex items-center gap-3">
                   <input
                     type="radio"
-                    id="public"
-                    name="visibility"
-                    value="public"
-                    checked={apiData.permiso === "public0"}
-                    onChange={(e) =>
-                      setApiData({ ...apiData, visibility: e.target.value })
-                    }
-                  />
-                  <label htmlFor="public" className="text-sm font-medium text-gray-700">
-                    Pública – Cualquiera puede acceder a esta API.
-                  </label>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    id="private"
-                    name="visibility"
-                    value="private"
-                    checked={apiData.permiso === "privado"}
-                    onChange={(e) =>
-                      setApiData({ ...apiData, visibility: e.target.value })
-                    }
-                  />
-                  <label htmlFor="private" className="text-sm font-medium text-gray-700">
-                    Privada – Solo tú y tus colaboradores pueden acceder.
-                  </label>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="radio"
                     id="restricted"
                     name="visibility"
                     value="restricted"
@@ -475,8 +451,11 @@ const APIDetail = () => {
               </div>
 
               <div className="pt-6">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                  Guardar permisos
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  onClick={handlePublicarAPI}
+                >
+                  Publicar API
                 </button>
               </div>
             </div>

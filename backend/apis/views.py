@@ -344,10 +344,11 @@ class DetalleAPIView(APIView):
 
         data = json.loads(request.body)
 
-        # Solo actualizamos los campos relevantes
         api.nombre = data.get("nombre", api.nombre)
         api.descripcion = data.get("descripcion", api.descripcion)
         api.documentacion = data.get("documentacion", api.documentacion)
+        api.permiso = data.get("permiso", api.permiso)
+        api.actualizado_en = timezone.now()
 
         api.save()
 
