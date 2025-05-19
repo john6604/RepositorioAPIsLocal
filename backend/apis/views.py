@@ -36,7 +36,6 @@ def registrar_usuario(request):
             if Usuario.objects.filter(correo=correo).exists():
                 return JsonResponse({"error": "El correo ya está registrado."}, status=409)
 
-            # Genera el username a partir del correo
             username_generado = correo.split("@")[0]
 
             usuario = Usuario.objects.create(
@@ -425,6 +424,7 @@ class PerfilUsuarioView(APIView):
             "estado": usuario.estado,
             "creado_en": usuario.creado_en,
             "actualizado_en": usuario.actualizado_en,
+            "biografia": usuario.biografia,
         }
 
         return Response(datos, status=status.HTTP_200_OK)

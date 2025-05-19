@@ -42,7 +42,7 @@ const PerfilConfiguracion = () => {
             name: data.nombres || "",
             lastName: data.apellidos || "",
             email: data.correo || "",
-            bio: data.estado || "",
+            bio: data.biografia || "",
           });
         } else {
           const err = await response.json();
