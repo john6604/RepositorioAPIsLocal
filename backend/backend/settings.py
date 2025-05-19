@@ -85,9 +85,6 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 #}
 import os, sys
 
-# Debug: ¿qué está leyendo Django realmente?
-print(">>> DEBUG: repr(DATABASE_URL) =", repr(os.environ.get("DATABASE_URL")))
-sys.stdout.flush()
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 IS_PRODUCTION = os.environ.get("RAILWAY_ENVIRONMENT") == "production"
