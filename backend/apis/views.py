@@ -41,10 +41,9 @@ def registrar_usuario(request):
 
             usuario = Usuario.objects.create(
                 correo          = correo,
-                username        = username_generado,        # ← aquí
+                username        = username_generado,       
                 contrasena_hash = make_password(clave),
-                # si no quieres guardar nombres/apellidos ahora, déjalos en blanco o null:
-                nombres         = None,
+                nombres         = username_generado,
                 apellidos       = None,
                 estado          = "activo",
                 rol_id          = 2,
