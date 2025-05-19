@@ -162,3 +162,5 @@ railway run pip install -r requirements.txt
 
 # Aplica migraciones:
 railway run python manage.py migrate --no-input
+
+ARREGLADO
