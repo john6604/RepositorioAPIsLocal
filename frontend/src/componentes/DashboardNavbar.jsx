@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   House,
   Menu,
@@ -29,6 +29,10 @@ const DashboardNavbar = () => {
   const [menuColaboradoresAbierto, setMenuColaboradoresAbierto] = useState(false);
   const [panelNotificacionesAbierto, setPanelNotificacionesAbierto] = useState(false);
   const location = useLocation();
+  const [formData, setFormData] = useState({
+    name: "",
+    lastName: "",
+  });
 
   const rutas = {
     "/dashboard": { titulo: "Mi Perfil", ruta: "/dashboard" },
@@ -55,6 +59,39 @@ const DashboardNavbar = () => {
       navigate(`/resultados-busqueda?q=${encodeURIComponent(busqueda.trim())}`);
     }
   };
+
+  useEffect(() => {
+    const fetchPerfil = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/cuenta/perfil/`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
+            "Content-Type": "application/json",
+          },
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          setFormData({
+            name: data.nombres || "",
+            lastName: data.apellidos || "",
+            email: data.correo || "",
+            bio: data.biografia || "",
+            username: data.username || "",
+          });
+        } else {
+          const err = await response.json();
+          alert("Error al obtener perfil: " + err.detail);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("No se pudo cargar el perfil.");
+      }
+    };
+  
+    fetchPerfil();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -85,6 +122,8 @@ const DashboardNavbar = () => {
       console.error('Error de red:', error);
     }
   };
+
+  const iniciales = `${formData.name.charAt(0)}${formData.lastName.charAt(0)}`.toUpperCase();
 
   return (
     <>
@@ -160,9 +199,9 @@ const DashboardNavbar = () => {
             <div className="relative">
               <button
                 onClick={() => setMenuPerfilAbierto(true)}
-                className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden flex items-center justify-center focus:outline-none"
+                className="w-8 h-8 rounded-full border-[1px] border-white bg-transparent overflow-hidden flex items-center justify-center focus:outline-none"
               >
-                <span className="text-sm text-black font-bold">JD</span>
+                <span className="text-xs text-white font-bold">{iniciales}</span>
               </button>
             </div>
           </div>

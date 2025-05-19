@@ -122,7 +122,7 @@ const APIs = () => {
                   className="block bg-white rounded-xl shadow hover:shadow-md transition p-6"
                 >
                   <div className="flex justify-between items-start">
-                    <h2 className="text-xl font-semibold text-[#0077ba]">{api.nombre}</h2>
+                    <h2 className="text-xl font-semibold text-[#0077ba]">{api.username}</h2>
                     <span
                       className={
                         api.permiso === 'publico'

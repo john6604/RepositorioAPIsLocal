@@ -239,6 +239,7 @@ def apis_por_usuario(request):
                 'estado': api.estado,
                 'descripcion': api.descripcion,
                 "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
+                "username": f"{api.creado_por.username}" if api.creado_por else "Sin autor",
             }
             for api in apis
         ]
@@ -478,7 +479,8 @@ def buscar_apis_publicas(request):
         Q(nombre__icontains=query) |
         Q(descripcion__icontains=query) |
         Q(documentacion__icontains=query) |
-        Q(creado_por__nombres__icontains=query)
+        Q(creado_por__nombres__icontains=query) |
+        Q(creado_por__username__icontains=query)
     ).select_related('creado_por') 
 
     resultados = [
@@ -489,6 +491,7 @@ def buscar_apis_publicas(request):
             "documentacion": api.documentacion,
             "permiso": api.permiso, 
             "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
+            "username": f"{api.creado_por.username}" if api.creado_por else "Sin autor",
         }
         for api in apis
     ]

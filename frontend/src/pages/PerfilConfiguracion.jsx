@@ -21,6 +21,7 @@ const PerfilConfiguracion = () => {
     lastName: "",
     email: "",
     bio: "",
+    username: "",
   });
   const [currentPassword, setCurrentPassword] = useState("MiContraseñaSegura123");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -43,6 +44,7 @@ const PerfilConfiguracion = () => {
             lastName: data.apellidos || "",
             email: data.correo || "",
             bio: data.biografia || "",
+            username: data.username || "",
           });
         } else {
           const err = await response.json();
@@ -84,7 +86,7 @@ const PerfilConfiguracion = () => {
   
         if (response.status === 204) {
           alert("Cuenta eliminada permanentemente.");
-          localStorage.removeItem("token_sesion");
+          localStorage.clear();
           window.location.href = "/login";
         } else {
           const data = await response.json();
@@ -110,6 +112,7 @@ const PerfilConfiguracion = () => {
           apellidos: formData.lastName,
           correo: formData.email,
           biografia: formData.bio,
+          username: formData.username,
         }),
       });
   
@@ -237,7 +240,16 @@ const PerfilConfiguracion = () => {
                       className="mt-1 block w-full border rounded-md px-3 py-2 text-sm shadow-sm focus:ring focus:ring-blue-200"
                     />
                   </div>
-
+                  <div>
+                    <label className="block text-sm font-medium">Nombre de Usuario</label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.username}
+                      onChange={handleChange}
+                      className="mt-1 block w-full border rounded-md px-3 py-2 text-sm shadow-sm focus:ring focus:ring-blue-200"
+                    />
+                  </div>
                   <div>
                     <label className="block text-sm font-medium">Email</label>
                     <input
@@ -281,12 +293,25 @@ const PerfilConfiguracion = () => {
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700">
-                            Nombre de usuario
+                            Nombres
                           </label>
                           <input
                             type="text"
                             name="username"
                             value={`${formData.name} ${formData.lastName}`.trim()}
+                            disabled
+                            className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100 shadow-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Nombre de Usuario
+                          </label>
+                          <input
+                            type="text"
+                            name="username"
+                            value={formData.username}
                             disabled
                             className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100 shadow-sm"
                           />
