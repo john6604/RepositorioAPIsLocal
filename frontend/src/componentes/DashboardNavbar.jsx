@@ -199,7 +199,7 @@ const DashboardNavbar = () => {
             <div className="relative">
               <button
                 onClick={() => setMenuPerfilAbierto(true)}
-                className="w-8 h-8 rounded-full border-[1px] border-white bg-transparent overflow-hidden flex items-center justify-center focus:outline-none"
+                className="w-8 h-8 rounded-full border-[2px] border-white bg-transparent hover:bg-[#003366] transition overflow-hidden flex items-center justify-center focus:outline-none"
               >
                 <span className="text-xs text-white font-bold">{iniciales}</span>
               </button>

@@ -101,10 +101,30 @@ const APIDetail = () => {
 
     const handlePublicarAPI = async () => {
       const nuevaApiData = { ...apiData, permiso: "publico" };
-      setApiData(nuevaApiData);
     
-      const fakeEvent = { preventDefault: () => {} };
-      await handleGuardarCambios(fakeEvent);
+      try {
+        const response = await fetch(`${API_BASE_URL}/listarapis/${nuevaApiData.id}/`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(nuevaApiData),
+        });
+    
+        if (response.ok) {
+          const updatedData = await response.json();
+          setApiData(updatedData);
+          alert("API publicada correctamente.");
+          navigate("/dashboard"); 
+        } else {
+          const error = await response.json();
+          console.error("Error al publicar:", error);
+          alert("Hubo un error al publicar la API.");
+        }
+      } catch (err) {
+        console.error("Error al enviar solicitud:", err);
+        alert("No se pudo conectar con el servidor.");
+      }
     };
 
     const handleEliminarAPI = async () => {
@@ -404,19 +424,37 @@ const APIDetail = () => {
               </h3>
 
               <div className="space-y-4">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
                   <input
                     type="radio"
-                    id="restricted"
-                    name="visibility"
-                    value="restricted"
-                    checked={apiData.permiso === "restringido"}
+                    id="privado"
+                    name="permiso"
+                    value="privado"
+                    checked={apiData.permiso === "privado"}
                     onChange={(e) =>
-                      setApiData({ ...apiData, visibility: e.target.value })
+                      setApiData({ ...apiData, permiso: e.target.value })
                     }
                   />
                   <label
-                    htmlFor="restricted"
+                    htmlFor="privado"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Privado – Solo tú tienes acceso a la API.
+                  </label>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    id="restringido"
+                    name="permiso"
+                    value="restringido"
+                    checked={apiData.permiso === "restringido"}
+                    onChange={(e) =>
+                      setApiData({ ...apiData, permiso: e.target.value })
+                    }
+                  />
+                  <label
+                    htmlFor="restringido"
                     className="text-sm font-medium text-gray-700"
                   >
                     Restringida – Acceso privado pero se puede compartir con enlace.
@@ -450,9 +488,17 @@ const APIDetail = () => {
                 )}
               </div>
 
-              <div className="pt-6">
+              <div className="pt-4 flex gap-x-4">
+                {(apiData.permiso === "privado" || apiData.permiso === "restringido") && (
+                  <button
+                    className="px-4 py-2 bg-[#0077ba] text-white rounded hover:bg-[#003366] transition"
+                    onClick={handleGuardarCambios}
+                  >
+                    Guardar Cambios
+                  </button>
+                )}
                 <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="px-4 py-2 bg-[#0077ba] text-white rounded hover:bg-[#003366] transition"
                   onClick={handlePublicarAPI}
                 >
                   Publicar API

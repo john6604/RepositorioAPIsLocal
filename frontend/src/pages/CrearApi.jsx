@@ -7,7 +7,11 @@ const CrearApi = () => {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [version, setVersion] = useState("1.0");
-  const [ejemploUso, setEjemploUso] = useState("");
+  const [metodo, setMetodo] = useState("GET");
+  const [endpoint, setEndpoint] = useState("");
+  const [parametros, setParametros] = useState("");
+  const [requestBody, setRequestBody] = useState("");
+  const [respuesta, setRespuesta] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -22,8 +26,12 @@ const CrearApi = () => {
     const nuevaApi = {
       nombre,
       descripcion,
-      version, // se guardará en documentacion
-      ejemploUso, // se guarda en detalles_tecnicos
+      version,
+      metodo,
+      endpoint,
+      parametros,
+      requestBody,
+      respuesta,
       token_sesion: tokenSesion,
     };
   
@@ -121,22 +129,77 @@ const CrearApi = () => {
             />
           </div>
 
-          {/* Ejemplo de uso */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Código de la API
+              Método HTTP <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={metodo}
+              onChange={(e) => setMetodo(e.target.value)}
+              className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
+            >
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+              <option value="PATCH">PATCH</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Endpoint <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={endpoint}
+              onChange={(e) => setEndpoint(e.target.value)}
+              className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
+              placeholder="/miapi/ejemplo"
+            />
+          </div>
+
+          {/* Parámetros */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Parámetros (JSON)
             </label>
             <textarea
-              value={ejemploUso}
-              onChange={(e) => setEjemploUso(e.target.value)}
+              value={parametros}
+              onChange={(e) => setParametros(e.target.value)}
               className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
-              rows={4}
-              placeholder={`curl -X GET https://miapi.com/endpoint\n# o código en JS, Python, etc.`}
-          />
-            <p className="text-xs text-gray-500 mt-1">
-              Incluye tu código de la API.
-            </p>
+              rows={3}
+              placeholder={`[\n  { "nombre": "ciudad", "tipo": "string", "requerido": true }\n]`}
+            />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Cuerpo de la solicitud (JSON)
+            </label>
+            <textarea
+              value={requestBody}
+              onChange={(e) => setRequestBody(e.target.value)}
+              className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
+              rows={3}
+              placeholder={`{\n  "nombre": "Juan",\n  "edad": 30\n}`}
+            />
+          </div>
+
+          {/* Respuesta esperada */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Respuesta esperada (JSON)
+            </label>
+            <textarea
+              value={respuesta}
+              onChange={(e) => setRespuesta(e.target.value)}
+              className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
+              rows={3}
+              placeholder={`{\n  "mensaje": "Éxito",\n  "resultado": {...}\n}`}
+            />
+          </div>
+
 
           {/* Botón */}
           <button
