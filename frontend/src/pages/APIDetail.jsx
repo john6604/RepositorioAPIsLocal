@@ -24,6 +24,8 @@ const APIDetail = () => {
       creado_en: "",
       actualizado_en: "",
     });
+    const [metodosApi, setMetodosApi] = useState([]);
+
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("api");
     const [searchQuery, setSearchQuery] = useState("");
@@ -163,20 +165,39 @@ const APIDetail = () => {
     
     useEffect(() => {
       const token = localStorage.getItem("token_sesion");
-      if (token) 
-        {
+      if (token) {
         obtenerUsuarioActual();
-      } 
-      else 
-      {
+      } else {
         setUsuarioActualId(null);
       }
-      obtenerDetalleAPI(apiId);
+    
+      obtenerDetalleAPI(apiId);       // Información general de la API
+      obtenerDetalleModelo(apiId);    // Métodos de la API (GET, POST, etc.)
     }, [apiId]);
+    
 
     const obtenerDetalleAPI = async (apiId) => {
+      console.log("ID recibido desde useParams:", apiId);
       try {
-        const url = `${API_BASE_URL}/listarapis/${apiId}/`;
+        const url = `${API_BASE_URL}/listarmodelo/${apiId}/`;
+        const response = await fetch(url);
+
+        const data = await response.json();
+        if (response.ok) {
+          setMetodosApi(data);
+        } else {
+          console.error("Error:", data.detail);
+        }
+      } catch (error) {
+        console.error("Error al obtener los datos de la API:", error);
+      }
+    };
+
+
+    const obtenerDetalleModelo = async (apiId) => {
+
+      try {
+        const url = `${API_BASE_URL}/listarmodelo/${apiId}/`;
         const response = await fetch(url);
 
         const data = await response.json();
@@ -187,7 +208,7 @@ const APIDetail = () => {
           console.error("Error:", data.detail);
         }
       } catch (error) {
-        console.error("Error al obtener los datos de la API:", error);
+        console.error("Error al obtener los datos del modelo:", error);
       }
     };
 
@@ -265,6 +286,24 @@ const APIDetail = () => {
                     
                   </pre>
                 </div>
+                {metodosApi.length > 0 ? (
+  <div className="mt-6">
+    <h3 className="text-xl font-semibold text-[#0077ba] mb-2">Métodos disponibles:</h3>
+    <ul className="space-y-4">
+      {metodosApi.map((metodo, index) => (
+        <li key={index} className="p-4 bg-gray-100 rounded-lg shadow">
+          <p><strong>Método:</strong> {metodo.metodo}</p>
+          <p><strong>Endpoint:</strong> {metodo.endpoint}</p>
+          <p><strong>Descripción:</strong> {metodo.descripcion || "Sin descripción"}</p>
+          <p><strong>Lenguaje:</strong> {metodo.lenguaje_codigo || "No especificado"}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+) : (
+  <p className="text-gray-600 mt-6">No hay métodos registrados para esta API.</p>
+)}
+
               </div>
             )}
 
