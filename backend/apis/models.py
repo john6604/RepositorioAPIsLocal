@@ -10,12 +10,39 @@ class Rol(models.Model):
     def __str__(self):
         return self.nombre
 
+class Categoria(models.Model):
+    nombre      = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = "categoria"
+
+    def __str__(self):
+        return self.nombre
+
+class Subcategoria(models.Model):
+    nombre      = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = "subcategoria"
+
+    def __str__(self):
+        return self.nombre
+
+class Tematica(models.Model):
+    nombre      = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = "tematica"
+
+    def __str__(self):
+        return self.nombre
 
 class Usuario(models.Model):
     correo           = models.EmailField(max_length=100, unique=True)
-    username         = models.CharField(max_length=160, 
-                                        unique=True
-                                        )
+    username         = models.CharField(max_length=160, unique=True)
     contrasena_hash  = models.TextField()
     nombres          = models.CharField(max_length=100, blank=True, null=True)
     apellidos        = models.CharField(max_length=100, blank=True, null=True)
@@ -32,7 +59,6 @@ class Usuario(models.Model):
     def __str__(self):
         return self.correo
 
-
 class API(models.Model):
     PERMISO_CHOICES = [
         ("publico", "Público"),
@@ -47,6 +73,9 @@ class API(models.Model):
     creado_por        = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column="creado_por", null=True, blank=True)
     permiso           = models.CharField(max_length=12, choices=PERMISO_CHOICES, default="privado")
     estado            = models.CharField(max_length=50, blank=True, null=True)
+    id_categoria      = models.ForeignKey(Categoria, on_delete=models.SET_NULL, db_column="id_categoria", null=True, blank=True)
+    id_subcategoria   = models.ForeignKey(Subcategoria, on_delete=models.SET_NULL, db_column="id_subcategoria", null=True, blank=True)
+    id_tematica       = models.ForeignKey(Tematica, on_delete=models.SET_NULL, db_column="id_tematica", null=True, blank=True)
     creado_en         = models.DateTimeField(auto_now_add=True, null=True)
     actualizado_en    = models.DateTimeField(auto_now=True, null=True)
 
@@ -54,12 +83,11 @@ class API(models.Model):
         db_table = "apis"
         indexes = [models.Index(fields=["nombre"], name="idx_api_nombre")]
         constraints = [
-            models.UniqueConstraint(fields=["nombre", "creado_por"], name="unique_api_por_usuario")
+            models.UniqueConstraint(fields=["nombre", "creado_por"], name="unique_api_por_usuario"),
         ]
 
     def __str__(self):
         return self.nombre
-
 
 class VersionApi(models.Model):
     api                 = models.ForeignKey(API, on_delete=models.CASCADE, db_column="api_id", null=True, blank=True)
@@ -75,7 +103,6 @@ class VersionApi(models.Model):
     def __str__(self):
         return f"{self.api.nombre} v{self.numero_version}"
 
-
 class PermisoApi(models.Model):
     api        = models.ForeignKey(API, on_delete=models.CASCADE, db_column="api_id", null=True, blank=True)
     usuario    = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column="usuario_id", null=True, blank=True)
@@ -87,7 +114,6 @@ class PermisoApi(models.Model):
 
     def __str__(self):
         return f"{self.usuario.correo} → {self.api.nombre}"
-
 
 class Sesion(models.Model):
     usuario      = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column="usuario_id", null=True, blank=True)
@@ -102,7 +128,6 @@ class Sesion(models.Model):
 
     def __str__(self):
         return f"Sesión {self.id} de {self.usuario.correo}"
-
 
 class Auditoria(models.Model):
     usuario        = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column="usuario_id", null=True, blank=True)
@@ -121,3 +146,33 @@ class Auditoria(models.Model):
 
     def __str__(self):
         return f"{self.accion} en {self.tabla_afectada}"
+
+class MetodoApi(models.Model):
+    METODO_CHOICES = [
+        ("GET", "GET"),
+        ("POST", "POST"),
+        ("PUT", "PUT"),
+        ("DELETE", "DELETE"),
+        ("PATCH", "PATCH"),
+    ]
+
+    api             = models.ForeignKey(API, on_delete=models.CASCADE, db_column="api_id", null=True, blank=True)
+    metodo          = models.CharField(max_length=6, choices=METODO_CHOICES)
+    endpoint        = models.CharField(max_length=200)
+    descripcion     = models.TextField(blank=True, null=True)
+    lenguaje_codigo = models.CharField(max_length=50, blank=True, null=True)
+    codigo          = models.TextField(blank=True, null=True)
+    parametros      = models.JSONField(blank=True, null=True)
+    retorno         = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        db_table = "metodos_api"
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(metodo__in=["GET","POST","PUT","DELETE","PATCH"]),
+                name="chk_metodo_valid"
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.metodo} {self.endpoint}"
