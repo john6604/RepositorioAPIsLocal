@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import API
 from rest_framework import viewsets
-from .models import API
+from .models import API, MetodoApi
 from .serializers import APISerializer
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
@@ -354,6 +354,57 @@ class DetalleAPIView(APIView):
 
         return JsonResponse({"detail": "API actualizada correctamente."}, status=200)
     
+
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MetodoApiDetalle(APIView):
+    def get(self, request, metodo_id):
+        try:
+            metodo = MetodoApi.objects.get(id=metodo_id)
+        except MetodoApi.DoesNotExist:
+            return JsonResponse({"detail": "Método no encontrado."}, status=404)
+
+        data = {
+            "id": metodo.id,
+            "api_id": metodo.api.id if metodo.api else None,
+            "metodo": metodo.metodo,
+            "endpoint": metodo.endpoint,
+            "descripcion": metodo.descripcion,
+            "lenguaje_codigo": metodo.lenguaje_codigo,
+            "codigo": metodo.codigo,
+            "parametros": metodo.parametros,
+            "retorno": metodo.retorno,
+        }
+        return JsonResponse(data, status=200)
+
+    def put(self, request, metodo_id):
+        try:
+            metodo = MetodoApi.objects.get(id=metodo_id)
+        except MetodoApi.DoesNotExist:
+            return JsonResponse({"detail": "Método no encontrado."}, status=404)
+
+        data = json.loads(request.body)
+
+        metodo.metodo = data.get("metodo", metodo.metodo)
+        metodo.endpoint = data.get("endpoint", metodo.endpoint)
+        metodo.descripcion = data.get("descripcion", metodo.descripcion)
+        metodo.lenguaje_codigo = data.get("lenguaje_codigo", metodo.lenguaje_codigo)
+        metodo.codigo = data.get("codigo", metodo.codigo)
+        metodo.parametros = data.get("parametros", metodo.parametros)
+        metodo.retorno = data.get("retorno", metodo.retorno)
+
+        metodo.save()
+        return JsonResponse({"detail": "Método actualizado correctamente."}, status=200)
+
+    def delete(self, request, metodo_id):
+        try:
+            metodo = MetodoApi.objects.get(id=metodo_id)
+        except MetodoApi.DoesNotExist:
+            return JsonResponse({"detail": "Método no encontrado."}, status=404)
+
+        metodo.delete()
+        return JsonResponse({"detail": "Método eliminado correctamente."}, status=204)
 # Eliminación de una API, vista
 class EliminarAPIView(APIView):
     def delete(self, request, api_id):
