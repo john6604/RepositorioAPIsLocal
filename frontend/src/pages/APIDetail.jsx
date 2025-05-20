@@ -200,7 +200,7 @@ const APIDetail = () => {
           {/* Sidebar */}
           <aside className="w-72 bg-white border-r">
             <div className="p-6 border-b">
-              <h2 className="text-lg font-semibold">Menú</h2>
+              <h2 className="text-lg font-semibold">Men</h2>
             </div>
             <nav className="flex flex-col">
             {visibleTabs.map((tab) => (
