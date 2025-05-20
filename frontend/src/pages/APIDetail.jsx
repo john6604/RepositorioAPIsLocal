@@ -172,7 +172,6 @@ const APIDetail = () => {
       }
     
       obtenerDetalleAPI(apiId);       // Información general de la API
-      obtenerDetalleModelo(apiId);    // Métodos de la API (GET, POST, etc.)
     }, [apiId]);
     
 
@@ -194,23 +193,7 @@ const APIDetail = () => {
     };
 
 
-    const obtenerDetalleModelo = async (apiId) => {
-
-      try {
-        const url = `${API_BASE_URL}/listarmodelo/${apiId}/`;
-        const response = await fetch(url);
-
-        const data = await response.json();
-        if (response.ok) {
-          setApiData(data);
-          setLoading(false);
-        } else {
-          console.error("Error:", data.detail);
-        }
-      } catch (error) {
-        console.error("Error al obtener los datos del modelo:", error);
-      }
-    };
+   
 
     useEffect(() => {
       if (usuarioActualId && apiData?.creado_por) {
