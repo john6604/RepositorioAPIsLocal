@@ -351,6 +351,21 @@ class DetalleAPIView(APIView):
         except API.DoesNotExist:
             return JsonResponse({"detail": "API no encontrada."}, status=404)
 
+        metodos = MetodoApi.objects.filter(api=api)
+        metodos_data = [
+            {
+                "id": metodo.id,
+                "metodo": metodo.metodo,
+                "endpoint": metodo.endpoint,
+                "descripcion": metodo.descripcion,
+                "lenguaje_codigo": metodo.lenguaje_codigo,
+                "codigo": metodo.codigo,
+                "parametros": metodo.parametros,
+                "retorno": metodo.retorno
+            }
+            for metodo in metodos
+        ]
+
         data = {
             "id": api.id,
             "nombre": api.nombre,
@@ -362,6 +377,7 @@ class DetalleAPIView(APIView):
             "estado": api.estado,
             "creado_en": api.creado_en,
             "actualizado_en": api.actualizado_en,
+            "metodos": metodos_data
         }
         return JsonResponse(data, status=200)
 

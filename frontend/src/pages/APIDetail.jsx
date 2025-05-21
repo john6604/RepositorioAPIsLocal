@@ -11,6 +11,7 @@ import DashboardNavbar from "../componentes/DashboardNavbar";
 import { useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const metodosHttp = ["GET", "POST", "PUT", "DELETE", "PATCH"];
 
@@ -26,6 +27,7 @@ const APIDetail = () => {
       estado: "",
       creado_en: "",
       actualizado_en: "",
+      metodos: {},
     });
     
     const [datosPorMetodo, setDatosPorMetodo] = useState({
@@ -220,7 +222,7 @@ const APIDetail = () => {
       try {
         const url = `${API_BASE_URL}/listarapis/${apiId}/`;
         const response = await fetch(url);
-
+    
         const data = await response.json();
         if (response.ok) {
           setApiData(data);
@@ -285,30 +287,76 @@ const APIDetail = () => {
 
           {/* Main content */}
           <main className="flex-1 p-10">
-            {activeTab === "api" && (
-              <div className="max-w-4xl mx-auto">
-                <h2 className="text-2xl font-bold mb-4">{apiData.nombre}</h2>
-                <p className="mb-2">{apiData.descripcion}</p>
-                <p className="mb-2">Versión: {apiData.documentacion}</p>
-                <div className="bg-white rounded-xl shadow p-4 mb-4">
-                  <h3 className="font-semibold">Endpoint:</h3>
-                  
-                </div>
-                <div className="bg-white rounded-xl shadow p-4 mb-4">
-                  <h3 className="font-semibold">Parámetros:</h3>
-                </div>
-                <div className="bg-white rounded-xl shadow p-4 mb-4">
-                  <h3 className="font-semibold">Retorna:</h3>
-                  
-                </div>
-                <div className="bg-white rounded-xl shadow p-4">
-                  <h3 className="font-semibold">Ejemplo de uso:</h3>
-                  <pre className="bg-gray-100 p-2 rounded whitespace-pre-line">
-                    
-                  </pre>
-                </div>
+          {activeTab === "api" && (
+            <div className="max-w-4xl mx-auto">
+              {/* Nombre, descripción y versión */}
+              <h2 className="text-2xl font-bold mb-4">{apiData.nombre}</h2>
+              <p className="mb-2">{apiData.descripcion}</p>
+              <p className="mb-6">Versión: {apiData.documentacion}</p>
+
+              {/* Toggle de métodos HTTP */}
+              <div className="flex rounded-lg overflow-hidden border border-gray-300 mb-6">
+                {metodosHttp.map((method) => (
+                  <button
+                    key={method}
+                    onClick={() => setMetodoActivo(method)}
+                    className={`flex-1 py-3 text-sm font-semibold transition-colors duration-300 ${
+                      metodoActivo === method
+                        ? "bg-[#0077ba] text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    {method}
+                  </button>
+                ))}
               </div>
-            )}
+
+              {/* Contenido del método activo */}
+              {apiData.metodos && apiData.metodos[metodoActivo] ? (
+                <motion.div
+                  key={metodoActivo}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-4"
+                >
+                  {/* Endpoint */}
+                  <div className="bg-white rounded-xl shadow p-4">
+                    <h3 className="font-semibold mb-2">Endpoint:</h3>
+                    <code className="text-blue-700 font-mono">
+                      {apiData.metodos[metodoActivo].endpoint || "No definido"}
+                    </code>
+                  </div>
+
+                  {/* Parámetros */}
+                  <div className="bg-white rounded-xl shadow p-4">
+                    <h3 className="font-semibold mb-2">Parámetros:</h3>
+                    <pre className="bg-gray-100 p-2 rounded text-sm whitespace-pre-wrap font-mono">
+                      {apiData.metodos[metodoActivo].parametros || "Ninguno"}
+                    </pre>
+                  </div>
+
+                  {/* Cuerpo */}
+                  <div className="bg-white rounded-xl shadow p-4">
+                    <h3 className="font-semibold mb-2">Cuerpo (body):</h3>
+                    <pre className="bg-gray-100 p-2 rounded text-sm whitespace-pre-wrap font-mono">
+                      {apiData.metodos[metodoActivo].requestBody || "Ninguno"}
+                    </pre>
+                  </div>
+
+                  {/* Respuesta esperada */}
+                  <div className="bg-white rounded-xl shadow p-4">
+                    <h3 className="font-semibold mb-2">Respuesta esperada:</h3>
+                    <pre className="bg-gray-100 p-2 rounded text-sm whitespace-pre-wrap font-mono">
+                      {apiData.metodos[metodoActivo].respuesta || "Ninguna"}
+                    </pre>
+                  </div>
+                </motion.div>
+              ) : (
+                <div className="text-gray-500">Este método no tiene información disponible.</div>
+              )}
+            </div>
+          )}
 
             {activeTab === "settings" && (
               <div className="max-w-3xl mx-auto space-y-8">
