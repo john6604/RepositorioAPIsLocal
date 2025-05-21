@@ -23,41 +23,16 @@ const CrearApi = () => {
       return;
     }
   
-    // Parsear los campos JSON con manejo de errores
-    let parametrosObj = null;
-    let requestBodyObj = null;
-    let respuestaObj = null;
-  
-    try {
-      parametrosObj = parametros ? JSON.parse(parametros) : null;
-    } catch {
-      alert("Parámetros JSON inválidos");
-      return;
-    }
-  
-    try {
-      requestBodyObj = requestBody ? JSON.parse(requestBody) : null;
-    } catch {
-      alert("Cuerpo de la solicitud JSON inválido");
-      return;
-    }
-  
-    try {
-      respuestaObj = respuesta ? JSON.parse(respuesta) : null;
-    } catch {
-      alert("Respuesta esperada JSON inválida");
-      return;
-    }
-  
+    
     const nuevaApi = {
       nombre,
       descripcion,
       version,
       metodo,
       endpoint,
-      parametros: parametrosObj,
-      requestBody: requestBodyObj,
-      respuesta: respuestaObj,
+      parametros,
+      requestBody,
+      respuesta,
       token_sesion: tokenSesion,
     };
   
