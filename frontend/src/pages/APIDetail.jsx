@@ -5,6 +5,7 @@ import {
   Lock,
   Code2,
   Search,
+  FileTerminal,
 } from "lucide-react";
 import DashboardNavbar from "../componentes/DashboardNavbar";
 import { useEffect } from "react";
@@ -34,6 +35,7 @@ const APIDetail = () => {
       { id: "settings", label: "Configuración", icon: Settings },
       { id: "colaborators", label: "Colaboradores", icon: Users },
       { id: "permissions", label: "Permisos", icon: Lock },
+      { id: "consume", label: "Consumir", icon: FileTerminal},
     ];
     
     const visibleTabs = isOwner
@@ -506,6 +508,31 @@ const APIDetail = () => {
               </div>
             </div>
           )}
+
+          {activeTab === "consume" && (
+              <div className="max-w-4xl mx-auto">
+                <h2 className="text-2xl font-bold mb-4">{apiData.nombre}</h2>
+                <p className="mb-2">{apiData.descripcion}</p>
+                <p className="mb-2">Versión: {apiData.documentacion}</p>
+                <div className="bg-white rounded-xl shadow p-4 mb-4">
+                  <h3 className="font-semibold">Endpoint:</h3>
+                  
+                </div>
+                <div className="bg-white rounded-xl shadow p-4 mb-4">
+                  <h3 className="font-semibold">Parámetros:</h3>
+                </div>
+                <div className="bg-white rounded-xl shadow p-4 mb-4">
+                  <h3 className="font-semibold">Retorna:</h3>
+                  
+                </div>
+                <div className="bg-white rounded-xl shadow p-4">
+                  <h3 className="font-semibold">Ejemplo de uso:</h3>
+                  <pre className="bg-gray-100 p-2 rounded whitespace-pre-line">
+                    
+                  </pre>
+                </div>
+              </div>
+            )}
         </main>
       </div>
     </>

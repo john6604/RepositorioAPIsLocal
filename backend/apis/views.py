@@ -371,8 +371,8 @@ class DetalleModeloView(APIView):
 
     def get(self, request, api_id):
         try:
-            modelo_api = ModeloApi.objects.get(id=api_id)
-        except ModeloApi.DoesNotExist:
+            modelo_api = MetodoApi.objects.get(id=api_id)
+        except MetodoApi.DoesNotExist:
             return JsonResponse({"detail": "API no encontrada."}, status=404)
 
         data = {
@@ -395,8 +395,8 @@ class DetalleModeloView(APIView):
 
     def put(self, request, api_id):
         try:
-            modelo_api = ModeloApi.objects.get(id=api_id)
-        except ModeloApi.DoesNotExist:
+            modelo_api = MetodoApi.objects.get(id=api_id)
+        except MetodoApi.DoesNotExist:
             return JsonResponse({"detail": "API no encontrada."}, status=404)
 
         try:
