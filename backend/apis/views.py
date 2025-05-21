@@ -366,6 +366,76 @@ class DetalleAPIView(APIView):
     
 
 
+@method_decorator(csrf_exempt, name='dispatch')
+class DetalleModeloView(APIView):
+
+    def get(self, request, api_id):
+        try:
+            modelo_api = ModeloApi.objects.get(id=api_id)
+        except ModeloApi.DoesNotExist:
+            return JsonResponse({"detail": "API no encontrada."}, status=404)
+
+        data = {
+            "id": modelo_api.id,
+            "nombre": modelo_api.nombre,
+            "descripcion": modelo_api.descripcion,
+            "version": modelo_api.version,
+            "metodo": modelo_api.metodo,
+            "endpoint": modelo_api.endpoint,
+            "parametros": modelo_api.parametros,
+            "codigo": modelo_api.codigo,
+            "requestBody": modelo_api.requestBody,
+            "respuesta": modelo_api.respuesta,
+            "creado_por": modelo_api.creado_por.username if modelo_api.creado_por else None,
+            "estado": modelo_api.estado,
+            "creado_en": modelo_api.creado_en,
+            "actualizado_en": modelo_api.actualizado_en,
+        }
+        return JsonResponse(data, status=200)
+
+    def put(self, request, api_id):
+        try:
+            modelo_api = ModeloApi.objects.get(id=api_id)
+        except ModeloApi.DoesNotExist:
+            return JsonResponse({"detail": "API no encontrada."}, status=404)
+
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "JSON inválido."}, status=400)
+
+        token = data.get("token_sesion")
+        if not token:
+            return JsonResponse({"error": "Token de sesión requerido."}, status=400)
+
+        # Validar sesión y usuario
+        try:
+            sesion = Sesion.objects.get(token=token)
+            usuario = sesion.usuario
+        except Sesion.DoesNotExist:
+            return JsonResponse({"error": "Token inválido o expirado."}, status=401)
+
+        # Verificar que el usuario sea el creador
+        if modelo_api.creado_por != usuario:
+            return JsonResponse({"error": "No tienes permiso para modificar esta API."}, status=403)
+
+        # Actualizar campos (solo los que se envían)
+        modelo_api.nombre = data.get("nombre", modelo_api.nombre)
+        modelo_api.descripcion = data.get("descripcion", modelo_api.descripcion)
+        modelo_api.version = data.get("version", modelo_api.version)
+        modelo_api.metodo = data.get("metodo", modelo_api.metodo)
+        modelo_api.endpoint = data.get("endpoint", modelo_api.endpoint)
+        modelo_api.parametros = data.get("parametros", modelo_api.parametros)
+        modelo_api.codigo = data.get("codigo", modelo_api.codigo)
+        modelo_api.requestBody = data.get("requestBody", modelo_api.requestBody)
+        modelo_api.respuesta = data.get("respuesta", modelo_api.respuesta)
+        modelo_api.estado = data.get("estado", modelo_api.estado)
+        modelo_api.actualizado_en = timezone.now()
+
+        modelo_api.save()
+
+        return JsonResponse({"detail": "API actualizada correctamente."}, status=200)
+
 
 
 # Eliminación de una API, vista
