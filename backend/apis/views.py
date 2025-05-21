@@ -296,7 +296,14 @@ def crear_api(request):
         if API.objects.filter(nombre=nombre_api, creado_por=usuario).exists():
             return Response({"error": "Ya tienes una API con ese nombre"}, status=409)
 
-       
+    nueva_api = API.objects.create(
+            nombre=nombre_api,
+            descripcion=data.get("descripcion"),
+            detalles_tecnicos=data.get("ejemploUso"),  # asegúrate que estas claves vengan bien desde el frontend
+            documentacion=data.get("version"),
+            creado_por=usuario,
+            permiso="privado",
+        )
 
         return Response({
             "mensaje": "API creada exitosamente",
