@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Settings, Bell, Lock, Upload, Trash2, Eye, EyeOff, ClipboardCopy, Users } from "lucide-react";
+import { User, Settings, Bell, Lock, Upload, Trash2, Users } from "lucide-react";
 import DashNavbar from "../componentes/DashboardNavbar";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
@@ -23,9 +23,7 @@ const PerfilConfiguracion = () => {
     bio: "",
     username: "",
   });
-  const [currentPassword, setCurrentPassword] = useState("MiContraseñaSegura123");
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-
+  
   useEffect(() => {
     const fetchPerfil = async () => {
       try {
@@ -423,36 +421,6 @@ const PerfilConfiguracion = () => {
 
                   <form onSubmit={(e) => { e.preventDefault(); alert("Contraseña actualizada"); }} className="space-y-6 max-w-md">
                     
-                    {/* Contraseña actual con toggle y copiar */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña actual</label>
-                      <div className="relative flex">
-                        <input
-                          type={showCurrentPassword ? "text" : "password"}
-                          name="currentPassword"
-                          value={currentPassword}
-                          onChange={(e) => setCurrentPassword(e.target.value)}
-                          className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 pr-20"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                          className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                        >
-                          {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(currentPassword);
-                            alert("Contraseña copiada al portapapeles");
-                          }}
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                        >
-                          <ClipboardCopy className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Nueva contraseña</label>

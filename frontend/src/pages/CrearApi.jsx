@@ -18,8 +18,9 @@ const CrearApi = () => {
     DELETE: { endpoint: "", parametros: "", requestBody: "", respuesta: "", codigo: "" },
     PATCH: { endpoint: "", parametros: "", requestBody: "", respuesta: "", codigo: "" },
   });
-
+  // eslint-disable-next-line
   const [requestBody, setRequestBody] = useState("");
+  // eslint-disable-next-line
   const [respuesta, setRespuesta] = useState("");
   const navigate = useNavigate();
 
