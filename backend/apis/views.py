@@ -596,3 +596,53 @@ def buscar_apis_publicas(request):
 class APIViewSet(viewsets.ModelViewSet):
     queryset = API.objects.all()
 
+# Crear APIs y sus metodos, vista
+@csrf_exempt
+def crear_api_y_metodos(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return JsonResponse({"detail": "Token no proporcionado"}, status=400)
+
+        token_sesion = auth_header.split(" ")[1]
+        sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
+        if not sesion:
+            return Response({"error": "Sesión no válida o expirada"}, status=401)
+
+        usuario = sesion.usuario
+
+        nueva_api = API.objects.create(
+            nombre=data.get("nombre"),
+            descripcion=data.get("descripcion"),
+            detalles_tecnicos="",
+            documentacion=data.get("version"),
+            creado_por=usuario,
+            permiso="privado",
+            estado="activo",
+            creado_en=timezone.now(),
+            actualizado_en=timezone.now()
+        )
+
+        metodos = data.get("metodos", {})
+
+        for metodo, info in metodos.items():
+            MetodoApi.objects.create(
+                api=nueva_api,
+                metodo=metodo,
+                endpoint=info.get("endpoint"),
+                descripcion=info.get("requestBody"),
+                lenguaje_codigo="python",
+                codigo=info.get("codigo"),
+                parametros=info.get("parametros"),
+                retorno=info.get("respuesta"),
+            )
+
+        return JsonResponse({"mensaje": "API y métodos creados correctamente"}, status=201)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

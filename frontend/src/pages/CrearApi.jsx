@@ -18,10 +18,6 @@ const CrearApi = () => {
     DELETE: { endpoint: "", parametros: "", requestBody: "", respuesta: "", codigo: "" },
     PATCH: { endpoint: "", parametros: "", requestBody: "", respuesta: "", codigo: "" },
   });
-  // eslint-disable-next-line
-  const [requestBody, setRequestBody] = useState("");
-  // eslint-disable-next-line
-  const [respuesta, setRespuesta] = useState("");
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -69,7 +65,7 @@ const CrearApi = () => {
 
   const campos = datosMetodo[metodoActivo];
 
-  const handleSubmit = async (e) => {
+  /*const handleSubmit = async (e) => {
     e.preventDefault();
   
     const tokenSesion = localStorage.getItem("token_sesion");
@@ -103,6 +99,48 @@ const CrearApi = () => {
       if (response.ok) {
         alert("API creada correctamente");
         console.log("Resultado:", data);
+        navigate("/dashboard");
+      } else {
+        alert("Error al crear la API: " + data.error);
+      }
+  
+    } catch (error) {
+      console.error("Error de red:", error);
+      alert("Error al enviar la solicitud");
+    }
+  };*/
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    const tokenSesion = localStorage.getItem("token_sesion");
+    if (!tokenSesion) {
+      alert("No se encontró token de sesión");
+      return;
+    }
+  
+    const nuevaApi = {
+      nombre,
+      descripcion,
+      version,
+      metodos: datosMetodo, 
+    };
+  
+    try {
+      const response = await fetch(`${API_BASE_URL}/crearapimetodos/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${tokenSesion}`,  
+        },
+        body: JSON.stringify(nuevaApi),
+      });
+  
+      const data = await response.json();
+      console.log("Respuesta del servidor:", data);
+  
+      if (response.ok) {
+        alert("API creada correctamente");
         navigate("/dashboard");
       } else {
         alert("Error al crear la API: " + data.error);
@@ -250,19 +288,6 @@ const CrearApi = () => {
                 className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
                 rows={3}
                 placeholder={`{\n  "mensaje": "Éxito",\n  "resultado": {...}\n}`}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Código (Python)
-              </label>
-              <textarea
-                value={campos.codigo}
-                onChange={(e) => handleChange("codigo", e.target.value)}
-                className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
-                rows={4}
-                placeholder={`Tu código en Python`}
               />
             </div>
           </div>

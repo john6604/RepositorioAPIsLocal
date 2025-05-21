@@ -130,6 +130,7 @@ const APIDetail = () => {
           const updatedData = await response.json();
           setApiData(updatedData);
           alert("Cambios guardados correctamente.");
+          navigate("/dashboard");
         } else {
           const error = await response.json();
           console.error("Error al guardar cambios:", error);

@@ -21,6 +21,6 @@ urlpatterns = [
     path('buscar-apis-publicas', views.buscar_apis_publicas, name='buscar_apis_publicas'),
     path('usuario_actual/', views.obtener_usuario_actual, name='usuario_actual'),
     path('listarmodelos/<int:api_id>/', views.DetalleModeloView.as_view(), name='modelo_actual'),
-
+    path('crearapimetodos/', views.crear_api_y_metodos, name='crear_api_metodos'),
 
 ]
