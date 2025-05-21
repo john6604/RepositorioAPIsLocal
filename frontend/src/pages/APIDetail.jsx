@@ -40,7 +40,7 @@ const APIDetail = () => {
     
     const visibleTabs = isOwner
       ? allTabs
-      : allTabs.filter((tab) => tab.id === "api");
+      : allTabs.filter((tab) => tab.id === "api" || tab.id === "consume");
     
     const handleChange = (e) => {
       const { name, value } = e.target;
