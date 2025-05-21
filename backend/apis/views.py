@@ -305,6 +305,17 @@ def crear_api(request):
             permiso="privado",
         )
 
+          metodo_api = MetodoApi.objects.create(
+            api=nueva_api,
+            metodo=data.get("metodo", "GET"),
+            endpoint=data.get("endpoint", ""),
+            descripcion=data.get("descripcion", ""),
+            lenguaje_codigo=data.get("lenguaje_codigo", ""),
+            codigo=data.get("codigo", ""),
+            parametros=data.get("parametros", None),  # ideal que venga un JSON válido o None
+            retorno=data.get("respuesta", None),      # idem para retorno
+        )
+
         return Response({
             "mensaje": "API creada exitosamente",
             "id_api": nueva_api.id
