@@ -20,7 +20,6 @@ urlpatterns = [
     path("eliminarapi/<int:api_id>/", views.EliminarAPIView.as_view(), name='eliminar_api'),
     path('buscar-apis-publicas', views.buscar_apis_publicas, name='buscar_apis_publicas'),
     path('usuario_actual/', views.obtener_usuario_actual, name='usuario_actual'),
-
-    path('api/hola/', views.hola, name='hola'),  # Nueva ruta
+    path('listarModelo/<int:api_id>/', views.DetalleModelo.as_view(), name='detalle_modelo'),
 
 ]
