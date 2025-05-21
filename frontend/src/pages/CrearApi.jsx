@@ -10,6 +10,8 @@ const CrearApi = () => {
   const [metodo, setMetodo] = useState("GET");
   const [endpoint, setEndpoint] = useState("");
   const [parametros, setParametros] = useState("");
+  const [codigo, setCodigo] = useState("");
+
   const [requestBody, setRequestBody] = useState("");
   const [respuesta, setRespuesta] = useState("");
   const navigate = useNavigate();
@@ -197,6 +199,20 @@ const CrearApi = () => {
               className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
               rows={3}
               placeholder={`{\n  "mensaje": "Éxito",\n  "resultado": {...}\n}`}
+            />
+          </div>
+
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Codigo (Python)
+            </label>
+            <textarea
+              value={codigo}
+              onChange={(e) => setCodigo(e.target.value)}
+              className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
+              rows={3}
+              placeholder={`Tu codigo en Python`}
             />
           </div>
 

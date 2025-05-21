@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import API
 from rest_framework import viewsets
-from .models import API
+from .models import API, MetodoApi
 from .serializers import APISerializer
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
@@ -304,6 +304,16 @@ def crear_api(request):
             creado_por=usuario,
             permiso="privado",
         )
+        nuevo_metodo = MetodoApi.objects.create(
+    api=nueva_api,  # se usa el objeto, Django asigna automáticamente api_id
+    metodo=data.get("metodo"),
+    endpoint=data.get("endpoint"),
+    descripcion=data.get("descripcion"),
+    lenguaje_codigo="Python",
+    codigo=data.get("codigo"),
+    parametros=data.get("parametros"),
+    retorno=data.get("respuesta"),
+)
 
         return Response({
             "mensaje": "API creada exitosamente",
