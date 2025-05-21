@@ -12,6 +12,8 @@ import { useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import { useNavigate, useParams } from "react-router-dom";
 
+const metodosHttp = ["GET", "POST", "PUT", "DELETE", "PATCH"];
+
 const APIDetail = () => {
     const { apiId } = useParams();
     const navigate = useNavigate();
@@ -25,6 +27,43 @@ const APIDetail = () => {
       creado_en: "",
       actualizado_en: "",
     });
+    
+    const [datosPorMetodo, setDatosPorMetodo] = useState({
+      GET: { endpoint: "", parametros: "", respuesta: "" },
+      POST: { endpoint: "", parametros: "", respuesta: "" },
+      PUT: { endpoint: "", parametros: "", respuesta: "" },
+      DELETE: { endpoint: "", parametros: "", respuesta: "" },
+      PATCH: { endpoint: "", parametros: "", respuesta: "" },
+    });
+    const [metodoActivo, setMetodoActivo] = useState("GET");
+    const datosMetodo = datosPorMetodo[metodoActivo];
+    
+
+    const handleChangeGeneral = (e) => {
+      const { name, value } = e.target;
+      setApiData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    };
+
+    const handleMetodoChange = (campo, valor) => {
+      setDatosPorMetodo((prev) => ({
+        ...prev,
+        [metodoActivo]: {
+          ...prev[metodoActivo],
+          [campo]: valor,
+        },
+      }));
+    };
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      console.log("Consumir API con:", metodoActivo, datosMetodo);
+    };
+
+    
+
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("api");
     const [searchQuery, setSearchQuery] = useState("");
@@ -37,6 +76,7 @@ const APIDetail = () => {
       { id: "permissions", label: "Permisos", icon: Lock },
       { id: "consume", label: "Consumir", icon: FileTerminal},
     ];
+    
     
     const visibleTabs = isOwner
       ? allTabs
@@ -511,81 +551,99 @@ const APIDetail = () => {
 
           {activeTab === "consume" && (
             <div className="bg-white p-6 rounded-xl shadow">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <FileTerminal className="w-5 h-5" />
-                Consumir la API
-              </h3>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <FileTerminal className="w-5 h-5" />
+              Consumir la API
+            </h3>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              {/* Nombre */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                <input
+                  type="text"
+                  name="nombre"
+                  value={apiData.nombre}
+                  onChange={handleChangeGeneral}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
 
-              <form className="space-y-4" onSubmit={null}>
-                {/* Nombre */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                  <input
-                    type="text"
-                    name="nombre"
-                    value={apiData.nombre}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  />
-                </div>
+              {/* Versión */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Versión</label>
+                <input
+                  type="text"
+                  name="documentacion"
+                  value={apiData.documentacion}
+                  onChange={handleChangeGeneral}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
 
-                {/* Versión */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Versión</label>
-                  <input
-                    type="text"
-                    name="documentacion"
-                    value={apiData.documentacion}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  />
-                </div>
-
-                {/* Endpoint */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Endpoint</label>
-                    <input
-                      type="text"
-                      defaultValue=""
-                      readOnly
-                      className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 sm:text-sm"
-                    />
-                  </div>
-                </div>
-
-                {/* Parámetros */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
-                  <textarea
-                    rows={4}
-                    placeholder={`{\n  "param1": "valor1",\n  "param2": "valor2"\n}`}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm font-mono"
-                  />
-                </div>
-
-                {/* Respuesta */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Respuesta</label>
-                  <textarea
-                    rows={6}
-                    readOnly
-                    placeholder="Aquí se mostrará la respuesta de la API..."
-                    className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm text-sm font-mono text-gray-700"
-                  />
-                </div>
-
-                {/* Botón */}
-                <div className="pt-4">
+              <div className="flex space-x-2 mb-4">
+                {metodosHttp.map((metodo) => (
                   <button
-                    type="submit"
-                    className="px-4 py-2 bg-[#0077ba] hover:bg-[#003366] transition text-white rounded"
+                    key={metodo}
+                    className={`px-3 py-1 rounded ${
+                      metodoActivo === metodo ? "bg-[#0077ba] text-white" : "bg-gray-200"
+                    }`}
+                    onClick={() => setMetodoActivo(metodo)}
+                    type="button"
                   >
-                    Consumir API
+                    {metodo}
                   </button>
+                ))}
+              </div>
+
+              {/* Endpoint */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Endpoint</label>
+                  <input
+                    type="text"
+                    value={datosMetodo.endpoint}
+                    onChange={(e) => handleMetodoChange("endpoint", e.target.value)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                    placeholder="/ejemplo"
+                  />
                 </div>
-              </form>
-            </div>
+              </div>
+
+              {/* Parámetros */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
+                <textarea
+                  rows={4}
+                  value={datosMetodo.parametros}
+                  onChange={(e) => handleMetodoChange("parametros", e.target.value)}
+                  placeholder={`{\n  "param1": "valor1",\n  "param2": "valor2"\n}`}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm font-mono"
+                />
+              </div>
+
+              {/* Respuesta */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Respuesta</label>
+                <textarea
+                  rows={6}
+                  value={datosMetodo.respuesta}
+                  readOnly
+                  placeholder="Aquí se mostrará la respuesta de la API..."
+                  className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm text-sm font-mono text-gray-700"
+                />
+              </div>
+
+              {/* Botón */}
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#0077ba] hover:bg-[#003366] transition text-white rounded"
+                >
+                  Consumir API
+                </button>
+              </div>
+            </form>
+          </div>
           )}
         </main>
       </div>
