@@ -610,7 +610,7 @@ def crear_api_y_metodos(request):
             return JsonResponse({"detail": "Token no proporcionado"}, status=400)
 
         token_sesion = auth_header.split(" ")[1]
-        sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
+        sesion = Sesion.objects.filter(token_sesion=token_sesion, activa=True, expira_en__gt=timezone.now()).first()
         if not sesion:
             return Response({"error": "Sesión no válida o expirada"}, status=401)
 
