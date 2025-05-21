@@ -1,217 +1,508 @@
-import { useState } from "react";
-import DashboardNavbar from "../componentes/DashboardNavbar";
-import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../config";
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import API
+from rest_framework import viewsets
+from .models import API
+from .serializers import APISerializer
+from django.utils import timezone
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
+from .models import Usuario, Rol, Sesion
+import secrets
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.views import APIView
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.db.models import Q
 
-const CrearApi = () => {
-  const [nombre, setNombre] = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [version, setVersion] = useState("1.0");
-  const [metodo, setMetodo] = useState("GET");
-  const [endpoint, setEndpoint] = useState("");
-  const [parametros, setParametros] = useState("");
-  const [requestBody, setRequestBody] = useState("");
-  const [respuesta, setRespuesta] = useState("");
-  const navigate = useNavigate();
+# Create your views here.
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    const tokenSesion = localStorage.getItem("token_sesion");
-    if (!tokenSesion) {
-      alert("No se encontró token de sesión");
-      return;
-    }
-  
-    const nuevaApi = {
-      nombre,
-      descripcion,
-      version,
-      metodo,
-      endpoint,
-      parametros,
-      requestBody,
-      respuesta,
-      token_sesion: tokenSesion,
-    };
-  
-    try {
-      const response = await fetch(`${API_BASE_URL}/crearapi/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(nuevaApi),
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        alert("API creada correctamente");
-        console.log("Resultado:", data);
-        navigate("/dashboard");
-      } else {
-        alert("Error al crear la API: " + data.error);
-      }
-  
-    } catch (error) {
-      console.error("Error de red:", error);
-      alert("Error al enviar la solicitud");
-    }
-  };
+# Registro de los Usuarios, Vistas
+@csrf_exempt
+def registrar_usuario(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            correo = data.get("correo")
+            clave  = data.get("contrasena")
 
-  return (
-    <>
-      <DashboardNavbar />
-      <div className="max-w-3xl mx-auto mt-8 bg-white shadow border rounded-xl p-8">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">
-          Crear una nueva API
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Nombre */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre de la API <span className="text-red-500">*</span>
-            </label>
+            if not correo or not clave:
+                return JsonResponse({"error": "Datos incompletos."}, status=400)
 
-            <div className="flex items-center space-x-2">
-              {/* Autor (no editable) */}
-              <div className="flex items-center space-x-2 px-3 py-2 border rounded-md bg-black/5">
-                <span className="text-sm text-gray-700 font-medium">john6604</span>
-              </div>
+            if Usuario.objects.filter(correo=correo).exists():
+                return JsonResponse({"error": "El correo ya está registrado."}, status=409)
 
-              <span className="text-gray-500 mr-1">/</span>
+            username_generado = correo.split("@")[0]
 
-              {/* Campo editable para el nombre */}
-              <div className="flex items-center px-3 py-2 border rounded-md flex-1">
-                <input
-                  type="text"
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  className="flex-1 outline-none text-sm"
-                  placeholder="nombre-de-la-api"
-                  required
-                />
-              </div>
-            </div>
+            usuario = Usuario.objects.create(
+                correo          = correo,
+                username        = username_generado,       
+                contrasena_hash = make_password(clave),
+                nombres         = username_generado,
+                apellidos       = None,
+                estado          = "activo",
+                rol_id          = 2,
+                creado_en       = timezone.now(),
+                actualizado_en  = timezone.now()
+            )
 
-            <p className="text-xs text-gray-500 mt-1">
-              Elige un nombre corto y descriptivo para tu API.
-            </p>
-          </div>
+            token_sesion = secrets.token_hex(16)
+            Sesion.objects.create(
+                usuario_id  = usuario.id,
+                token_sesion = token_sesion,
+                expira_en   = timezone.now() + timezone.timedelta(days=1),
+                activa      = True
+            )
 
-          {/* Descripción */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Descripción
-            </label>
-            <textarea
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
-              rows={3}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Explica brevemente qué hace tu API.
-            </p>
-          </div>
+            return JsonResponse({
+                "mensaje": "Usuario registrado con éxito.",
+                "token_sesion": token_sesion
+            }, status=201)
 
-          {/* Versión */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Versión inicial <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={version}
-              onChange={(e) => setVersion(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
-            />
-          </div>
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Método no permitido."}, status=405)
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Método HTTP <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={metodo}
-              onChange={(e) => setMetodo(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
-            >
-              <option value="GET">GET</option>
-              <option value="POST">POST</option>
-              <option value="PUT">PUT</option>
-              <option value="DELETE">DELETE</option>
-              <option value="PATCH">PATCH</option>
-            </select>
-          </div>
+# Login de usuarios, vista
+@csrf_exempt
+def login_usuario(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            correo = data.get("correo")
+            clave = data.get("contrasena")
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Endpoint <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={endpoint}
-              onChange={(e) => setEndpoint(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
-              placeholder="/miapi/ejemplo"
-            />
-          </div>
+            if not correo or not clave:
+                return JsonResponse({"error": "Datos incompletos."}, status=400)
 
-          {/* Parámetros */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Parámetros (JSON)
-            </label>
-            <textarea
-              value={parametros}
-              onChange={(e) => setParametros(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
-              rows={3}
-              placeholder={`[\n  { "nombre": "ciudad", "tipo": "string", "requerido": true }\n]`}
-            />
-          </div>
+            try:
+                usuario = Usuario.objects.get(correo=correo)
+            except Usuario.DoesNotExist:
+                return JsonResponse({"error": "Usuario no encontrado."}, status=404)
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Cuerpo de la solicitud (JSON)
-            </label>
-            <textarea
-              value={requestBody}
-              onChange={(e) => setRequestBody(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
-              rows={3}
-              placeholder={`{\n  "nombre": "Juan",\n  "edad": 30\n}`}
-            />
-          </div>
+            if not check_password(clave, usuario.contrasena_hash):
+                return JsonResponse({"error": "Contraseña incorrecta."}, status=401)
 
-          {/* Respuesta esperada */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Respuesta esperada (JSON)
-            </label>
-            <textarea
-              value={respuesta}
-              onChange={(e) => setRespuesta(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
-              rows={3}
-              placeholder={`{\n  "mensaje": "Éxito",\n  "resultado": {...}\n}`}
-            />
-          </div>
+            # Crear siempre una nueva sesión
+            token = secrets.token_hex(32)
+            Sesion.objects.create(
+                usuario=usuario,
+                token_sesion=token,
+                creado_en=timezone.now(),
+                expira_en=timezone.now() + timezone.timedelta(days=30),
+                activa=True
+            )
+
+            request.session['usuario_id'] = usuario.id
+
+            return JsonResponse({
+                "mensaje": "Inicio de sesión exitoso",
+                "token": token, 
+                "usuario_id": usuario.id,
+                "rol_id": usuario.rol_id,
+                "nombres": usuario.nombres,
+                "apellidos": usuario.apellidos
+            })
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+
+# Cerrar sesiones, vistas
+@csrf_exempt
+def logout_usuario(request):
+    if request.method == "POST":
+        try:
+            # Obtener el token de sesión enviado en la solicitud
+            data = json.loads(request.body)
+            token = data.get("token_sesion")
+
+            if not token:
+                return JsonResponse({"error": "Token de sesión no proporcionado."}, status=400)
+
+            # Buscar la sesión en la base de datos
+            sesion = Sesion.objects.filter(token_sesion=token, activa=True).first()
+
+            if not sesion:
+                return JsonResponse({"error": "Sesión no encontrada o ya está inactiva."}, status=404)
+
+            # Marcar la sesión como inactiva
+            sesion.activa = False
+            sesion.save()
+
+            return JsonResponse({"mensaje": "Sesión cerrada correctamente."})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+
+# Cerrar todas las sesiones, vista
+@csrf_exempt
+def cerrar_todas_las_sesiones(request):
+    if request.method == "POST":
+        try:
+            # Cerrar todas las sesiones activas
+            Sesion.objects.filter(activa=True).update(activa=False)
+            return JsonResponse({"mensaje": "Todas las sesiones han sido cerradas."})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+        
+# Cerrar todas las sesiones de un usuario, vista
+@csrf_exempt
+def cerrar_todas_las_sesiones_usuario(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            token = data.get("token_sesion")
+
+            if not token:
+                return JsonResponse({"error": "Token de sesión no proporcionado."}, status=400)
+
+            # Verificar la sesión actual
+            sesion_actual = Sesion.objects.filter(token_sesion=token, activa=True).first()
+
+            if not sesion_actual:
+                return JsonResponse({"error": "Sesión no válida o expirada."}, status=401)
+
+            # Cerrar todas las sesiones activas del mismo usuario
+            Sesion.objects.filter(usuario=sesion_actual.usuario, activa=True).update(activa=False)
+
+            return JsonResponse({"mensaje": "Todas las sesiones han sido cerradas correctamente."})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+
+# Sesiones activas en un dispoditivo, vista
+@csrf_exempt
+def validar_sesion(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            token = data.get("token_sesion")
+
+            if not token:
+                return JsonResponse({"error": "Token de sesión no proporcionado."}, status=400)
+
+            sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
+
+            if not sesion:
+                return JsonResponse({"valida": False})
+
+            return JsonResponse({
+                "valida": True,
+                "usuario_id": sesion.usuario.id,
+                "rol_id": sesion.usuario.rol_id,
+                "nombres": sesion.usuario.nombres,
+                "apellidos": sesion.usuario.apellidos
+            })
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+        
+# Filtrar APIs por usuario, vista
+@api_view(['POST'])
+@csrf_exempt
+def apis_por_usuario(request):
+    
+    try:
+        data = request.data 
+        token = data.get("token_sesion")
+
+        if not token:
+            return Response({'error': 'Token de sesión no proporcionado'}, status=400)
 
 
-          {/* Botón */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
-          >
-            Crear API
-          </button>
-        </form>
-      </div>
-    </>
-  );
-};
+        sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
+        if not sesion:
+            return Response({'error': 'Sesión no válida o expirada'}, status=401)
 
-export default CrearApi;
+        usuario_id = sesion.usuario.id
+
+        apis = API.objects.filter(creado_por_id=usuario_id)
+        data = [
+            {
+                'id': api.id,
+                'nombre': api.nombre,
+                'permiso': api.permiso,
+                'estado': api.estado,
+                'descripcion': api.descripcion,
+                "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
+                "username": f"{api.creado_por.username}" if api.creado_por else "Sin autor",
+            }
+            for api in apis
+        ]
+
+        return Response(data)
+
+    except Exception as e:
+        print("Error:", str(e))
+        return Response({'error': str(e)}, status=500)
+
+# Obtener el Usuario id de la sesion actual, vista
+@api_view(['POST'])
+@csrf_exempt
+def obtener_usuario_actual(request):
+    try:
+        data = request.data 
+        token = data.get("token_sesion")
+
+        if not token:
+            return Response({'error': 'Token no proporcionado'}, status=400)
+
+        sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
+        if not sesion:
+            return Response({'error': 'Sesión inválida o expirada'}, status=401)
+
+        usuario = sesion.usuario
+
+        return Response({'usuario_id': usuario.id})
+    
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+# Vista para crear APIs
+@api_view(['POST'])
+def crear_api(request):
+    try:
+        data = request.data
+        token = data.get("token_sesion")
+
+        if not token:
+            return Response({"error": "Token de sesión no proporcionado"}, status=400)
+
+        sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
+        if not sesion:
+            return Response({"error": "Sesión no válida o expirada"}, status=401)
+
+        usuario = sesion.usuario
+        nombre_api = data.get("nombre")
+
+        if not nombre_api:
+            return Response({"error": "El nombre de la API es obligatorio"}, status=400)
+
+        # Verificar que el nombre de la API no exista para este usuario
+        if API.objects.filter(nombre=nombre_api, creado_por=usuario).exists():
+            return Response({"error": "Ya tienes una API con ese nombre"}, status=409)
+
+        nueva_api = API.objects.create(
+            nombre=nombre_api,
+            descripcion=data.get("descripcion"),
+            detalles_tecnicos=data.get("ejemploUso"),  # asegúrate que estas claves vengan bien desde el frontend
+            documentacion=data.get("version"),
+            creado_por=usuario,
+            permiso="privado",
+        )
+
+        return Response({
+            "mensaje": "API creada exitosamente",
+            "id_api": nueva_api.id
+        }, status=201)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+# Obtener una API especifica
+@method_decorator(csrf_exempt, name='dispatch')
+class DetalleAPIView(APIView):
+    def get(self, request, api_id):
+        try:
+            api = API.objects.get(id=api_id)
+        except API.DoesNotExist:
+            return JsonResponse({"detail": "API no encontrada."}, status=404)
+
+        data = {
+            "id": api.id,
+            "nombre": api.nombre,
+            "descripcion": api.descripcion,
+            "detalles_tecnicos": api.detalles_tecnicos,
+            "documentacion": api.documentacion,
+            "creado_por": api.creado_por.id if api.creado_por else None,
+            "permiso": api.permiso,
+            "estado": api.estado,
+            "creado_en": api.creado_en,
+            "actualizado_en": api.actualizado_en,
+        }
+        return JsonResponse(data, status=200)
+
+    def put(self, request, api_id):
+        try:
+            api = API.objects.get(id=api_id)
+        except API.DoesNotExist:
+            return JsonResponse({"detail": "API no encontrada."}, status=404)
+
+        data = json.loads(request.body)
+
+        api.nombre = data.get("nombre", api.nombre)
+        api.descripcion = data.get("descripcion", api.descripcion)
+        api.documentacion = data.get("documentacion", api.documentacion)
+        api.permiso = data.get("permiso", api.permiso)
+        api.actualizado_en = timezone.now()
+
+        api.save()
+
+        return JsonResponse({"detail": "API actualizada correctamente."}, status=200)
+    
+
+
+
+
+# Eliminación de una API, vista
+class EliminarAPIView(APIView):
+    def delete(self, request, api_id):
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return JsonResponse({"detail": "Token no proporcionado"}, status=400)
+
+        token_sesion = auth_header.split(" ")[1]
+
+        try:
+            sesion = Sesion.objects.get(token_sesion=token_sesion)
+            usuario = sesion.usuario
+        except Sesion.DoesNotExist:
+            return JsonResponse({"detail": "Sesión inválida"}, status=401)
+
+        try:
+            api = API.objects.get(id=api_id)
+        except API.DoesNotExist:
+            return JsonResponse({"detail": "API no encontrada"}, status=404)
+
+        if api.creado_por != usuario:
+            return JsonResponse({"detail": "No tienes permiso para eliminar esta API"}, status=403)
+
+        api.delete()
+        return JsonResponse({"detail": "API eliminada"}, status=204)
+
+# Eliminación de una cuenta, vista
+class EliminarCuentaView(APIView):
+    def delete(self, request):
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return JsonResponse({"detail": "Token no proporcionado."}, status=401)
+
+
+        token_sesion = auth_header.split(" ")[1]
+
+        try:
+            sesion = Sesion.objects.get(token_sesion=token_sesion)
+            usuario = sesion.usuario
+        except Sesion.DoesNotExist:
+            return JsonResponse({"detail": "Sesión inválida."}, status=401)
+
+        usuario.delete()
+        sesion.delete()  # opcional, porque el usuario se elimina en cascada si está relacionado
+
+        print("Eliminado")
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# Getter de informacion del usuario, vista
+class PerfilUsuarioView(APIView):
+    def get(self, request):
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return JsonResponse({"detail": "Token no proporcionado."}, status=401)
+
+        token_sesion = auth_header.split(" ")[1]
+
+        try:
+            sesion = Sesion.objects.get(token_sesion=token_sesion)
+            usuario = sesion.usuario
+        except Sesion.DoesNotExist:
+            return JsonResponse({"detail": "Sesión inválida."}, status=401)
+
+        datos = {
+            "correo": usuario.correo,
+            "username": usuario.username,
+            "nombres": usuario.nombres,
+            "apellidos": usuario.apellidos,
+            "rol": usuario.rol.id if usuario.rol else None,
+            "estado": usuario.estado,
+            "creado_en": usuario.creado_en,
+            "actualizado_en": usuario.actualizado_en,
+            "biografia": usuario.biografia,
+        }
+
+        return Response(datos, status=status.HTTP_200_OK)
+
+# Actualización de Datos del Usuario, vista
+class ActualizarUsuarioView(APIView):
+    def put(self, request):
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return JsonResponse({"detail": "Token no proporcionado."}, status=401)
+
+        token_sesion = auth_header.split(" ")[1]
+
+        try:
+            sesion = Sesion.objects.get(token_sesion=token_sesion)
+            usuario = sesion.usuario
+        except Sesion.DoesNotExist:
+            return JsonResponse({"detail": "Sesión inválida."}, status=401)
+
+        data = request.data
+        try:
+            # Actualizar los campos de usuario si están presentes en los datos
+            if "nombres" in data:
+                usuario.nombres = data["nombres"]
+            if "apellidos" in data:
+                usuario.apellidos = data["apellidos"]
+            if "correo" in data:
+                usuario.correo = data["correo"]
+            if "biografia" in data:
+                usuario.biografia = data["biografia"]
+
+            usuario.save()
+
+            return JsonResponse({"detail": "Datos actualizados correctamente."}, status=200)
+
+        except Exception as e:
+            return JsonResponse({"detail": f"Error al actualizar los datos: {str(e)}"}, status=400)
+
+# Vista para buscar APIs globalmente
+@api_view(['GET'])
+def buscar_apis_publicas(request):
+    query = request.GET.get('q', '').strip().lower()
+
+    if not query:
+        return Response({"resultados": []})
+
+    # Filtra solo APIs públicas que coincidan por nombre, descripción, documentación o autor
+    apis = API.objects.filter(
+        permiso='publico'
+    ).filter(
+        Q(nombre__icontains=query) |
+        Q(descripcion__icontains=query) |
+        Q(documentacion__icontains=query) |
+        Q(creado_por__nombres__icontains=query) |
+        Q(creado_por__username__icontains=query)
+    ).select_related('creado_por') 
+
+    resultados = [
+        {
+            "id": api.id,
+            "nombre": api.nombre,
+            "descripcion": api.descripcion,
+            "documentacion": api.documentacion,
+            "permiso": api.permiso, 
+            "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
+            "username": f"{api.creado_por.username}" if api.creado_por else "Sin autor",
+        }
+        for api in apis
+    ]
+
+    return Response({"resultados": resultados})
+
+class APIViewSet(viewsets.ModelViewSet):
+    queryset = API.objects.all()
+
