@@ -32,6 +32,7 @@ const CrearApi = () => {
       metodo,
       endpoint,
       parametros,
+      codigo,
       requestBody,
       respuesta,
       token_sesion: tokenSesion,
@@ -47,7 +48,8 @@ const CrearApi = () => {
       });
   
       const data = await response.json();
-  
+      console.log("Nueva API:", nuevaApi)
+
       if (response.ok) {
         alert("API creada correctamente");
         console.log("Resultado:", data);

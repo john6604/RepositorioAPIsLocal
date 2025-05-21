@@ -304,16 +304,35 @@ def crear_api(request):
             creado_por=usuario,
             permiso="privado",
         )
+
+        parametros = data.get("parametros")
+        respuesta = data.get("respuesta")
+        cuerpo = data.get("requestBody")
+
+
+        if isinstance(parametros, str):
+            parametros = json.loads(parametros)
+        if isinstance(respuesta, str):
+            respuesta = json.loads(respuesta)
+        if isinstance(cuerpo, str):
+             cuerpo = json.loads(cuerpo)
+
+    
+    
         nuevo_metodo = MetodoApi.objects.create(
-    api=nueva_api,  # se usa el objeto, Django asigna automáticamente api_id
-    metodo=data.get("metodo"),
-    endpoint=data.get("endpoint"),
-    descripcion=data.get("descripcion"),
-    lenguaje_codigo="Python",
-    codigo=data.get("codigo"),
-    parametros=data.get("parametros"),
-    retorno=data.get("respuesta"),
-)
+            api=nueva_api,
+            metodo=data.get("metodo"),
+            endpoint=data.get("endpoint"),
+            descripcion=data.get("descripcion"),
+            lenguaje_codigo="Python",
+            codigo=data.get("codigo"),
+            parametros=parametros,
+            retorno=respuesta,
+            cuerpo=cuerpo,  # solo si lo tienes definido en el modelo
+        )
+        print("✔ Parámetros guardados:", nuevo_metodo.parametros)
+        print("✔ Respuesta guardada:", nuevo_metodo.retorno)
+
 
         return Response({
             "mensaje": "API creada exitosamente",
@@ -373,23 +392,14 @@ class DetalleModeloView(APIView):
         try:
             modelo_api = MetodoApi.objects.get(id=api_id)
         except MetodoApi.DoesNotExist:
-            return JsonResponse({"detail": "API no encontrada."}, status=404)
+            return JsonResponse({"detail": "API no encontradaaa."}, status=404)
 
         data = {
-            "id": modelo_api.id,
-            "nombre": modelo_api.nombre,
-            "descripcion": modelo_api.descripcion,
-            "version": modelo_api.version,
             "metodo": modelo_api.metodo,
             "endpoint": modelo_api.endpoint,
             "parametros": modelo_api.parametros,
             "codigo": modelo_api.codigo,
-            "requestBody": modelo_api.requestBody,
-            "respuesta": modelo_api.respuesta,
-            "creado_por": modelo_api.creado_por.username if modelo_api.creado_por else None,
-            "estado": modelo_api.estado,
-            "creado_en": modelo_api.creado_en,
-            "actualizado_en": modelo_api.actualizado_en,
+            "retorno": modelo_api.retorno,
         }
         return JsonResponse(data, status=200)
 
@@ -397,7 +407,7 @@ class DetalleModeloView(APIView):
         try:
             modelo_api = MetodoApi.objects.get(id=api_id)
         except MetodoApi.DoesNotExist:
-            return JsonResponse({"detail": "API no encontrada."}, status=404)
+            return JsonResponse({"detail": "API no encontradas."}, status=404)
 
         try:
             data = json.loads(request.body)
