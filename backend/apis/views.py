@@ -505,3 +505,6 @@ def buscar_apis_publicas(request):
 
 class APIViewSet(viewsets.ModelViewSet):
     queryset = API.objects.all()
+
+def hola(request):
+    return JsonResponse({"mensaje": "¡Hola, mundo!"})
