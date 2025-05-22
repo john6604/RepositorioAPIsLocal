@@ -37,18 +37,21 @@ const APIDetail = () => {
     async function handleSubmit(e) {
       e.preventDefault();
     
-      const codigo = apiData.metodos[metodoActivo].requestbody || "";
+      const codigo = metodoInfo.requestBody || "";
+      console.log(codigo);
       let parametros = {};
     
       try {
-        parametros = JSON.parse(apiData.metodos[metodoActivo].parametros || "{}");
+        parametros = JSON.parse(metodoInfo.parametros || "{}");
+        console.log(parametros);
+
       } catch {
         setRespuestaAPI("Error: Parámetros JSON inválidos");
         return;
       }
     
       try {
-        const response = await fetch("/apis/ejecutar/", {
+        const response = await fetch(`${API_BASE_URL}/ejecutar/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
