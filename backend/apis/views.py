@@ -389,15 +389,31 @@ class DetalleAPIView(APIView):
 
         data = json.loads(request.body)
 
+        # Actualizar datos generales del API
         api.nombre = data.get("nombre", api.nombre)
         api.descripcion = data.get("descripcion", api.descripcion)
         api.documentacion = data.get("documentacion", api.documentacion)
         api.permiso = data.get("permiso", api.permiso)
         api.actualizado_en = timezone.now()
-
         api.save()
 
-        return JsonResponse({"detail": "API actualizada correctamente."}, status=200)
+        # Actualizar métodos HTTP asociados
+        metodos_data = data.get("metodos", {})
+
+        for metodo_http, datos_metodo in metodos_data.items():
+            try:
+                metodo_obj = MetodoApi.objects.get(api=api, metodo=metodo_http)
+                metodo_obj.endpoint = datos_metodo.get("endpoint", metodo_obj.endpoint)
+                metodo_obj.parametros = datos_metodo.get("parametros", metodo_obj.parametros)
+                metodo_obj.codigo = datos_metodo.get("requestBody", metodo_obj.codigo)
+                metodo_obj.retorno = datos_metodo.get("respuesta", metodo_obj.retorno)
+                metodo_obj.save()
+            except MetodoApi.DoesNotExist:
+                # Este bloque no debería ejecutarse en tu caso,
+                # pero lo dejamos por seguridad (puede registrar un warning si deseas)
+                continue
+
+        return JsonResponse({"detail": "API y métodos actualizados correctamente."}, status=200)
     
 
 

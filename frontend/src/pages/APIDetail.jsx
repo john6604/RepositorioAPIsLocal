@@ -29,16 +29,7 @@ const APIDetail = () => {
       actualizado_en: "",
       metodos: {},
     });
-    
-    const [datosPorMetodo, setDatosPorMetodo] = useState({
-      GET: { endpoint: "", parametros: "", respuesta: "" },
-      POST: { endpoint: "", parametros: "", respuesta: "" },
-      PUT: { endpoint: "", parametros: "", respuesta: "" },
-      DELETE: { endpoint: "", parametros: "", respuesta: "" },
-      PATCH: { endpoint: "", parametros: "", respuesta: "" },
-    });
     const [metodoActivo, setMetodoActivo] = useState("GET");
-    const datosMetodo = datosPorMetodo[metodoActivo];
     
 
     const handleChangeGeneral = (e) => {
@@ -49,22 +40,20 @@ const APIDetail = () => {
       }));
     };
 
-    const handleMetodoChange = (campo, valor) => {
-      setDatosPorMetodo((prev) => ({
-        ...prev,
-        [metodoActivo]: {
-          ...prev[metodoActivo],
-          [campo]: valor,
+    const handleMetodoChange = (e) => {
+      const { name, value } = e.target;
+    
+      setApiData((prevData) => ({
+        ...prevData,
+        metodos: {
+          ...prevData.metodos,
+          [metodoActivo]: {
+            ...prevData.metodos[metodoActivo],
+            [name]: value,
+          },
         },
       }));
     };
-
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      console.log("Consumir API con:", metodoActivo, datosMetodo);
-    };
-
-    
 
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("api");
@@ -99,6 +88,8 @@ const APIDetail = () => {
         [name]: value,
       }));
     };
+
+    
 
     const obtenerUsuarioActual = async () => {
       try {
@@ -391,8 +382,8 @@ const APIDetail = () => {
           )}
 
             {activeTab === "settings" && (
-              <div className="max-w-3xl mx-auto space-y-8">
-                {/* Configuración General */}
+              <div className="max-w-4xl mx-auto space-y-8">
+                {/* Configuración general */}
                 <div className="bg-white p-6 rounded-xl shadow">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <Settings className="w-5 h-5" />
@@ -418,52 +409,120 @@ const APIDetail = () => {
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         rows={3}
                       />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Versión</label>
-                    <input
-                      type="text"
-                      name="documentacion"
-                      value={apiData.documentacion}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+                    </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Endpoint</label>
+                      <label className="block text-sm font-medium text-gray-700">Versión</label>
                       <input
                         type="text"
-                        defaultValue=""
-                        readOnly
-                        className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 sm:text-sm"
+                        name="documentacion"
+                        value={apiData.documentacion}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       />
                     </div>
+              
+                    {/* Toggle de métodos HTTP */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Método</label>
-                      <select
-                        defaultValue=""
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      >
-                        <option>GET</option>
-                        <option>POST</option>
-                        <option>PUT</option>
-                        <option>DELETE</option>
-                      </select>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Métodos</label>
+                      <div className="flex rounded-lg overflow-hidden border border-gray-300">
+                        {metodosHttp.map((method) => (
+                          <button
+                            type="button"
+                            key={method}
+                            onClick={() => setMetodoActivo(method)}
+                            className={`flex-1 py-2 text-sm font-semibold transition-colors duration-300 ${
+                              metodoActivo === method
+                                ? "bg-[#0077ba] text-white"
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                          >
+                            {method}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div className="pt-4">
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              
+                    {/* Campos editables del método activo */}
+                    <motion.div
+                      key={metodoActivo}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-4 mt-6"
                     >
-                      Guardar cambios
-                    </button>
-                  </div>
-                </form>
-              </div>
+                      {/* Endpoint */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Endpoint</label>
+                        <input
+                          type="text"
+                          value={metodoInfo.endpoint || ""}
+                          onChange={(e) => handleMetodoChange(metodoActivo, "endpoint", e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                          placeholder="/miapi/ejemplo"
+                        />
+                      </div>
+              
+                      {/* Parámetros */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
+                        <textarea
+                          value={metodoInfo.parametros || ""}
+                          onChange={(e) => handleMetodoChange(metodoActivo, "parametros", e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
+                          rows={3}
+                          placeholder={`[\n  { "nombre": "ciudad", "tipo": "string", "requerido": true }\n]`}
+                        />
+                      </div>
+              
+                      {/* Body */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Cuerpo (Body - JSON)</label>
+                        <textarea
+                          value={metodoInfo.requestBody || ""}
+                          onChange={(e) => handleMetodoChange(metodoActivo, "requestBody", e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
+                          rows={3}
+                          placeholder={`{\n  "nombre": "Juan",\n  "edad": 30\n}`}
+                        />
+                      </div>
+              
+                      {/* Respuesta esperada */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Respuesta esperada (JSON)</label>
+                        <textarea
+                          value={metodoInfo.respuesta || ""}
+                          onChange={(e) => handleMetodoChange(metodoActivo, "respuesta", e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
+                          rows={3}
+                          placeholder={`{\n  "mensaje": "Éxito",\n  "resultado": {...}\n}`}
+                        />
+                      </div>
+              
+                      {/* Código */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Código</label>
+                        <textarea
+                          value={metodoInfo.codigo || ""}
+                          onChange={(e) => handleMetodoChange(metodoActivo, "codigo", e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
+                          rows={5}
+                          placeholder={"Inserte el código (Python)"}
+                        />
+                      </div>
+                    </motion.div>
+              
+                    {/* Botón guardar */}
+                    <div className="pt-6">
+                      <button
+                        type="submit"
+                        className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        Guardar cambios
+                      </button>
+                    </div>
+                  </form>
+                </div>
 
-              {/* Danger Zone */}
               <div className="bg-white p-6 rounded-xl shadow border border-red-300">
                 <h3 className="text-lg font-semibold text-red-600 mb-2">Zona de peligro</h3>
                 <p className="text-sm text-gray-700 mb-4">
@@ -636,7 +695,7 @@ const APIDetail = () => {
               <FileTerminal className="w-5 h-5" />
               Consumir la API
             </h3>
-            <form className="space-y-4" onSubmit={handleSubmit}>
+            <form className="space-y-4" onSubmit={null}>
               {/* Nombre */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Nombre</label>
@@ -682,7 +741,7 @@ const APIDetail = () => {
                   <label className="block text-sm font-medium text-gray-700">Endpoint</label>
                   <input
                     type="text"
-                    value={datosMetodo.endpoint}
+                    value={""}
                     onChange={(e) => handleMetodoChange("endpoint", e.target.value)}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
                     placeholder="/ejemplo"
@@ -695,7 +754,7 @@ const APIDetail = () => {
                 <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
                 <textarea
                   rows={4}
-                  value={datosMetodo.parametros}
+                  value={""}
                   onChange={(e) => handleMetodoChange("parametros", e.target.value)}
                   placeholder={`{\n  "param1": "valor1",\n  "param2": "valor2"\n}`}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm font-mono"
@@ -707,7 +766,7 @@ const APIDetail = () => {
                 <label className="block text-sm font-medium text-gray-700">Respuesta</label>
                 <textarea
                   rows={6}
-                  value={datosMetodo.respuesta}
+                  value={""}
                   readOnly
                   placeholder="Aquí se mostrará la respuesta de la API..."
                   className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm text-sm font-mono text-gray-700"
