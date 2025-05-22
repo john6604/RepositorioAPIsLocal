@@ -681,14 +681,23 @@ def crear_api_y_metodos(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-@csrf_exempt  # para desarrollo, usar tokens CSRF en producción
+@csrf_exempt  # Usar protección CSRF en producción
 def ejecutar_codigo(request):
-    if request.method != 'POST':
+    if request.method not in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
         return JsonResponse({"error": "Método no permitido"}, status=405)
+
     try:
-        data = json.loads(request.body)
-        codigo = data.get('codigo')
-        parametros = data.get('parametros')
+        if request.method == 'GET':
+            # Parámetros codificados en la URL
+            codigo = request.GET.get('codigo')
+            parametros = request.GET.get('parametros')
+            if parametros:
+                parametros = json.loads(parametros)
+        else:
+            # Cuerpo JSON
+            data = json.loads(request.body)
+            codigo = data.get('codigo')
+            parametros = data.get('parametros')
 
         if not codigo or parametros is None:
             return JsonResponse({"error": "Faltan 'codigo' o 'parametros'"}, status=400)
@@ -701,7 +710,6 @@ def ejecutar_codigo(request):
             return JsonResponse({"error": "No se definió función 'ejecutar(parametros)' correctamente"}, status=400)
 
         resultado = ejecutar_func(parametros)
-
         return JsonResponse(resultado)
 
     except Exception as e:
