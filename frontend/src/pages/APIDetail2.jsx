@@ -29,6 +29,8 @@ const APIDetail = () => {
       actualizado_en: "",
       metodos: {},
     });
+    const [metodoActivo, setMetodoActivo] = useState("GET");
+    
 
     const [metodoData, setMetodoData] = useState({
       id: null,
@@ -40,9 +42,7 @@ const APIDetail = () => {
       parametros: "",
       retorno: ""
     });
-    
-    const [metodoActivo, setMetodoActivo] = useState("GET");
-    
+
 
     const handleChangeGeneral = (e) => {
       const { name, value } = e.target;
@@ -227,6 +227,7 @@ const APIDetail = () => {
         setUsuarioActualId(null);
       }
       obtenerDetalleAPI(apiId);
+      obtenerDetalleMetodo(apiId);
     }, [apiId]);
 
     const obtenerDetalleAPI = async (apiId) => {
@@ -244,6 +245,24 @@ const APIDetail = () => {
         }
       } catch (error) {
         console.error("Error al obtener los datos de la API:", error);
+      }
+    };
+  
+    const obtenerDetalleMetodo = async (apiId) => {
+      try {
+        const url = `${API_BASE_URL}/listarmodelos/${apiId-3}/`;
+        const response = await fetch(url);
+    
+        const data = await response.json();
+        if (response.ok) {
+          setMetodoData(data);
+          setLoading(false);
+          console.log(data);
+        } else {
+          console.error("Error:", data.detail);
+        }
+      } catch (error) {
+        console.error("Error al obtener los datos del modelo:", error);
       }
     };
 
