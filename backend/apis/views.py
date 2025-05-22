@@ -422,7 +422,7 @@ class DetalleModeloView(APIView):
 
     def get(self, request, api_id):
         try:
-            modelo_api = MetodoApi.objects.get(api_id=api_id)
+            modelo_api = MetodoApi.objects.get(api=api_id)
         except MetodoApi.DoesNotExist:
             return JsonResponse({"detail": "API no encontradaaa."}, status=404)
 
