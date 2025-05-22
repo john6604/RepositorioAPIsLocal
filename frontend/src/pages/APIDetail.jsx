@@ -79,6 +79,14 @@ const APIDetail = () => {
       { id: "consume", label: "Consumir", icon: FileTerminal},
     ];
     
+    const metodoInfo = apiData.metodos ? apiData.metodos[metodoActivo] : null;
+
+    const metodoSinInfo =
+      metodoInfo &&
+      !metodoInfo.endpoint &&
+      !metodoInfo.parametros &&
+      !metodoInfo.requestBody &&
+      !metodoInfo.respuesta;
     
     const visibleTabs = isOwner
       ? allTabs
@@ -227,6 +235,7 @@ const APIDetail = () => {
         if (response.ok) {
           setApiData(data);
           setLoading(false);
+          console.log(data);
         } else {
           console.error("Error:", data.detail);
         }
@@ -234,6 +243,29 @@ const APIDetail = () => {
         console.error("Error al obtener los datos de la API:", error);
       }
     };
+
+    useEffect(() => {
+      if (apiData.metodos && Array.isArray(apiData.metodos)) {
+        const metodosTransformados = {};
+    
+        apiData.metodos.forEach((m) => {
+          metodosTransformados[m.metodo] = {
+            endpoint: m.endpoint || "",
+            parametros: m.parametros || "",
+            requestBody: m.codigo || "", 
+            respuesta: m.retorno || "", 
+          };
+        });
+    
+        setApiData((prev) => ({
+          ...prev,
+          metodos: metodosTransformados,
+        }));
+
+        const primeros = Object.keys(metodosTransformados);
+        if (primeros.length > 0) setMetodoActivo(primeros[0]);
+      }
+    }, [apiData.metodos]);
 
     useEffect(() => {
       if (usuarioActualId && apiData?.creado_por) {
@@ -312,7 +344,7 @@ const APIDetail = () => {
               </div>
 
               {/* Contenido del método activo */}
-              {apiData.metodos && apiData.metodos[metodoActivo] ? (
+              {metodoInfo && !metodoSinInfo ? (
                 <motion.div
                   key={metodoActivo}
                   initial={{ opacity: 0, y: 10 }}
@@ -324,7 +356,7 @@ const APIDetail = () => {
                   <div className="bg-white rounded-xl shadow p-4">
                     <h3 className="font-semibold mb-2">Endpoint:</h3>
                     <code className="text-blue-700 font-mono">
-                      {apiData.metodos[metodoActivo].endpoint || "No definido"}
+                      {metodoInfo.endpoint || "No definido"}
                     </code>
                   </div>
 
@@ -332,7 +364,7 @@ const APIDetail = () => {
                   <div className="bg-white rounded-xl shadow p-4">
                     <h3 className="font-semibold mb-2">Parámetros:</h3>
                     <pre className="bg-gray-100 p-2 rounded text-sm whitespace-pre-wrap font-mono">
-                      {apiData.metodos[metodoActivo].parametros || "Ninguno"}
+                      {metodoInfo.parametros || "Ninguno"}
                     </pre>
                   </div>
 
@@ -340,7 +372,7 @@ const APIDetail = () => {
                   <div className="bg-white rounded-xl shadow p-4">
                     <h3 className="font-semibold mb-2">Cuerpo (body):</h3>
                     <pre className="bg-gray-100 p-2 rounded text-sm whitespace-pre-wrap font-mono">
-                      {apiData.metodos[metodoActivo].requestBody || "Ninguno"}
+                      {metodoInfo.requestBody || "Ninguno"}
                     </pre>
                   </div>
 
@@ -348,7 +380,7 @@ const APIDetail = () => {
                   <div className="bg-white rounded-xl shadow p-4">
                     <h3 className="font-semibold mb-2">Respuesta esperada:</h3>
                     <pre className="bg-gray-100 p-2 rounded text-sm whitespace-pre-wrap font-mono">
-                      {apiData.metodos[metodoActivo].respuesta || "Ninguna"}
+                      {metodoInfo.respuesta || "Ninguna"}
                     </pre>
                   </div>
                 </motion.div>

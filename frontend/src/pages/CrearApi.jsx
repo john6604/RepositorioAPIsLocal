@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import DashboardNavbar from "../componentes/DashboardNavbar";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
+import { motion } from "framer-motion";
 
 
 const metodosHttp = ["GET", "POST", "PUT", "DELETE", "PATCH"];
@@ -222,75 +223,102 @@ const CrearApi = () => {
             />
           </div>
 
-          <div className="space-y-4">
-            {/* Tabs de métodos */}
-            <div className="flex space-x-2 mb-4">
-              {metodosHttp.map((metodo) => (
+          <div className="max-w-4xl mx-auto space-y-4">
+            {/* Tabs de métodos con estilo toggle mejorado */}
+            <div className="flex rounded-lg overflow-hidden border border-gray-300 mb-6">
+              {metodosHttp.map((method) => (
                 <button
-                  key={metodo}
-                  className={`px-3 py-1 rounded ${
-                    metodoActivo === metodo ? "bg-[#0077ba] text-white" : "bg-gray-200"
+                  key={method}
+                  onClick={() => setMetodoActivo(method)}
+                  className={`flex-1 py-3 text-sm font-semibold transition-colors duration-300 ${
+                    metodoActivo === method
+                      ? "bg-[#0077ba] text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
-                  onClick={() => setMetodoActivo(metodo)}
                   type="button"
                 >
-                  {metodo}
+                  {method}
                 </button>
               ))}
             </div>
 
-            {/* Campos específicos por método */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Endpoint <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={campos.endpoint}
-                onChange={(e) => handleChange("endpoint", e.target.value)}
-                className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
-                placeholder="/miapi/ejemplo"
-              />
-            </div>
+            <motion.div
+              key={metodoActivo}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {/* Endpoint */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Endpoint <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={campos.endpoint}
+                  onChange={(e) => handleChange("endpoint", e.target.value)}
+                  className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
+                  placeholder="/miapi/ejemplo"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Parámetros (JSON)
-              </label>
-              <textarea
-                value={campos.parametros}
-                onChange={(e) => handleChange("parametros", e.target.value)}
-                className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
-                rows={3}
-                placeholder={`[\n  { "nombre": "ciudad", "tipo": "string", "requerido": true }\n]`}
-              />
-            </div>
+              {/* Parámetros */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Parámetros (JSON)
+                </label>
+                <textarea
+                  value={campos.parametros}
+                  onChange={(e) => handleChange("parametros", e.target.value)}
+                  className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
+                  rows={3}
+                  placeholder={`[\n  { "nombre": "ciudad", "tipo": "string", "requerido": true }\n]`}
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Cuerpo de la solicitud (JSON)
-              </label>
-              <textarea
-                value={campos.requestBody}
-                onChange={(e) => handleChange("requestBody", e.target.value)}
-                className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
-                rows={3}
-                placeholder={`{\n  "nombre": "Juan",\n  "edad": 30\n}`}
-              />
-            </div>
+              {/* Cuerpo de la solicitud */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cuerpo de la solicitud (JSON)
+                </label>
+                <textarea
+                  value={campos.requestBody}
+                  onChange={(e) => handleChange("requestBody", e.target.value)}
+                  className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
+                  rows={3}
+                  placeholder={`{\n  "nombre": "Juan",\n  "edad": 30\n}`}
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Respuesta esperada (JSON)
-              </label>
-              <textarea
-                value={campos.respuesta}
-                onChange={(e) => handleChange("respuesta", e.target.value)}
-                className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
-                rows={3}
-                placeholder={`{\n  "mensaje": "Éxito",\n  "resultado": {...}\n}`}
-              />
-            </div>
+              {/* Respuesta esperada */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Respuesta esperada (JSON)
+                </label>
+                <textarea
+                  value={campos.respuesta}
+                  onChange={(e) => handleChange("respuesta", e.target.value)}
+                  className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
+                  rows={3}
+                  placeholder={`{\n  "mensaje": "Éxito",\n  "resultado": {...}\n}`}
+                />
+              </div>
+
+              {/* Código */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Código
+                </label>
+                <textarea
+                  value={campos.codigo}
+                  onChange={(e) => handleChange("codigo", e.target.value)}
+                  className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
+                  rows={5}
+                  placeholder={"Inserte el código (Python)"}
+                />
+              </div>
+            </motion.div>
           </div>
 
 
