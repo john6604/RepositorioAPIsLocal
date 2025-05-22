@@ -18,6 +18,8 @@ from rest_framework.views import APIView
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse, HttpResponseBadRequest
 
 # Create your views here.
 
@@ -675,6 +677,32 @@ def crear_api_y_metodos(request):
             )
 
         return JsonResponse({"mensaje": "API y métodos creados correctamente"}, status=201)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt  # para desarrollo, usar tokens CSRF en producción
+def ejecutar_codigo(request):
+    if request.method != 'POST':
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+    try:
+        data = json.loads(request.body)
+        codigo = data.get('codigo')
+        parametros = data.get('parametros')
+
+        if not codigo or parametros is None:
+            return JsonResponse({"error": "Faltan 'codigo' o 'parametros'"}, status=400)
+
+        entorno = {}
+        exec(codigo, entorno)
+
+        ejecutar_func = entorno.get('ejecutar')
+        if not callable(ejecutar_func):
+            return JsonResponse({"error": "No se definió función 'ejecutar(parametros)' correctamente"}, status=400)
+
+        resultado = ejecutar_func(parametros)
+
+        return JsonResponse(resultado)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
