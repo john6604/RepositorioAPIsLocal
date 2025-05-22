@@ -351,7 +351,6 @@ class DetalleAPIView(APIView):
         except API.DoesNotExist:
             return JsonResponse({"detail": "API no encontrada."}, status=404)
 
-        modelos = Modelo.objects.filter(api_id=api_id)  # filtro por api_id FK
         metodos_data = [
             {
                 "id": metodo.id,
@@ -422,9 +421,9 @@ class DetalleModeloView(APIView):
 
     def get(self, request, api_id):
         try:
-            modelo_api = MetodoApi.objects.get(id=api_id)
+            modelo_api = MetodoApi.objects.filter(api_id=api_id)
         except MetodoApi.DoesNotExist:
-            return JsonResponse({"detail": "API no encontradaaa."}, status=404)
+            return JsonResponse({"detail": "Modelo no encontrado :OOOOO."}, status=404)
 
         data = {
             "metodo": modelo_api.metodo,
