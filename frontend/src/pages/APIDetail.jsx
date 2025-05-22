@@ -688,100 +688,114 @@ const APIDetail = () => {
           )}
 
           {activeTab === "consume" && (
-            <div className="bg-white p-6 rounded-xl shadow">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <FileTerminal className="w-5 h-5" />
-              Consumir la API
-            </h3>
-            <form className="space-y-4" onSubmit={null}>
-              {/* Nombre */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                <input
-                  type="text"
-                  name="nombre"
-                  value={apiData.nombre}
-                  onChange={handleChangeGeneral}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-              </div>
+            <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow">
+              <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                <FileTerminal className="w-5 h-5" />
+                Consumir la API
+              </h3>
 
-              {/* Versión */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Versión</label>
-                <input
-                  type="text"
-                  name="documentacion"
-                  value={apiData.documentacion}
-                  onChange={handleChangeGeneral}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-              </div>
-
-              <div className="flex space-x-2 mb-4">
-                {metodosHttp.map((metodo) => (
-                  <button
-                    key={metodo}
-                    className={`px-3 py-1 rounded ${
-                      metodoActivo === metodo ? "bg-[#0077ba] text-white" : "bg-gray-200"
-                    }`}
-                    onClick={() => setMetodoActivo(metodo)}
-                    type="button"
-                  >
-                    {metodo}
-                  </button>
-                ))}
-              </div>
-
-              {/* Endpoint */}
-              <div className="grid grid-cols-2 gap-4">
+              <form className="space-y-6" onSubmit={null}>
+                {/* Nombre */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Endpoint</label>
+                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
                   <input
                     type="text"
-                    value={""}
-                    onChange={(e) => handleMetodoChange("endpoint", e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
-                    placeholder="/ejemplo"
+                    name="nombre"
+                    value={apiData.nombre}
+                    onChange={handleChangeGeneral}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                 </div>
-              </div>
 
-              {/* Parámetros */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
-                <textarea
-                  rows={4}
-                  value={""}
-                  onChange={(e) => handleMetodoChange("parametros", e.target.value)}
-                  placeholder={`{\n  "param1": "valor1",\n  "param2": "valor2"\n}`}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm font-mono"
-                />
-              </div>
+                {/* Versión */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Versión</label>
+                  <input
+                    type="text"
+                    name="documentacion"
+                    value={apiData.documentacion}
+                    onChange={handleChangeGeneral}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
 
-              {/* Respuesta */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Respuesta</label>
-                <textarea
-                  rows={6}
-                  value={""}
-                  readOnly
-                  placeholder="Aquí se mostrará la respuesta de la API..."
-                  className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm text-sm font-mono text-gray-700"
-                />
-              </div>
+                {/* Toggle de métodos HTTP */}
+                <div className="flex rounded-lg overflow-hidden border border-gray-300">
+                  {metodosHttp.map((metodo) => (
+                    <button
+                      key={metodo}
+                      type="button"
+                      onClick={() => setMetodoActivo(metodo)}
+                      className={`flex-1 py-2 text-sm font-semibold transition-colors duration-300 ${
+                        metodoActivo === metodo
+                          ? "bg-[#0077ba] text-white"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {metodo}
+                    </button>
+                  ))}
+                </div>
 
-              {/* Botón */}
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#0077ba] hover:bg-[#003366] transition text-white rounded"
-                >
-                  Consumir API
-                </button>
-              </div>
-            </form>
-          </div>
+                {/* Contenido del método activo */}
+                {metodoInfo && !metodoSinInfo ? (
+                  <motion.div
+                    key={metodoActivo}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-4"
+                  >
+                    {/* Endpoint */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Endpoint</label>
+                      <input
+                        type="text"
+                        value={metodoInfo.endpoint || ""}
+                        readOnly
+                        placeholder="/ejemplo"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                      />
+                    </div>
+
+                    {/* Parámetros */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
+                      <textarea
+                        rows={4}
+                        onChange={(e) => handleMetodoChange(metodoActivo, "parametros", e.target.value)}
+                        placeholder={`{\n  "param1": "valor1",\n  "param2": "valor2"\n}`}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm font-mono"
+                      />
+                    </div>
+
+                    {/* Respuesta */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Respuesta</label>
+                      <textarea
+                        rows={6}
+                        value={""}
+                        readOnly
+                        placeholder="Aquí se mostrará la respuesta de la API..."
+                        className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm text-sm font-mono text-gray-700"
+                      />
+                    </div>
+
+                    {/* Botón */}
+                    <div className="pt-4">
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-[#0077ba] hover:bg-[#003366] transition text-white rounded"
+                      >
+                        Consumir API
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="text-gray-500 mt-4">Este método no tiene información disponible.</div>
+                )}
+              </form>
+            </div>
           )}
         </main>
       </div>

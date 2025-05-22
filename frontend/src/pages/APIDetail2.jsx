@@ -32,17 +32,7 @@ const APIDetail = () => {
     const [metodoActivo, setMetodoActivo] = useState("GET");
     
 
-    const [metodoData, setMetodoData] = useState({
-      id: null,
-      metodo: "",
-      endpoint: "",
-      descripcion: "",
-      lenguaje_codigo: "",
-      codigo: "",
-      parametros: "",
-      retorno: ""
-    });
-
+   
 
     const handleChangeGeneral = (e) => {
       const { name, value } = e.target;
@@ -227,7 +217,6 @@ const APIDetail = () => {
         setUsuarioActualId(null);
       }
       obtenerDetalleAPI(apiId);
-      obtenerDetalleMetodo(apiId);
     }, [apiId]);
 
     const obtenerDetalleAPI = async (apiId) => {
@@ -248,24 +237,7 @@ const APIDetail = () => {
       }
     };
   
-    const obtenerDetalleMetodo = async (apiId) => {
-      try {
-        const url = `${API_BASE_URL}/listarmodelos/${apiId-3}/`;
-        const response = await fetch(url);
-    
-        const data = await response.json();
-        if (response.ok) {
-          setMetodoData(data);
-          setLoading(false);
-          console.log(data);
-        } else {
-          console.error("Error:", data.detail);
-        }
-      } catch (error) {
-        console.error("Error al obtener los datos del modelo:", error);
-      }
-    };
-
+   
     useEffect(() => {
       if (apiData.metodos && Array.isArray(apiData.metodos)) {
         const metodosTransformados = {};
@@ -533,8 +505,8 @@ const APIDetail = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Código</label>
                         <textarea
-                          value={metodoInfo.codigo || ""}
-                          onChange={(e) => handleMetodoChange(metodoActivo, "codigo", e.target.value)}
+                          value={metodoInfo.requestBody || ""}
+                          onChange={(e) => handleMetodoChange(metodoActivo, "requestBody", e.target.value)}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
                           rows={5}
                           placeholder={"Inserte el código (Python)"}
@@ -772,21 +744,21 @@ const APIDetail = () => {
                   <label className="block text-sm font-medium text-gray-700">Endpoint</label>
                   <input
                     type="text"
-                    value={""}
-                    onChange={(e) => handleMetodoChange("endpoint", e.target.value)}
+                    value={metodoInfo.endpoint || ""}
+                    onChange={(e) => handleMetodoChange(metodoActivo, "endpoint", e.target.value)}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
                     placeholder="/ejemplo"
                   />
                 </div>
               </div>
 
-              {/* Parámetros */}
+              {/* Body */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
                 <textarea
                   rows={4}
-                  value={""}
-                  onChange={(e) => handleMetodoChange("parametros", e.target.value)}
+                  value={metodoInfo.parametros || ""}
+                  onChange={(e) => handleMetodoChange(metodoActivo, "parametros", e.target.value)}
                   placeholder={`{\n  "param1": "valor1",\n  "param2": "valor2"\n}`}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm font-mono"
                 />
