@@ -31,7 +31,45 @@ const APIDetail = () => {
     });
     const [metodoActivo, setMetodoActivo] = useState("GET");
     
+    const [respuestaAPI, setRespuestaAPI] = React.useState('');
 
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+    
+      const codigo = apiData.metodos[metodoActivo].requestbody || "";
+      let parametros = {};
+    
+      try {
+        parametros = JSON.parse(apiData.metodos[metodoActivo].parametros || "{}");
+      } catch {
+        setRespuestaAPI("Error: Parámetros JSON inválidos");
+        return;
+      }
+    
+      try {
+        const response = await fetch("/apis/ejecutar/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            codigo,
+            parametros,
+          }),
+        });
+    
+        const data = await response.json();
+    
+        if (!response.ok) {
+          setRespuestaAPI(`Error: ${data.error || "Error desconocido"}`);
+        } else {
+          setRespuestaAPI(JSON.stringify(data, null, 2));
+        }
+      } catch (error) {
+        setRespuestaAPI("Error en la petición: " + error.message);
+      }
+    }
    
 
     const handleChangeGeneral = (e) => {
@@ -42,9 +80,7 @@ const APIDetail = () => {
       }));
     };
 
-    const handleMetodoChange = (e) => {
-      const { name, value } = e.target;
-    
+    const handleMetodoChange = (metodoActivo, name, value) => {
       setApiData((prevData) => ({
         ...prevData,
         metodos: {
@@ -56,6 +92,7 @@ const APIDetail = () => {
         },
       }));
     };
+    
 
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("api");
@@ -698,7 +735,7 @@ const APIDetail = () => {
               <FileTerminal className="w-5 h-5" />
               Consumir la API
             </h3>
-            <form className="space-y-4" onSubmit={null}>
+            <form className="space-y-4" onSubmit={handleSubmit}>
               {/* Nombre */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Nombre</label>
@@ -764,17 +801,16 @@ const APIDetail = () => {
                 />
               </div>
 
-              {/* Respuesta */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Respuesta</label>
-                <textarea
-                  rows={6}
-                  value={""}
-                  readOnly
-                  placeholder="Aquí se mostrará la respuesta de la API..."
-                  className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm text-sm font-mono text-gray-700"
-                />
-              </div>
+    <label className="block text-sm font-medium text-gray-700">Respuesta</label>
+    <textarea
+      rows={6}
+      value={respuestaAPI}
+      readOnly
+      placeholder="Aquí se mostrará la respuesta de la API..."
+      className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm text-sm font-mono text-gray-700"
+    />
+  </div>
 
               {/* Botón */}
               <div className="pt-4">
