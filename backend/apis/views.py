@@ -342,7 +342,7 @@ def crear_api(request):
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
-# Obtener un modelo en especifico
+# Obtener una API especifica
 @method_decorator(csrf_exempt, name='dispatch')
 class DetalleAPIView(APIView):
     def get(self, request, api_id):
@@ -351,6 +351,7 @@ class DetalleAPIView(APIView):
         except API.DoesNotExist:
             return JsonResponse({"detail": "API no encontrada."}, status=404)
 
+        metodos = MetodoApi.objects.filter(api=api)
         metodos_data = [
             {
                 "id": metodo.id,
@@ -421,9 +422,9 @@ class DetalleModeloView(APIView):
 
     def get(self, request, api_id):
         try:
-            modelo_api = MetodoApi.objects.filter(api_id=api_id)
+            modelo_api = MetodoApi.objects.get(id=api_id)
         except MetodoApi.DoesNotExist:
-            return JsonResponse({"detail": "Modelo no encontrado :OOOOO."}, status=404)
+            return JsonResponse({"detail": "API no encontradaaa."}, status=404)
 
         data = {
             "metodo": modelo_api.metodo,
