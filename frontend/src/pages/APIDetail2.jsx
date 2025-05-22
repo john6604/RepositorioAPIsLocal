@@ -29,6 +29,18 @@ const APIDetail = () => {
       actualizado_en: "",
       metodos: {},
     });
+
+    const [metodoData, setMetodoData] = useState({
+      id: null,
+      metodo: "",
+      endpoint: "",
+      descripcion: "",
+      lenguaje_codigo: "",
+      codigo: "",
+      parametros: "",
+      retorno: ""
+    });
+    
     const [metodoActivo, setMetodoActivo] = useState("GET");
     
 
@@ -40,14 +52,16 @@ const APIDetail = () => {
       }));
     };
 
-    const handleMetodoChange = (metodo, campo, valor) => {
+    const handleMetodoChange = (e) => {
+      const { name, value } = e.target;
+    
       setApiData((prevData) => ({
         ...prevData,
         metodos: {
           ...prevData.metodos,
-          [metodo]: {
-            ...prevData.metodos[metodo],
-            [campo]: valor,
+          [metodoActivo]: {
+            ...prevData.metodos[metodoActivo],
+            [name]: value,
           },
         },
       }));
