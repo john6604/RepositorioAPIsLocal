@@ -21,6 +21,9 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponseBadRequest
 
+import numpy as np
+from sklearn.linear_model import LinearRegression
+
 # Create your views here.
 
 # Registro de los Usuarios, Vistas
@@ -301,7 +304,7 @@ def crear_api(request):
         nueva_api = API.objects.create(
             nombre=nombre_api,
             descripcion=data.get("descripcion"),
-            detalles_tecnicos=data.get("ejemploUso"),  # asegúrate que estas claves vengan bien desde el frontend
+            detalles_tecnicos=data.get("ejemploUso"), 
             documentacion=data.get("version"),
             creado_por=usuario,
             permiso="privado",
@@ -411,8 +414,7 @@ class DetalleAPIView(APIView):
                 metodo_obj.retorno = datos_metodo.get("respuesta", metodo_obj.retorno)
                 metodo_obj.save()
             except MetodoApi.DoesNotExist:
-                # Este bloque no debería ejecutarse en tu caso,
-                # pero lo dejamos por seguridad (puede registrar un warning si deseas)
+               
                 continue
 
         return JsonResponse({"detail": "API y métodos actualizados correctamente."}, status=200)
@@ -681,7 +683,7 @@ def crear_api_y_metodos(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-@csrf_exempt  # Usar protección CSRF en producción
+@csrf_exempt 
 def ejecutar_codigo(request):
     if request.method not in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
         return JsonResponse({"error": "Método no permitido"}, status=405)

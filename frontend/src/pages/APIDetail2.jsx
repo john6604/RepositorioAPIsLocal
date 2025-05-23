@@ -33,20 +33,23 @@ const APIDetail = () => {
     
     const [respuestaAPI, setRespuestaAPI] = React.useState('');
 
+    const [cargando, setCargando] = useState(false);
+
+
 
     async function handleSubmit(e) {
       e.preventDefault();
+      setCargando(true); // Inicia el estado de carga
+      setRespuestaAPI(""); // Limpia el resultado anterior
     
       const codigo = metodoInfo.requestBody || "";
-      console.log(codigo);
       let parametros = {};
     
       try {
         parametros = JSON.parse(metodoInfo.parametros || "{}");
-        console.log(parametros);
-
       } catch {
         setRespuestaAPI("Error: Parámetros JSON inválidos");
+        setCargando(false);
         return;
       }
     
@@ -71,8 +74,11 @@ const APIDetail = () => {
         }
       } catch (error) {
         setRespuestaAPI("Error en la petición: " + error.message);
+      } finally {
+        setCargando(false); // Termina el estado de carga
       }
     }
+    
    
 
     const handleChangeGeneral = (e) => {
@@ -805,7 +811,12 @@ const APIDetail = () => {
               </div>
 
               <div>
-    <label className="block text-sm font-medium text-gray-700">Respuesta</label>
+  <label className="block text-sm font-medium text-gray-700">Respuesta</label>
+  {cargando ? (
+    <div className="mt-1 p-2 bg-yellow-100 rounded text-sm text-yellow-800 font-mono">
+      Cargando...
+    </div>
+  ) : (
     <textarea
       rows={6}
       value={respuestaAPI}
@@ -813,7 +824,9 @@ const APIDetail = () => {
       placeholder="Aquí se mostrará la respuesta de la API..."
       className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm text-sm font-mono text-gray-700"
     />
-  </div>
+  )}
+</div>
+
 
               {/* Botón */}
               <div className="pt-4">
