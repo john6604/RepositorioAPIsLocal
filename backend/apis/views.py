@@ -245,6 +245,7 @@ def apis_por_usuario(request):
                 'descripcion': api.descripcion,
                 "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
                 "username": f"{api.creado_por.username}" if api.creado_por else "Sin autor",
+                "rol": f"{api.creado_por.rol}" if api.creado_por and api.creado_por.rol else "Sin rol",
             }
             for api in apis
         ]

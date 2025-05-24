@@ -13,6 +13,9 @@ import {
   List,
   PlusCircle,
   Bookmark,
+  Folder, 
+  FolderPlus, 
+  Tags
 } from "lucide-react";
 
 
@@ -20,10 +23,10 @@ const Dashboard = () => {
   const [apis, setApis] = useState([]);
   const [stats, setStats] = useState({ total: 0, public: 0, private: 0, draft: 0 });
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("grid"); // 'grid' o 'list'
-  const [filterCategory, setFilterCategory] = useState(null); // null | 'favoritas' | 'guardadas' | 'Pública' | 'Privada' | 'Borrador'
+  const [viewMode, setViewMode] = useState("grid"); 
+  const [filterCategory, setFilterCategory] = useState(null); 
+  const [rolUsuario, setRolUsuario] = useState(null);
 
-  //agregar un lading mientras carga
   const [loading, setLoading] = useState(true);
 
   const tokenSesion = localStorage.getItem("token_sesion");
@@ -44,6 +47,9 @@ const Dashboard = () => {
         });
     
         setApis(data);
+        if (data.length > 0 && data[0].rol !== undefined) {
+          setRolUsuario(data[0].rol);
+        }
         setStats({
           total: data.length,
           public: data.filter(a => a.permiso === "publico").length,
@@ -143,6 +149,25 @@ const Dashboard = () => {
                   <PlusCircle className="w-5 h-5 text-gray-600" /> Crear API
                 </Link>
               </li>
+              {rolUsuario === 1 && (
+              <>
+                <li>
+                  <Link to="/crear" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                    <Folder className="w-5 h-5 text-gray-600" /> Categoría
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/crear" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                    <FolderPlus className="w-5 h-5 text-gray-600" /> Subcategoría
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/crear" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                    <Tags className="w-5 h-5 text-gray-600" /> Temática
+                  </Link>
+                </li>
+              </>
+            )}
             </ul>
           </nav>
         </aside>
