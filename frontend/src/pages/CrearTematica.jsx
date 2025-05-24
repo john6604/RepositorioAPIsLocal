@@ -24,11 +24,10 @@ const CrearTematica = () => {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/tematicas/crear/`, {
+      const response = await fetch(`${API_BASE_URL}/tematica/crear/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${tokenSesion}`,
         },
         body: JSON.stringify(nuevaTematica),
       });
@@ -36,7 +35,7 @@ const CrearTematica = () => {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Categoría creada correctamente");
+        alert("Temática creada correctamente");
         navigate("/dashboard");
       } else {
         alert("Error al crear la categoría: " + data.error);

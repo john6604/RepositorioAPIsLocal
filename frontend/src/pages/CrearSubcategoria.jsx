@@ -28,7 +28,6 @@ const CrearSubcategoria = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${tokenSesion}`,
         },
         body: JSON.stringify(nuevaSubcategoria),
       });
@@ -36,7 +35,7 @@ const CrearSubcategoria = () => {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Categoría creada correctamente");
+        alert("Subcategoría creada correctamente");
         navigate("/dashboard");
       } else {
         alert("Error al crear la categoría: " + data.error);
