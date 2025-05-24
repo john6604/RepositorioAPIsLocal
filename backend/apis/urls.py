@@ -23,7 +23,7 @@ urlpatterns = [
     path('listarmodelos/<int:api_id>/', views.DetalleModeloView.as_view(), name='modelo_actual'),
     path('crearapimetodos/', views.crear_api_y_metodos, name='crear_api_metodos'),
     path('ejecutar/', views.ejecutar_codigo, name='ejecutar_codigo'),
-    path('categorias/crear'), views.crear_categoria, name='crear_categoria'),
-    path('subcategorias/crear'), views.crear_subcategoria, name='crear_subcategoria'),
-    path('tematicas/crear'), views.crear_tematica, name='crear_tematica'),
+    path('categorias/crear', views.crear_categoria, name='crear_categoria'),
+    path('subcategorias/crear', views.crear_subcategoria, name='crear_subcategoria'),
+    path('tematica/crear', views.crear_tematica, name='crear_tematica'),
 ]
