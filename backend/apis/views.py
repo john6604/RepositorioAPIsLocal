@@ -20,6 +20,7 @@ from django.views import View
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponseBadRequest
+from .models import Categoria, Subcategoria, Tematica
 
 import numpy as np
 from sklearn.linear_model import LinearRegression

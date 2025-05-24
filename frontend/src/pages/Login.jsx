@@ -45,7 +45,6 @@ const Login = () => {
       const data = await response.json();
   
       if (response.ok) {
-        // Guardar token y datos del usuario en localStorage
         localStorage.setItem("token_sesion", data.token);
         localStorage.setItem("usuario_id", data.usuario_id);
         localStorage.setItem("nombre_usuario", `${data.nombres} ${data.apellidos}`);
