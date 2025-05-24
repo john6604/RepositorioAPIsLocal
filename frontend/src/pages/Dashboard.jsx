@@ -47,6 +47,7 @@ const Dashboard = () => {
         });
     
         setApis(data);
+        console.log(data);
         if (data.length > 0 && data[0].rol !== undefined) {
           setRolUsuario(data[0].rol);
         }
@@ -149,20 +150,20 @@ const Dashboard = () => {
                   <PlusCircle className="w-5 h-5 text-gray-600" /> Crear API
                 </Link>
               </li>
-              {rolUsuario === 1 && (
+              {rolUsuario === "Administrador" && (
               <>
                 <li>
-                  <Link to="/crear" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                  <Link to="/crearCategoria" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
                     <Folder className="w-5 h-5 text-gray-600" /> Categoría
                   </Link>
                 </li>
                 <li>
-                  <Link to="/crear" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                  <Link to="/crearSubcategoria" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
                     <FolderPlus className="w-5 h-5 text-gray-600" /> Subcategoría
                   </Link>
                 </li>
                 <li>
-                  <Link to="/crear" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                  <Link to="/crearTematica" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
                     <Tags className="w-5 h-5 text-gray-600" /> Temática
                   </Link>
                 </li>

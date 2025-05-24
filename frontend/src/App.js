@@ -7,11 +7,13 @@ import Login       from "./pages/Login";
 import Registro    from "./pages/Registro";
 import APIDetail   from "./pages/APIDetail";
 import APIDetail2   from "./pages/APIDetail2";
-
 import Dashboard   from "./pages/Dashboard";
 import Notificaciones from "./pages/Notificaciones";
 import Configuracion from "./pages/PerfilConfiguracion";
 import ResultadosBusqueda from "./pages/Apis";
+import Categoria from "./pages/CrearCategoria";
+import Subcategoria from "./pages/CrearSubcategoria";
+import Tematica from "./pages/CrearTematica";
 
 function App() {
   return (
@@ -28,6 +30,9 @@ function App() {
               <Route path="/dashboard"element={<Dashboard/>} />
               <Route path="/notificaciones" element={<Notificaciones />} />
               <Route path="/perfilConfig" element={<Configuracion />} />
+              <Route path="/crearCategoria" element={<Categoria />} />
+              <Route path="/crearSubcategoria" element={<Subcategoria />} />
+              <Route path="/crearTematica" element={<Tematica />} />
             </Route>
           </Routes>
     </Router>

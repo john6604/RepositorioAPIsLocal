@@ -42,7 +42,10 @@ const DashboardNavbar = () => {
     "/mis-apis": { titulo: "Tus APIs", ruta: "/mis-apis" },
     "/favoritas": { titulo: "Tus Favoritas", ruta: "/favoritas" },
     "/borradores": { titulo: "Tus Borradores", ruta: "/borradores" },
-    "/crear": { titulo: "Crear API", ruta: "/crear" }
+    "/crear": { titulo: "Crear API", ruta: "/crear" },
+    "/crearCategoria": { titulo: "Crear Categoría", ruta: "/crearCategoria" },
+    "/crearSubcategoria": { titulo: "Crear Subcategoría", ruta: "/crearSubcategoria" },
+    "/crearTematica": { titulo: "Crear Temática", ruta: "/crearTematica" },
   };
   
   const { titulo, ruta } = rutas[location.pathname] || {

@@ -717,3 +717,37 @@ def ejecutar_codigo(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+# Crear vistas para clasificación, vista
+@api_view(['POST'])
+def crear_categoria(request):
+    nombre = request.data.get("nombre")
+    descripcion = request.data.get("descripcion")
+
+    if not nombre:
+        return Response({"error": "El nombre es obligatorio"}, status=status.HTTP_400_BAD_REQUEST)
+
+    categoria = Categoria.objects.create(nombre=nombre, descripcion=descripcion)
+    return Response({"mensaje": "Categoría creada", "id": categoria.id}, status=status.HTTP_201_CREATED)
+
+@api_view(['POST'])
+def crear_subcategoria(request):
+    nombre = request.data.get("nombre")
+    descripcion = request.data.get("descripcion")
+
+    if not nombre:
+        return Response({"error": "El nombre es obligatorio"}, status=status.HTTP_400_BAD_REQUEST)
+
+    subcategoria = Subcategoria.objects.create(nombre=nombre, descripcion=descripcion)
+    return Response({"mensaje": "Subcategoría creada", "id": subcategoria.id}, status=status.HTTP_201_CREATED)
+
+@api_view(['POST'])
+def crear_tematica(request):
+    nombre = request.data.get("nombre")
+    descripcion = request.data.get("descripcion")
+
+    if not nombre:
+        return Response({"error": "El nombre es obligatorio"}, status=status.HTTP_400_BAD_REQUEST)
+
+    tematica = Tematica.objects.create(nombre=nombre, descripcion=descripcion)
+    return Response({"mensaje": "Temática creada", "id": tematica.id}, status=status.HTTP_201_CREATED)
