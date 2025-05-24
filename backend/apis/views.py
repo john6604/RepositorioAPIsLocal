@@ -726,10 +726,16 @@ def crear_categoria(request):
     descripcion = request.data.get("descripcion")
 
     if not nombre:
-        return Response({"error": "El nombre es obligatorio"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El campo 'nombre' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
 
     categoria = Categoria.objects.create(nombre=nombre, descripcion=descripcion)
-    return Response({"mensaje": "Categoría creada", "id": categoria.id}, status=status.HTTP_201_CREATED)
+    return Response({
+        "mensaje": "Categoría creada correctamente.",
+        "id": categoria.id,
+        "nombre": categoria.nombre,
+        "descripcion": categoria.descripcion
+    }, status=status.HTTP_201_CREATED)
+
 
 @api_view(['POST'])
 def crear_subcategoria(request):
@@ -737,10 +743,16 @@ def crear_subcategoria(request):
     descripcion = request.data.get("descripcion")
 
     if not nombre:
-        return Response({"error": "El nombre es obligatorio"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El campo 'nombre' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
 
     subcategoria = Subcategoria.objects.create(nombre=nombre, descripcion=descripcion)
-    return Response({"mensaje": "Subcategoría creada", "id": subcategoria.id}, status=status.HTTP_201_CREATED)
+    return Response({
+        "mensaje": "Subcategoría creada correctamente.",
+        "id": subcategoria.id,
+        "nombre": subcategoria.nombre,
+        "descripcion": subcategoria.descripcion
+    }, status=status.HTTP_201_CREATED)
+
 
 @api_view(['POST'])
 def crear_tematica(request):
@@ -748,7 +760,12 @@ def crear_tematica(request):
     descripcion = request.data.get("descripcion")
 
     if not nombre:
-        return Response({"error": "El nombre es obligatorio"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El campo 'nombre' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
 
     tematica = Tematica.objects.create(nombre=nombre, descripcion=descripcion)
-    return Response({"mensaje": "Temática creada", "id": tematica.id}, status=status.HTTP_201_CREATED)
+    return Response({
+        "mensaje": "Temática creada correctamente.",
+        "id": tematica.id,
+        "nombre": tematica.nombre,
+        "descripcion": tematica.descripcion
+    }, status=status.HTTP_201_CREATED)
