@@ -28,7 +28,6 @@ const CrearCategoria = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${tokenSesion}`,
         },
         body: JSON.stringify(nuevaCategoria),
       });
