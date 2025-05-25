@@ -3,11 +3,14 @@ import DashboardNavbar from "../componentes/DashboardNavbar";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import { motion } from "framer-motion";
+import { useRequireAuth } from "../hooks/useRequireAuth";
+
 
 
 const metodosHttp = ["GET", "POST", "PUT", "DELETE", "PATCH"];
 
 const CrearApi = () => {
+  useRequireAuth();
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [version, setVersion] = useState("1.0");

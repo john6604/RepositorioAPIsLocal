@@ -1,8 +1,10 @@
+// src/pages/Dashboard.jsx
 import DashboardNavbar from "../componentes/DashboardNavbar";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
+import { useRequireAuth } from "../hooks/useRequireAuth";
 
 import {
   Star,
@@ -13,41 +15,34 @@ import {
   List,
   PlusCircle,
   Bookmark,
-  Folder, 
-  FolderPlus, 
+  Folder,
+  FolderPlus,
   Tags
 } from "lucide-react";
 
-
 const Dashboard = () => {
+  useRequireAuth(); // <- aquí aplicamos la protección
+
   const [apis, setApis] = useState([]);
   const [stats, setStats] = useState({ total: 0, public: 0, private: 0, draft: 0 });
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("grid"); 
-  const [filterCategory, setFilterCategory] = useState(null); 
+  const [viewMode, setViewMode] = useState("grid");
+  const [filterCategory, setFilterCategory] = useState(null);
   const [rolUsuario, setRolUsuario] = useState(null);
-
   const [loading, setLoading] = useState(true);
 
   const tokenSesion = localStorage.getItem("token_sesion");
 
   useEffect(() => {
     const fetchApis = async () => {
-      if (!tokenSesion) {
-        console.error("Token de sesión no encontrado.");
-        setLoading(false);
-        return;
-      }
-    
       try {
-        const { data } = await axios.post(`${API_BASE_URL}/listarapis/`, {
-          token_sesion: tokenSesion,
-        }, {
-          headers: { "Content-Type": "application/json" },
-        });
-    
+        const { data } = await axios.post(
+          `${API_BASE_URL}/listarapis/`,
+          { token_sesion: tokenSesion },
+          { headers: { "Content-Type": "application/json" } }
+        );
+
         setApis(data);
-        console.log(data);
         if (data.length > 0 && data[0].rol !== undefined) {
           setRolUsuario(data[0].rol);
         }
@@ -65,7 +60,11 @@ const Dashboard = () => {
       }
     };
 
-    fetchApis();
+    if (tokenSesion) {
+      fetchApis();
+    } else {
+      setLoading(false);
+    }
   }, [tokenSesion]);
 
   if (loading) {
@@ -86,21 +85,18 @@ const Dashboard = () => {
   const filteredApis = apis.filter(api => {
     const matchesSearch = api.nombre.toLowerCase().includes(searchTerm.toLowerCase());
     if (!matchesSearch) return false;
-    if (filterCategory === 'favoritas') return api.favorito;
-    if (filterCategory === 'guardadas') return api.guardada;
-    if (filterCategory === 'Pública') {
-      return api.permiso === 'publico';
+    switch (filterCategory) {
+      case 'favoritas': return api.favorito;
+      case 'guardadas': return api.guardada;
+      case 'Pública':   return api.permiso === 'publico';
+      case 'Privada':   return api.permiso === 'privado';
+      case 'Borrador':  return api.permiso === 'borrador';
+      default:          return true;
     }
-    if (filterCategory === 'Privada') {
-      return api.permiso === 'privado';
-    }
-    if (filterCategory === 'Borrador') {
-      return api.permiso === 'Borrador';
-    }
-    return true;
   });
-  const cardClass = (active) =>
+  const cardClass = active =>
     `cursor-pointer rounded-xl shadow p-6 text-center ${active ? "bg-[#0077ba] text-white" : "bg-white"}`;
+
   return (
     <>
       <DashboardNavbar />
@@ -151,33 +147,36 @@ const Dashboard = () => {
                 </Link>
               </li>
               {rolUsuario === "Administrador" && (
-              <>
-                <li>
-                  <Link to="/crearCategoria" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
-                    <Folder className="w-5 h-5 text-gray-600" /> Categoría
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/crearSubcategoria" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
-                    <FolderPlus className="w-5 h-5 text-gray-600" /> Subcategoría
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/crearTematica" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
-                    <Tags className="w-5 h-5 text-gray-600" /> Temática
-                  </Link>
-                </li>
-              </>
-            )}
+                <>
+                  <li>
+                    <Link to="/crearCategoria" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                      <Folder className="w-5 h-5 text-gray-600" /> Categoría
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/crearSubcategoria" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                      <FolderPlus className="w-5 h-5 text-gray-600" /> Subcategoría
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/crearTematica" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                      <Tags className="w-5 h-5 text-gray-600" /> Temática
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </nav>
         </aside>
+
         {/* Contenido principal */}
         <main className="flex-1 p-8 ml-8">
+          {/* Encabezado y controles */}
           <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
             <h1 className="text-3xl font-bold text-[#0077ba]">Dashboard de APIs</h1>
             <div className="flex gap-2">
-              <button aria-label="Vista en cuadrícula"
+              <button
+                aria-label="Vista en cuadrícula"
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded ${viewMode === 'grid' ? 'bg-[#0077ba] text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
               >
@@ -191,6 +190,7 @@ const Dashboard = () => {
               </button>
             </div>
           </div>
+
           {/* Estadísticas */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className={cardClass(filterCategory === null)} onClick={() => handleCategory(null)}>
@@ -210,6 +210,7 @@ const Dashboard = () => {
               <p className="text-sm">Borrador</p>
             </div>
           </div>
+
           {/* Vista de APIs */}
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -263,4 +264,5 @@ const Dashboard = () => {
     </>
   );
 };
+
 export default Dashboard;

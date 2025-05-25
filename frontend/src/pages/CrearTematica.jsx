@@ -2,8 +2,10 @@ import { useState } from "react";
 import DashboardNavbar from "../componentes/DashboardNavbar";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
+import { useRequireAuth } from "../hooks/useRequireAuth";
 
 const CrearTematica = () => {
+  useRequireAuth();
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
 

@@ -3,6 +3,7 @@ import { User, Settings, Bell, Lock, Upload, Trash2, Users } from "lucide-react"
 import DashNavbar from "../componentes/DashboardNavbar";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
+import { useRequireAuth } from "../hooks/useRequireAuth";
 
 const tabs = [
   { id: "profile", label: "Perfil", icon: User },
@@ -13,7 +14,7 @@ const tabs = [
 ];
 
 const PerfilConfiguracion = () => {
-
+  useRequireAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [formData, setFormData] = useState({

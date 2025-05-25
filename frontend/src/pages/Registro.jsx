@@ -4,8 +4,10 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
 import { useNavigate } from 'react-router-dom';
+import { useRequireAuth } from "../hooks/useRequireAuth";
 
 const Registro = () => {
+  useRequireAuth();
   const [correo, setCorreo] = useState("");
   const [clave, setClave] = useState("");
   const [confirmacion, setConfirmacion] = useState("");
