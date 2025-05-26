@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import { motion } from "framer-motion";
 import { useRequireAuth } from "../hooks/useRequireAuth";
-
+import axios from "axios";
 
 
 const metodosHttp = ["GET", "POST", "PUT", "DELETE", "PATCH"];
@@ -15,6 +15,12 @@ const CrearApi = () => {
   const [descripcion, setDescripcion] = useState("");
   const [version, setVersion] = useState("1.0");
   const [metodoActivo, setMetodoActivo] = useState("GET");
+  const [categorias, setCategorias] = useState([]);
+  const [subcategorias, setSubcategorias] = useState([]);
+  const [tematicas, setTematicas] = useState([]);
+  const [categoria, setCategoria] = useState("");
+  const [subcategoria, setSubcategoria] = useState("");
+  const [tematica, setTematica] = useState("");
 
   const [datosMetodo, setDatosMetodo] = useState({
     GET: { endpoint: "", parametros: "", requestBody: "", respuesta: "", codigo: "" },
@@ -28,6 +34,20 @@ const CrearApi = () => {
   const [formData, setFormData] = useState({
     username: "",
   });
+
+  useEffect(() => {
+    axios.get(`${API_BASE_URL}/categorias/`).then((res) => {
+      setCategorias(res.data);
+    });
+
+    axios.get(`${API_BASE_URL}/subcategorias/`).then((res) => {
+      setSubcategorias(res.data);
+    });
+
+    axios.get(`${API_BASE_URL}/tematicas/`).then((res) => {
+      setTematicas(res.data);
+    });
+  }, []);
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -224,6 +244,65 @@ const CrearApi = () => {
               onChange={(e) => setVersion(e.target.value)}
               className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Categoría <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={categoria}
+                onChange={(e) => setCategoria(e.target.value)}
+                required
+                className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
+              >
+                <option value="">Seleccione una categoría...</option>
+                {categorias.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Subcategoría <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={subcategoria}
+                onChange={(e) => setSubcategoria(e.target.value)}
+                required
+                className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
+              >
+                <option value="">Seleccione una subcategoría...</option>
+                {subcategorias.map((sub) => (
+                  <option key={sub.id} value={sub.id}>
+                    {sub.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Temática <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={tematica}
+                onChange={(e) => setTematica(e.target.value)}
+                required
+                className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
+              >
+                <option value="">Seleccione una temática...</option>
+                {tematicas.map((tema) => (
+                  <option key={tema.id} value={tema.id}>
+                    {tema.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="max-w-4xl mx-auto space-y-4">

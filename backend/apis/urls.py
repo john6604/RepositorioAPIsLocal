@@ -26,4 +26,7 @@ urlpatterns = [
     path('categorias/crear/', views.crear_categoria, name='crear_categoria'),
     path('subcategorias/crear/', views.crear_subcategoria, name='crear_subcategoria'),
     path('tematica/crear/', views.crear_tematica, name='crear_tematica'),
+    path('categorias/', views.CategoriaListView.as_view(), name='categorias-list'),
+    path('subcategorias/', views.SubcategoriaListView.as_view(), name='subcategorias-list'),
+    path('tematicas/', views.TematicaListView.as_view(), name='tematicas-list'),
 ]

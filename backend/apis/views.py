@@ -4,7 +4,7 @@ import json
 from .models import API
 from rest_framework import viewsets
 from .models import API, MetodoApi
-from .serializers import APISerializer
+from .serializers import APISerializer, CategoriaSerializer, SubcategoriaSerializer, TematicaSerializer
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework import generics
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.db.models import Q
@@ -769,3 +770,16 @@ def crear_tematica(request):
         "nombre": tematica.nombre,
         "descripcion": tematica.descripcion
     }, status=status.HTTP_201_CREATED)
+
+# Vistas para seleccionar categorización
+class CategoriaListView(generics.ListAPIView):
+    queryset = Categoria.objects.all()
+    serializer_class = CategoriaSerializer
+
+class SubcategoriaListView(generics.ListAPIView):
+    queryset = Subcategoria.objects.all()
+    serializer_class = SubcategoriaSerializer
+
+class TematicaListView(generics.ListAPIView):
+    queryset = Tematica.objects.all()
+    serializer_class = TematicaSerializer
