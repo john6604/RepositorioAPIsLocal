@@ -148,7 +148,10 @@ const CrearApi = () => {
       nombre,
       descripcion,
       version,
-      metodos: datosMetodo, 
+      metodos: datosMetodo,
+      id_categoria: categoria,
+      id_subcategoria: subcategoria,
+      id_tematica: tematica,
     };
   
     try {

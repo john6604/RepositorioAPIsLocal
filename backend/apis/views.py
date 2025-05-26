@@ -655,6 +655,10 @@ def crear_api_y_metodos(request):
 
         usuario = sesion.usuario
 
+        id_categoria = data.get("id_categoria")
+        id_subcategoria = data.get("id_subcategoria")
+        id_tematica = data.get("id_tematica")
+
         nueva_api = API.objects.create(
             nombre=data.get("nombre"),
             descripcion=data.get("descripcion"),
@@ -663,6 +667,9 @@ def crear_api_y_metodos(request):
             creado_por=usuario,
             permiso="privado",
             estado="activo",
+            id_categoria_id=id_categoria,
+            id_subcategoria_id=id_subcategoria,
+            id_tematica_id=id_tematica,
             creado_en=timezone.now(),
             actualizado_en=timezone.now()
         )
