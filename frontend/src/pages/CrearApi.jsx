@@ -21,6 +21,8 @@ const CrearApi = () => {
   const [categoria, setCategoria] = useState("");
   const [subcategoria, setSubcategoria] = useState("");
   const [tematica, setTematica] = useState("");
+  const [detallesTecnicos, setDetallesTecnicos] = useState("");
+
 
   const [datosMetodo, setDatosMetodo] = useState({
     GET: { endpoint: "", parametros: "", requestBody: "", respuesta: "", codigo: "" },
@@ -152,6 +154,8 @@ const CrearApi = () => {
       id_categoria: categoria,
       id_subcategoria: subcategoria,
       id_tematica: tematica,
+      detalles_tecnicos: detallesTecnicos, // <- aquí va el campo nuevo
+
     };
   
     try {
@@ -404,6 +408,23 @@ const CrearApi = () => {
                 />
               </div>
             </motion.div>
+          </div>
+
+          {/* Detalles técnicos (requerimientos) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Detalles técnicos / Requerimientos
+            </label>
+            <textarea
+              value={detallesTecnicos}
+              onChange={(e) => setDetallesTecnicos(e.target.value)}
+              className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
+              rows={2}
+              placeholder="numpy, pandas, scikit-learn"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Lista de librerías requeridas separadas por comas.
+            </p>
           </div>
 
 

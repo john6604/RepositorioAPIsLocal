@@ -672,7 +672,7 @@ def crear_api_y_metodos(request):
         nueva_api = API.objects.create(
             nombre=data.get("nombre"),
             descripcion=data.get("descripcion"),
-            detalles_tecnicos="",
+            detalles_tecnicos=data.get("detalles_tecnicos"),
             documentacion=data.get("version"),
             creado_por=usuario,
             permiso="privado",

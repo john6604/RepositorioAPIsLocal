@@ -12,12 +12,12 @@ import { useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useRequireAuth } from "../hooks/useRequireAuth";
+//import { useRequireAuth } from "../hooks/useRequireAuth";
 
 const metodosHttp = ["GET", "POST", "PUT", "DELETE", "PATCH"];
 
 const APIDetail = () => {
-    useRequireAuth();
+    //useRequireAuth();
     const { apiId } = useParams();
     const navigate = useNavigate();
     const [apiData, setApiData] = useState({
