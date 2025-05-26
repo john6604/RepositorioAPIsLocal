@@ -606,7 +606,6 @@ def buscar_apis_publicas(request):
     if not query:
         return Response({"resultados": []})
 
-    # Filtra solo APIs públicas que coincidan por nombre, descripción, documentación o autor
     apis = API.objects.filter(
         permiso='publico'
     ).filter(
@@ -614,8 +613,16 @@ def buscar_apis_publicas(request):
         Q(descripcion__icontains=query) |
         Q(documentacion__icontains=query) |
         Q(creado_por__nombres__icontains=query) |
-        Q(creado_por__username__icontains=query)
-    ).select_related('creado_por') 
+        Q(creado_por__username__icontains=query) |
+        Q(id_categoria__nombre__icontains=query) |
+        Q(id_subcategoria__nombre__icontains=query) |
+        Q(id_tematica__nombre__icontains=query)
+    ).select_related(
+        'creado_por',
+        'id_categoria',
+        'id_subcategoria',
+        'id_tematica'
+    )
 
     resultados = [
         {
@@ -625,7 +632,10 @@ def buscar_apis_publicas(request):
             "documentacion": api.documentacion,
             "permiso": api.permiso, 
             "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
-            "username": f"{api.creado_por.username}" if api.creado_por else "Sin autor",
+            "username": api.creado_por.username if api.creado_por else "Sin autor",
+            "categoria": api.id_categoria.nombre if api.id_categoria else None,
+            "subcategoria": api.id_subcategoria.nombre if api.id_subcategoria else None,
+            "tematica": api.id_tematica.nombre if api.id_tematica else None,
         }
         for api in apis
     ]
