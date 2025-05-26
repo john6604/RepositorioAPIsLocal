@@ -703,6 +703,9 @@ def crear_api_y_metodos(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+import subprocess
+import sys
+
 @csrf_exempt 
 def ejecutar_codigo(request):
     if request.method not in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
@@ -710,19 +713,30 @@ def ejecutar_codigo(request):
 
     try:
         if request.method == 'GET':
-            # Parámetros codificados en la URL
             codigo = request.GET.get('codigo')
             parametros = request.GET.get('parametros')
+            detalles_tecnicos = request.GET.get('detalles_tecnicos', '')  # Leer dependencias
             if parametros:
                 parametros = json.loads(parametros)
         else:
-            # Cuerpo JSON
             data = json.loads(request.body)
             codigo = data.get('codigo')
             parametros = data.get('parametros')
+            detalles_tecnicos = data.get('detalles_tecnicos', '')  # Leer dependencias
 
         if not codigo or parametros is None:
             return JsonResponse({"error": "Faltan 'codigo' o 'parametros'"}, status=400)
+
+        # Función para instalar dependencias
+        def instalar_dependencias(paquetes_str):
+            paquetes = [p.strip() for p in paquetes_str.split(",") if p.strip()]
+            for paquete in paquetes:
+                try:
+                    __import__(paquete)
+                except ImportError:
+                    subprocess.check_call([sys.executable, "-m", "pip", "install", paquete])
+
+        instalar_dependencias(detalles_tecnicos)
 
         entorno = {}
         exec(codigo, entorno)
@@ -736,6 +750,7 @@ def ejecutar_codigo(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
 
 # Crear vistas para clasificación, vista
 @api_view(['POST'])
