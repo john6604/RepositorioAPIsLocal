@@ -51,6 +51,7 @@ class Usuario(models.Model):
     estado           = models.CharField(max_length=50, blank=True, null=True)
     creado_en        = models.DateTimeField(auto_now_add=True, null=True)
     actualizado_en   = models.DateTimeField(auto_now=True, null=True)
+    origen           = models.CharField(max_length=20, default='local')
 
     class Meta:
         db_table = "usuarios"
