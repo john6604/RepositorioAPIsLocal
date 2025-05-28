@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronDown, LogIn, UserPlus } from "lucide-react";
 import logoUazuay from "../assets/logoUazuay.png";
 import { useNavigate } from "react-router-dom";
+import logoLidi from "../assets/LIDI_logo2.png";
 
 const Navbar = () => {
   const [menuAbierto, setMenuAbierto] = useState(null);
@@ -80,13 +81,28 @@ const Navbar = () => {
       }`}
     >
       <div className="w-full px-4 py-4 md:py-5 flex items-center justify-between">
-        <Link to="/">
-          <img
-            src={logoUazuay}
-            alt="Universidad del Azuay"
-            className="h-12 w-auto object-contain"
-          />
-        </Link>
+        <div className="flex items-center gap-4">
+    {/* Primer logo */}
+          <Link to="/">
+            <img
+              src={logoUazuay}
+              alt="Universidad del Azuay"
+              className="h-8 w-auto object-contain"
+            />
+          </Link>
+
+          {/* Línea divisora estilo pipe */}
+          <div className="text-white text-xl font-light">|</div>
+
+          {/* Segundo logo (reemplaza 'RUTA_DE_TU_OTRO_LOGO' cuando lo tengas) */}
+          <Link to="/">
+            <img
+              src={logoLidi}
+              alt="Segundo logo"
+              className="h-16 w-auto object-contain"
+            />
+          </Link>
+        </div>
 
         <div className="flex gap-4 items-center">
           <MenuDropdown

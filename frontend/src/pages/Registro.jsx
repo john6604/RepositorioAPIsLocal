@@ -5,6 +5,8 @@ import axios from "axios";
 import { API_BASE_URL } from "../config";
 import { useNavigate } from 'react-router-dom';
 //import { useRequireAuth } from "../hooks/useRequireAuth";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 
 const Registro = () => {
   //useRequireAuth();
@@ -26,6 +28,26 @@ const Registro = () => {
       nuevosErrores.confirmacion = "Las contraseñas no coinciden.";
     }
     return nuevosErrores;
+  };
+
+  const registrarUsuarioConGoogle = async ({ correo, username, nombres, sub }) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/registraruser/`, {
+        correo,
+        contrasena: sub, 
+        username,
+        nombres
+      });
+  
+      console.log("Usuario registrado con Google:", response.data);
+      localStorage.setItem("token_sesion", response.data.token_sesion);
+      navigate("/dashboard");
+  
+    } catch (error) {
+      console.error("Error al registrar con Google:", error.response || error.message);
+      const mensaje = error.response?.data?.error || 'Error al conectar con el servidor.';
+      setErrores(prev => ({ ...prev, api: mensaje }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -117,19 +139,26 @@ const Registro = () => {
           </button>
         </form>
 
-        <div className="mt-6 border-t pt-4">
-          <p className="text-center text-sm text-gray-500 mb-2">O</p>
-          <button
-            onClick={null}
-            className="w-full flex items-center justify-center border border-gray-300 hover:border-gray-500 py-2 rounded-md transition duration-200"
-          >
-            <img
-              src="https://www.svgrepo.com/show/355037/google.svg"
-              alt="Google"
-              className="w-5 h-5 mr-2"
-            />
-            Regístrate con Google
-          </button>
+        <div className="w-full flex justify-center">
+          <GoogleLogin
+            onSuccess={(credentialResponse) => {
+              const token = credentialResponse.credential;
+              const decoded = jwtDecode(token);
+            
+              console.log("Datos decodificados:", decoded);
+            
+              const correo = decoded.email;
+              const username = correo.split('@')[0];
+              const nombres = decoded.name;
+              const foto = decoded.picture;
+              const sub = decoded.sub;
+            
+              registrarUsuarioConGoogle({ correo, username, nombres, sub });
+            }}
+            onError={() => {
+              console.log("Login Failed");
+            }}
+          />
         </div>
 
         <p className="text-sm text-center mt-4">

@@ -675,7 +675,7 @@ const APIDetail = () => {
                     Privado – Solo tú tienes acceso a la API.
                   </label>
                 </div>
-                <div className="flex items-center gap-3">
+                {/*<div className="flex items-center gap-3">
                   <input
                     type="radio"
                     id="restringido"
@@ -692,7 +692,7 @@ const APIDetail = () => {
                   >
                     Restringida – Acceso privado pero se puede compartir con enlace.
                   </label>
-                </div>
+                </div>*/}
 
                 {apiData.visibility === "restricted" && (
                   <div className="pt-2">

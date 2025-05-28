@@ -85,7 +85,7 @@ const DashboardNavbar = () => {
           });
         } else {
           const err = await response.json();
-          alert("Error al obtener perfil: " + err.detail);
+          {/*alert("Error al obtener perfil: " + err.detail);*/}
         }
       } catch (error) {
         console.error("Error:", error);
