@@ -22,6 +22,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponseBadRequest
 from .models import Categoria, Subcategoria, Tematica
+import requests
 
 import numpy as np
 from sklearn.linear_model import LinearRegression
@@ -36,10 +37,10 @@ def registrar_usuario(request):
             data = json.loads(request.body)
 
             correo     = data.get("correo")
-            clave      = data.get("contrasena")  # puede ser 'clave real' o 'sub' de Google
+            clave      = data.get("contrasena")  
             username   = data.get("username") or correo.split('@')[0]
             nombres    = data.get("nombres") or username
-            origen     = data.get("origen", "local")  # por defecto es 'local'
+            origen     = data.get("origen", "local") 
 
             if not correo or not clave:
                 return JsonResponse({"error": "Datos incompletos."}, status=400)
@@ -746,51 +747,54 @@ def crear_api_y_metodos(request):
 import subprocess
 import sys
 
-@csrf_exempt 
+@csrf_exempt
 def ejecutar_codigo(request):
     if request.method not in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
     try:
+        # Leer datos desde GET o desde el body en métodos como POST
         if request.method == 'GET':
             codigo = request.GET.get('codigo')
             parametros = request.GET.get('parametros')
-            detalles_tecnicos = request.GET.get('detalles_tecnicos', '')  # Leer dependencias
+            detalles_tecnicos = request.GET.get('detalles_tecnicos', '')
             if parametros:
                 parametros = json.loads(parametros)
         else:
             data = json.loads(request.body)
             codigo = data.get('codigo')
             parametros = data.get('parametros')
-            detalles_tecnicos = data.get('detalles_tecnicos', '')  # Leer dependencias
+            detalles_tecnicos = data.get('detalles_tecnicos', '')
 
+        # Validar campos requeridos
         if not codigo or parametros is None:
             return JsonResponse({"error": "Faltan 'codigo' o 'parametros'"}, status=400)
 
-        # Función para instalar dependencias
-        def instalar_dependencias(paquetes_str):
-            paquetes = [p.strip() for p in paquetes_str.split(",") if p.strip()]
-            for paquete in paquetes:
-                try:
-                    __import__(paquete)
-                except ImportError:
-                    subprocess.check_call([sys.executable, "-m", "pip", "install", paquete])
+        # Delegar ejecución al microservicio FastAPI
+        url = "https://fastapiservice-7z74.onrender.com/run"
+        payload = {
+            "codigo": codigo,
+            "parametros": parametros,
+            "detalles_tecnicos": detalles_tecnicos
+        }
 
-        instalar_dependencias(detalles_tecnicos)
+        try:
+            response = requests.post(url, json=payload, timeout=30)
+        except requests.RequestException as e:
+            return JsonResponse({"error": "Error al conectar con el microservicio", "detalles": str(e)}, status=503)
 
-        entorno = {}
-        exec(codigo, entorno)
-
-        ejecutar_func = entorno.get('ejecutar')
-        if not callable(ejecutar_func):
-            return JsonResponse({"error": "No se definió función 'ejecutar(parametros)' correctamente"}, status=400)
-
-        resultado = ejecutar_func(parametros)
-        return JsonResponse(resultado)
+        # Retornar la respuesta tal cual del microservicio
+        if response.status_code == 200:
+            return JsonResponse(response.json())
+        else:
+            return JsonResponse({
+                "error": "Error en el microservicio",
+                "status_code": response.status_code,
+                "detalles": response.text
+            }, status=response.status_code)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
 
 # Crear vistas para clasificación, vista
 @api_view(['POST'])
