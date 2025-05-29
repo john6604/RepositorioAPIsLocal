@@ -3,6 +3,8 @@ import Navbar from "../componentes/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import { Eye, EyeOff } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
   const [correo, setCorreo] = useState("");
@@ -101,6 +103,47 @@ const Login = () => {
             Iniciar Sesión
           </button>
         </form>
+
+        <div className="my-4 flex justify-center">
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              try {
+                const decoded = jwtDecode(credentialResponse.credential);
+                const { email, sub, given_name, family_name } = decoded;
+
+                const response = await fetch(`${API_BASE_URL}/login/`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    correo: email,
+                    contrasena: sub,
+                    origen: "google",
+                    nombres: given_name,
+                    apellidos: family_name
+                  })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                  localStorage.setItem("token_sesion", data.token);
+                  localStorage.setItem("usuario_id", data.usuario_id);
+                  localStorage.setItem("nombre_usuario", `${data.nombres} ${data.apellidos}`);
+                  alert("Inicio de sesión exitoso");
+                  navigate("/dashboard");
+                } else {
+                  alert(data.error || "Error al iniciar sesión con Google");
+                }
+              } catch (error) {
+                console.error("Error al iniciar sesión con Google:", error);
+                alert("Error al procesar el inicio de sesión con Google");
+              }
+            }}
+            onError={() => {
+              console.log("Login con Google fallido");
+            }}
+          />
+        </div>
+
         <p className="text-sm text-center mt-4">
           <Link to="/registro" className="text-[#0077ba] underline hover:text-[#00509e]">
             Olvidó su contraseña?

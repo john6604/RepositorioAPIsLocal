@@ -95,6 +95,7 @@ def login_usuario(request):
             data = json.loads(request.body)
             correo = data.get("correo")
             clave = data.get("contrasena")
+            origen = data.get("origen", "local")
 
             if not correo or not clave:
                 return JsonResponse({"error": "Datos incompletos."}, status=400)
@@ -102,12 +103,38 @@ def login_usuario(request):
             try:
                 usuario = Usuario.objects.get(correo=correo)
             except Usuario.DoesNotExist:
-                return JsonResponse({"error": "Usuario no encontrado."}, status=404)
+                if origen == "google":
+                    # Crear automáticamente el usuario con datos básicos
+                    nombres = data.get("nombres", "")
+                    apellidos = data.get("apellidos", "")
+                    username = correo.split("@")[0]
 
-            if not check_password(clave, usuario.contrasena_hash):
-                return JsonResponse({"error": "Contraseña incorrecta."}, status=401)
+                    # Asegurar username único
+                    original_username = username
+                    contador = 1
+                    while Usuario.objects.filter(username=username).exists():
+                        username = f"{original_username}{contador}"
+                        contador += 1
 
-            # Crear siempre una nueva sesión
+                    usuario = Usuario.objects.create(
+                        correo=correo,
+                        username=username,
+                        contrasena_hash=clave,  # lo almacenamos sin hashear, ya que no se usa para login tradicional
+                        nombres=nombres,
+                        apellidos=apellidos,
+                        origen="google"
+                    )
+                else:
+                    return JsonResponse({"error": "Usuario no encontrado."}, status=404)
+
+            if origen == "google":
+                # No verificamos la clave para usuarios de Google
+                pass
+            else:
+                if not check_password(clave, usuario.contrasena_hash):
+                    return JsonResponse({"error": "Contraseña incorrecta."}, status=401)
+
+            # Crear sesión
             token = secrets.token_hex(32)
             Sesion.objects.create(
                 usuario=usuario,
@@ -121,7 +148,7 @@ def login_usuario(request):
 
             return JsonResponse({
                 "mensaje": "Inicio de sesión exitoso",
-                "token": token, 
+                "token": token,
                 "usuario_id": usuario.id,
                 "rol_id": usuario.rol_id,
                 "nombres": usuario.nombres,
