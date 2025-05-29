@@ -34,35 +34,47 @@ def registrar_usuario(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            correo = data.get("correo")
-            clave  = data.get("contrasena")
+
+            correo     = data.get("correo")
+            clave      = data.get("contrasena")  # puede ser 'clave real' o 'sub' de Google
+            username   = data.get("username") or correo.split('@')[0]
+            nombres    = data.get("nombres") or username
+            origen     = data.get("origen", "local")  # por defecto es 'local'
 
             if not correo or not clave:
                 return JsonResponse({"error": "Datos incompletos."}, status=400)
 
-            if Usuario.objects.filter(correo=correo).exists():
-                return JsonResponse({"error": "El correo ya está registrado."}, status=409)
+            # Si el usuario ya existe
+            usuario_existente = Usuario.objects.filter(correo=correo).first()
 
-            username_generado = correo.split("@")[0]
-
-            usuario = Usuario.objects.create(
-                correo          = correo,
-                username        = username_generado,       
-                contrasena_hash = make_password(clave),
-                nombres         = username_generado,
-                apellidos       = None,
-                estado          = "activo",
-                rol_id          = 2,
-                creado_en       = timezone.now(),
-                actualizado_en  = timezone.now()
-            )
+            if usuario_existente:
+                if origen == "google":
+                    # Permitir continuar y crear sesión
+                    pass
+                else:
+                    return JsonResponse({"error": "El correo ya está registrado."}, status=409)
+            else:
+                usuario = Usuario.objects.create(
+                    correo          = correo,
+                    username        = username,
+                    contrasena_hash = make_password(clave),
+                    nombres         = nombres,
+                    apellidos       = None,
+                    estado          = "activo",
+                    rol_id          = 2,
+                    creado_en       = timezone.now(),
+                    actualizado_en  = timezone.now(),
+                    origen          = origen
+                )
+            # Buscar de nuevo (por si lo creamos recién ahora)
+            usuario = Usuario.objects.get(correo=correo)
 
             token_sesion = secrets.token_hex(16)
             Sesion.objects.create(
-                usuario_id  = usuario.id,
+                usuario_id   = usuario.id,
                 token_sesion = token_sesion,
-                expira_en   = timezone.now() + timezone.timedelta(days=1),
-                activa      = True
+                expira_en    = timezone.now() + timezone.timedelta(days=1),
+                activa       = True
             )
 
             return JsonResponse({
@@ -72,6 +84,7 @@ def registrar_usuario(request):
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
 # Login de usuarios, vista

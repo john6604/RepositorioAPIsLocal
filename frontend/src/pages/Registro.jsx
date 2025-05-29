@@ -36,10 +36,10 @@ const Registro = () => {
         correo,
         contrasena: sub, 
         username,
-        nombres
+        nombres,
+        origen: "google"
       });
   
-      console.log("Usuario registrado con Google:", response.data);
       localStorage.setItem("token_sesion", response.data.token_sesion);
       navigate("/dashboard");
   
@@ -150,7 +150,6 @@ const Registro = () => {
               const correo = decoded.email;
               const username = correo.split('@')[0];
               const nombres = decoded.name;
-              const foto = decoded.picture;
               const sub = decoded.sub;
             
               registrarUsuarioConGoogle({ correo, username, nombres, sub });
