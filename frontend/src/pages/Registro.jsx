@@ -139,7 +139,12 @@ const Registro = () => {
           </button>
         </form>
 
-        <div className="w-full flex justify-center">
+        <div className="flex items-center my-6">
+          <hr className="flex-grow border-t border-gray-300" />
+          <span className="mx-4 text-gray-500 font-medium">O</span>
+          <hr className="flex-grow border-t border-gray-300" />
+        </div>
+        <div className="flex justify-center">
           <GoogleLogin
             onSuccess={(credentialResponse) => {
               const token = credentialResponse.credential;

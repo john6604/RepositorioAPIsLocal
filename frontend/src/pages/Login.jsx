@@ -104,7 +104,12 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="my-4 flex justify-center">
+        <div className="flex items-center my-6">
+          <hr className="flex-grow border-t border-gray-300" />
+          <span className="mx-4 text-gray-500 font-medium">O</span>
+          <hr className="flex-grow border-t border-gray-300" />
+        </div>
+        <div className="w-full flex justify-center">
           <GoogleLogin
             onSuccess={async (credentialResponse) => {
               try {
@@ -141,6 +146,7 @@ const Login = () => {
             onError={() => {
               console.log("Login con Google fallido");
             }}
+            width="100%" // Esto fuerza el ancho completo del botón
           />
         </div>
 
