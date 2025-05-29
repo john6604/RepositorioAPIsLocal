@@ -119,7 +119,7 @@ def login_usuario(request):
                     usuario = Usuario.objects.create(
                         correo=correo,
                         username=username,
-                        contrasena_hash=clave,  # lo almacenamos sin hashear, ya que no se usa para login tradicional
+                        contrasena_hash=make_password(clave),  
                         nombres=nombres,
                         apellidos=apellidos,
                         origen="google"
