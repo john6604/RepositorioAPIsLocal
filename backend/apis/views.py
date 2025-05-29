@@ -744,33 +744,34 @@ def crear_api_y_metodos(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-import subprocess
-import sys
-
 @csrf_exempt
 def ejecutar_codigo(request):
     if request.method not in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
     try:
-        # Leer datos desde GET o desde el body en métodos como POST
         if request.method == 'GET':
             codigo = request.GET.get('codigo')
             parametros = request.GET.get('parametros')
             detalles_tecnicos = request.GET.get('detalles_tecnicos', '')
             if parametros:
-                parametros = json.loads(parametros)
+                try:
+                    parametros = json.loads(parametros)
+                except json.JSONDecodeError:
+                    return JsonResponse({"error": "Parámetros mal formateados (no es JSON)"}, status=400)
         else:
-            data = json.loads(request.body)
+            try:
+                data = json.loads(request.body.decode('utf-8'))
+            except json.JSONDecodeError:
+                return JsonResponse({"error": "Cuerpo de solicitud no es JSON válido"}, status=400)
+
             codigo = data.get('codigo')
             parametros = data.get('parametros')
             detalles_tecnicos = data.get('detalles_tecnicos', '')
 
-        # Validar campos requeridos
         if not codigo or parametros is None:
             return JsonResponse({"error": "Faltan 'codigo' o 'parametros'"}, status=400)
 
-        # Delegar ejecución al microservicio FastAPI
         url = "https://fastapiservice-7z74.onrender.com/run"
         payload = {
             "codigo": codigo,
@@ -783,15 +784,12 @@ def ejecutar_codigo(request):
         except requests.RequestException as e:
             return JsonResponse({"error": "Error al conectar con el microservicio", "detalles": str(e)}, status=503)
 
-        # Retornar la respuesta tal cual del microservicio
-        if response.status_code == 200:
-            return JsonResponse(response.json())
-        else:
-            return JsonResponse({
-                "error": "Error en el microservicio",
-                "status_code": response.status_code,
-                "detalles": response.text
-            }, status=response.status_code)
+        try:
+            response_data = response.json()
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Respuesta del microservicio no es JSON válido", "detalles": response.text}, status=500)
+
+        return JsonResponse(response_data, status=response.status_code)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
