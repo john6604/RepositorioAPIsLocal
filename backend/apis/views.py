@@ -777,8 +777,6 @@ def ejecutar_codigo(request):
 
         # Enviar al microservicio FastAPI
         url = "https://fastapiservice-7z74.onrender.com/run"
-        print("Payload enviado al microservicio:")
-        print(json.dumps(payload, indent=2))
         response = requests.post(url, json=payload, timeout=60)
 
         if response.status_code == 200:
