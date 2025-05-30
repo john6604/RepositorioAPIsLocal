@@ -755,16 +755,9 @@ def ejecutar_codigo(request):
             parametros = request.GET.get('parametros')
             detalles_tecnicos = request.GET.get('detalles_tecnicos', '')
             if parametros:
-                try:
-                    parametros = json.loads(parametros)
-                except json.JSONDecodeError:
-                    return JsonResponse({"error": "Parámetros mal formateados (no es JSON)"}, status=400)
+                parametros = json.loads(parametros)
         else:
-            try:
-                data = json.loads(request.body.decode('utf-8'))
-            except json.JSONDecodeError:
-                return JsonResponse({"error": "Cuerpo de solicitud no es JSON válido"}, status=400)
-
+            data = json.loads(request.body)
             codigo = data.get('codigo')
             parametros = data.get('parametros')
             detalles_tecnicos = data.get('detalles_tecnicos', '')
@@ -772,24 +765,25 @@ def ejecutar_codigo(request):
         if not codigo or parametros is None:
             return JsonResponse({"error": "Faltan 'codigo' o 'parametros'"}, status=400)
 
-        url = "https://fastapiservice-7z74.onrender.com/run"
+        # Payload que enviamos al microservicio
         payload = {
             "codigo": codigo,
             "parametros": parametros,
             "detalles_tecnicos": detalles_tecnicos
         }
 
-        try:
-            response = requests.post(url, json=payload, timeout=30)
-        except requests.RequestException as e:
-            return JsonResponse({"error": "Error al conectar con el microservicio", "detalles": str(e)}, status=503)
+        # Enviar al microservicio FastAPI
+        url = "https://fastapiservice-7z74.onrender.com/run"
+        response = requests.post(url, json=payload, timeout=60)
 
-        try:
-            response_data = response.json()
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Respuesta del microservicio no es JSON válido", "detalles": response.text}, status=500)
-
-        return JsonResponse(response_data, status=response.status_code)
+        if response.status_code == 200:
+            return JsonResponse(response.json())
+        else:
+            return JsonResponse({
+                "error": "Error en el microservicio",
+                "status_code": response.status_code,
+                "detalles": response.text
+            }, status=response.status_code)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
