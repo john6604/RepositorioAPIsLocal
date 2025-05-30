@@ -744,7 +744,10 @@ def crear_api_y_metodos(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-@csrf_exempt
+import subprocess
+import sys
+
+@csrf_exempt 
 def ejecutar_codigo(request):
     if request.method not in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
         return JsonResponse({"error": "Método no permitido"}, status=405)
@@ -753,37 +756,38 @@ def ejecutar_codigo(request):
         if request.method == 'GET':
             codigo = request.GET.get('codigo')
             parametros = request.GET.get('parametros')
-            detalles_tecnicos = request.GET.get('detalles_tecnicos', '')
+            detalles_tecnicos = request.GET.get('detalles_tecnicos', '')  # Leer dependencias
             if parametros:
                 parametros = json.loads(parametros)
         else:
             data = json.loads(request.body)
             codigo = data.get('codigo')
             parametros = data.get('parametros')
-            detalles_tecnicos = data.get('detalles_tecnicos', '')
+            detalles_tecnicos = data.get('detalles_tecnicos', '')  # Leer dependencias
 
         if not codigo or parametros is None:
             return JsonResponse({"error": "Faltan 'codigo' o 'parametros'"}, status=400)
 
-        # Payload que enviamos al microservicio
-        payload = {
-            "codigo": codigo,
-            "parametros": parametros,
-            "detalles_tecnicos": detalles_tecnicos
-        }
+        # Función para instalar dependencias
+        def instalar_dependencias(paquetes_str):
+            paquetes = [p.strip() for p in paquetes_str.split(",") if p.strip()]
+            for paquete in paquetes:
+                try:
+                    __import__(paquete)
+                except ImportError:
+                    subprocess.check_call([sys.executable, "-m", "pip", "install", paquete])
 
-        # Enviar al microservicio FastAPI
-        url = "https://fastapiservice-7z74.onrender.com/run"
-        response = requests.post(url, json=payload, timeout=60)
+        instalar_dependencias(detalles_tecnicos)
 
-        if response.status_code == 200:
-            return JsonResponse(response.json())
-        else:
-            return JsonResponse({
-                "error": "Error en el microservicio",
-                "status_code": response.status_code,
-                "detalles": response.text
-            }, status=response.status_code)
+        entorno = {}
+        exec(codigo, entorno)
+
+        ejecutar_func = entorno.get('ejecutar')
+        if not callable(ejecutar_func):
+            return JsonResponse({"error": "No se definió función 'ejecutar(parametros)' correctamente"}, status=400)
+
+        resultado = ejecutar_func(parametros)
+        return JsonResponse(resultado)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
