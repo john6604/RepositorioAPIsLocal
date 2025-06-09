@@ -287,15 +287,23 @@ const APIDetail = () => {
   
    
     useEffect(() => {
-      if (apiData.metodos && Array.isArray(apiData.metodos)) {
-        const metodosTransformados = {};
+      if (
+        apiData.metodos &&
+        !Array.isArray(apiData.metodos) &&
+        typeof apiData.metodos === "object" &&
+        Object.keys(apiData.metodos).length > 0
+      ) {
+        return; 
+      }
     
+      if (Array.isArray(apiData.metodos)) {
+        const metodosTransformados = {};
         apiData.metodos.forEach((m) => {
           metodosTransformados[m.metodo] = {
             endpoint: m.endpoint || "",
             parametros: m.parametros || "",
-            requestBody: m.codigo || "", 
-            respuesta: m.retorno || "", 
+            requestBody: m.codigo || "",
+            respuesta: m.retorno || "",
           };
         });
     
@@ -303,7 +311,7 @@ const APIDetail = () => {
           ...prev,
           metodos: metodosTransformados,
         }));
-
+    
         const primeros = Object.keys(metodosTransformados);
         if (primeros.length > 0) setMetodoActivo(primeros[0]);
       }
@@ -506,8 +514,10 @@ const APIDetail = () => {
                         <label className="block text-sm font-medium text-gray-700">Endpoint</label>
                         <input
                           type="text"
-                          value={metodoInfo.endpoint || ""}
-                          onChange={(e) => handleMetodoChange(metodoActivo, "endpoint", e.target.value)}
+                          value={metodoInfo?.endpoint || ""}
+                          onChange={(e) =>
+                            metodoInfo && handleMetodoChange(metodoActivo, "endpoint", e.target.value)
+                          }
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
                           placeholder="/miapi/ejemplo"
                         />
@@ -517,7 +527,7 @@ const APIDetail = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
                         <textarea
-                          value={metodoInfo.parametros || ""}
+                          value={metodoInfo?.parametros || ""}
                           onChange={(e) => handleMetodoChange(metodoActivo, "parametros", e.target.value)}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
                           rows={3}
@@ -529,7 +539,7 @@ const APIDetail = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Cuerpo (Body - JSON)</label>
                         <textarea
-                          value={metodoInfo.requestBody || ""}
+                          value={metodoInfo?.requestBody || ""}
                           onChange={(e) => handleMetodoChange(metodoActivo, "requestBody", e.target.value)}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
                           rows={3}
@@ -541,7 +551,7 @@ const APIDetail = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Respuesta esperada (JSON)</label>
                         <textarea
-                          value={metodoInfo.respuesta || ""}
+                          value={metodoInfo?.respuesta || ""}
                           onChange={(e) => handleMetodoChange(metodoActivo, "respuesta", e.target.value)}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
                           rows={3}
@@ -553,7 +563,7 @@ const APIDetail = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Código</label>
                         <textarea
-                          value={metodoInfo.requestBody || ""}
+                          value={metodoInfo?.requestBody || ""}
                           onChange={(e) => handleMetodoChange(metodoActivo, "requestBody", e.target.value)}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
                           rows={5}
