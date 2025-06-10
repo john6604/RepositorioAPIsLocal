@@ -142,7 +142,6 @@ const APIDetail = () => {
 
   const handleAdd = async () => {
     if (!selectedUser) return;
-    console.log(selectedUser.value);
   
     try {
       await axios.post(`${API_BASE_URL}/colaborador/agregar/`, {

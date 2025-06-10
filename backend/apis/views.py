@@ -883,53 +883,52 @@ def search_users(request):
 # Vista para añadir colaboradores
 import traceback
 
-@method_decorator(csrf_exempt, name='dispatch')
-class AddCollaboratorView(View):
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            api_id = data.get('api_id')
-            colaborador_id = data.get('colaborador_id')
+@api_view(['POST'])
+def agregar_colaborador(request, api_id):
+    colaborador_id = request.data.get("colaborador_id")
 
-            if not api_id or not colaborador_id:
-                return JsonResponse({'message': 'api_id and colaborador_id are required'}, status=400)
+    if not colaborador_id:
+        return Response({"error": "El campo 'usuario_id' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
 
-            api = get_object_or_404(API, id=api_id)
-            colaborador = get_object_or_404(Usuario, id=colaborador_id)  # Esto debe ser instancia
+    api = get_object_or_404(API, id=api_id)
+    colaborador = get_object_or_404(Usuario, id=colaborador_id)
 
-            permiso, created = PermisoApi.objects.get_or_create(api=api, colaborador=colaborador)
-            if not created:
-                return JsonResponse({'message': 'El colaborador ya existe para esta API'}, status=400)
+    # Verificar si ya existe el permiso
+    if PermisoApi.objects.filter(api=api, colaborador=colaborador).exists():
+        return Response({"error": "Este colaborador ya está asignado a la API."}, status=status.HTTP_400_BAD_REQUEST)
 
-            return JsonResponse({'message': 'Colaborador añadido correctamente'}, status=201)
+    permiso = PermisoApi.objects.create(api=api, colaborador=colaborador)
 
-        except json.JSONDecodeError:
-            return JsonResponse({'message': 'JSON inválido'}, status=400)
-        except Exception as e:
-            print("Error en AddCollaboratorView:", e)
-            import traceback; traceback.print_exc()
-            return JsonResponse({'message': f'Error interno: {str(e)}'}, status=500)
+    return Response({
+        "mensaje": "Colaborador agregado correctamente.",
+        "id": permiso.id,
+        "api": api.id,
+        "colaborador": {
+            "id": colaborador.id,
+            "username": colaborador.username,
+            "correo": colaborador.correo,
+        }
+    }, status=status.HTTP_201_CREATED)
 
 # Listar Colaboradores
-def list_collaborators(request, api_id):
-    if request.method != 'GET':
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-
+@api_view(['GET'])
+def listar_colaboradores(request, api_id):
     api = get_object_or_404(API, id=api_id)
     permisos = PermisoApi.objects.filter(api=api).select_related('colaborador')
 
-    colaboradores = []
-    for permiso in permisos:
-        u = permiso.colaborador
-        colaboradores.append({
-            'id': permiso.id,
-            'usuario': {
-                'id': u.id,
-                'username': u.username,
-                'email': u.correo or getattr(u, 'email', ''),
-                'nombres': u.nombres,
-                'apellidos': u.apellidos,
-            }
-        })
+    colaboradores_data = [
+        {
+            "id": permiso.id,
+            "usuario": {
+                "id": permiso.colaborador.id,
+                "username": permiso.colaborador.username,
+                "correo": permiso.colaborador.correo,
+                "nombres": permiso.colaborador.nombres,
+                "apellidos": permiso.colaborador.apellidos,
+            },
+            "creado_en": permiso.creado_en,
+        }
+        for permiso in permisos
+    ]
 
-    return JsonResponse(colaboradores, safe=False)
+    return Response(colaboradores_data, status=status.HTTP_200_OK)

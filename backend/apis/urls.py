@@ -30,6 +30,6 @@ urlpatterns = [
     path('subcategorias/', views.SubcategoriaListView.as_view(), name='subcategorias-list'),
     path('tematicas/', views.TematicaListView.as_view(), name='tematicas-list'),
     path('usuarios/search/', views.search_users, name='search_users'),
-    path('colaborador/agregar/', views.AddCollaboratorView.as_view(), name='add-collaborator'),
-    path('colaboradores/<int:api_id>/', views.list_collaborators, name='list-collaborators'),
+    path('colaborador/agregar/', views.agregar_colaborador, name='add-collaborator'),
+    path('colaboradores/<int:api_id>/', views.listar_colaboradores, name='list-collaborators'),
 ]
