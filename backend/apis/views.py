@@ -895,7 +895,7 @@ class AddCollaboratorView(View):
                 return JsonResponse({'message': 'api_id and colaborador_id are required'}, status=400)
 
             api = get_object_or_404(API, id=api_id)
-            colaborador = get_object_or_404(Usuario, id=colaborador_id)
+            colaborador = get_object_or_404(Usuario, id=colaborador_id)  # Esto debe ser instancia
 
             permiso, created = PermisoApi.objects.get_or_create(api=api, colaborador=colaborador)
             if not created:
@@ -907,7 +907,7 @@ class AddCollaboratorView(View):
             return JsonResponse({'message': 'JSON inválido'}, status=400)
         except Exception as e:
             print("Error en AddCollaboratorView:", e)
-            traceback.print_exc()
+            import traceback; traceback.print_exc()
             return JsonResponse({'message': f'Error interno: {str(e)}'}, status=500)
 
 # Listar Colaboradores
