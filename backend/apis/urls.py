@@ -29,4 +29,5 @@ urlpatterns = [
     path('categorias/', views.CategoriaListView.as_view(), name='categorias-list'),
     path('subcategorias/', views.SubcategoriaListView.as_view(), name='subcategorias-list'),
     path('tematicas/', views.TematicaListView.as_view(), name='tematicas-list'),
+    path('usuarios/search/', views.search_users, name='search_users'),
 ]

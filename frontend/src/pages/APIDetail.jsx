@@ -130,7 +130,6 @@ const APIDetail = () => {
   }, [activeTab, apiId]);
   
 
-  // Búsqueda de usuarios para autocomplete
   const handleSearch = async (input) => {
     if (!input) return;
     const { data } = await axios.get(

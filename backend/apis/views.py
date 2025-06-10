@@ -854,3 +854,27 @@ class SubcategoriaListView(generics.ListAPIView):
 class TematicaListView(generics.ListAPIView):
     queryset = Tematica.objects.all()
     serializer_class = TematicaSerializer
+
+# Vista para buscar colaboradores
+def search_users(request):
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse([], safe=False)
+
+    usuarios = Usuario.objects.filter(
+        Q(username__icontains=query) |
+        Q(correo__icontains=query) |
+        Q(nombres__icontains=query) |
+        Q(apellidos__icontains=query)
+    )
+
+    data = [
+        {
+            "id": u.id,
+            "username": u.username,
+            "email": u.correo,
+            "nombre_completo": f"{u.nombres or ''} {u.apellidos or ''}".strip()
+        }
+        for u in usuarios
+    ]
+    return JsonResponse(data, safe=False)
