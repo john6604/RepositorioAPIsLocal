@@ -881,6 +881,8 @@ def search_users(request):
     return JsonResponse(data, safe=False)
 
 # Vista para añadir colaboradores
+import traceback
+
 @method_decorator(csrf_exempt, name='dispatch')
 class AddCollaboratorView(View):
     def post(self, request, *args, **kwargs):
@@ -890,21 +892,23 @@ class AddCollaboratorView(View):
             colaborador_id = data.get('colaborador_id')
 
             if not api_id or not colaborador_id:
-                return JsonResponse({'error': 'api_id and colaborador_id are required'}, status=400)
+                return JsonResponse({'message': 'api_id and colaborador_id are required'}, status=400)
 
             api = get_object_or_404(API, id=api_id)
             colaborador = get_object_or_404(Usuario, id=colaborador_id)
 
-            # Verificar si ya existe el permiso para evitar duplicados
             permiso, created = PermisoApi.objects.get_or_create(api=api, colaborador=colaborador)
-
             if not created:
                 return JsonResponse({'message': 'El colaborador ya existe para esta API'}, status=400)
 
             return JsonResponse({'message': 'Colaborador añadido correctamente'}, status=201)
 
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'JSON inválido'}, status=400)
+            return JsonResponse({'message': 'JSON inválido'}, status=400)
+        except Exception as e:
+            print("Error en AddCollaboratorView:", e)
+            traceback.print_exc()
+            return JsonResponse({'message': f'Error interno: {str(e)}'}, status=500)
 
 # Listar Colaboradores
 def list_collaborators(request, api_id):

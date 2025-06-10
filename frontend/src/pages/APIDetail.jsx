@@ -144,19 +144,19 @@ const APIDetail = () => {
     if (!selectedUser) return;
   
     try {
-      await axios.post(`${API_BASE_URL}/colaborador/agregar`, {
-        api_id: apiId,            // el id actual de la API
-        colaborador_id: selectedUser.value, // id del usuario seleccionado
+      await axios.post(`${API_BASE_URL}/colaborador/agregar/`, {
+        api_id: apiId,
+        colaborador_id: selectedUser.value,
       });
   
       setSelectedUser(null);
       setSearchOptions([]);
   
-      // Refrescar la lista de colaboradores
       const { data } = await axios.get(`${API_BASE_URL}/colaboradores/${apiId}/`);
       setCollaborators(data);
   
     } catch (error) {
+      console.error('Error detalle:', error.response?.data || error.message);
       alert(error.response?.data?.message || 'Error al añadir colaborador');
     }
   };
