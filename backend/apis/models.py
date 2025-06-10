@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 class Rol(models.Model):
     nombre      = models.CharField(max_length=50)
@@ -79,6 +80,11 @@ class API(models.Model):
     id_tematica       = models.ForeignKey(Tematica, on_delete=models.SET_NULL, db_column="id_tematica", null=True, blank=True)
     creado_en         = models.DateTimeField(auto_now_add=True, null=True)
     actualizado_en    = models.DateTimeField(auto_now=True, null=True)
+    colaboradores     = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        through='PermisoApi',
+        related_name='apis_colaborando',
+    )
 
     class Meta:
         db_table = "apis"
@@ -105,16 +111,30 @@ class VersionApi(models.Model):
         return f"{self.api.nombre} v{self.numero_version}"
 
 class PermisoApi(models.Model):
-    api        = models.ForeignKey(API, on_delete=models.CASCADE, db_column="api_id", null=True, blank=True)
-    usuario    = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column="usuario_id", null=True, blank=True)
-    creado_en  = models.DateTimeField(auto_now_add=True, null=True)
+    id = models.AutoField(primary_key=True)
+    api = models.ForeignKey(
+        API,
+        on_delete=models.CASCADE,
+        db_column="api_id",
+        null=True,
+        blank=True,
+    )
+    colaborador = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        db_column="colaborador_id",
+        null=True,
+        blank=True,
+    )
+    creado_en = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     class Meta:
-        db_table = "permisos_api"
-        unique_together = [("api", "usuario")]
+        db_table = "permiso_api"
+        unique_together = ('api', 'colaborador')
+        ordering = ['-creado_en']
 
     def __str__(self):
-        return f"{self.usuario.correo} → {self.api.nombre}"
+        return f"Colaborador {self.colaborador} en API {self.api}"
 
 class Sesion(models.Model):
     usuario      = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column="usuario_id", null=True, blank=True)

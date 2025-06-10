@@ -43,8 +43,8 @@ class VersionApiAdmin(admin.ModelAdmin):
 
 @admin.register(PermisoApi)
 class PermisoApiAdmin(admin.ModelAdmin):
-    list_display = ("id", "api", "usuario", "creado_en")
-    list_filter = ("api", "usuario")
+    list_display = ("id", "api", "colaborador", "creado_en")
+    list_filter  = ("api", "colaborador")
 
 @admin.register(Sesion)
 class SesionAdmin(admin.ModelAdmin):
