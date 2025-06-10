@@ -12,363 +12,411 @@ import { useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import axios from "axios";
+import Select from "react-select";
+import { XCircle } from "lucide-react";
+
 //import { useRequireAuth } from "../hooks/useRequireAuth";
 
 const metodosHttp = ["GET", "POST", "PUT", "DELETE", "PATCH"];
 
 const APIDetail = () => {
   //useRequireAuth();
-    const { apiId } = useParams();
-    const navigate = useNavigate();
-    const [apiData, setApiData] = useState({
-      nombre: "",
-      descripcion: "",
-      detalles_tecnicos: "",
-      documentacion: "",
-      permiso: "",
-      estado: "",
-      creado_en: "",
-      actualizado_en: "",
-      metodos: {},
-    });
-    const [metodoActivo, setMetodoActivo] = useState("GET");
-    
-    const [respuestaAPI, setRespuestaAPI] = React.useState('');
+  const { apiId } = useParams();
+  const navigate = useNavigate();
+  const [apiData, setApiData] = useState({
+    nombre: "",
+    descripcion: "",
+    detalles_tecnicos: "",
+    documentacion: "",
+    permiso: "",
+    estado: "",
+    creado_en: "",
+    actualizado_en: "",
+    metodos: {},
+  });
+  const [metodoActivo, setMetodoActivo] = useState("GET");
 
-    const [cargando, setCargando] = useState(false);
+  const [respuestaAPI, setRespuestaAPI] = React.useState('');
+
+  const [cargando, setCargando] = useState(false);
 
 
 
-    async function handleSubmit(e) {
-      e.preventDefault();
-      setCargando(true); // Inicia el estado de carga
-      setRespuestaAPI(""); // Limpia el resultado anterior
-    
-      const codigo = metodoInfo.requestBody || "";
-      let parametros = {};
-    
-      try {
-        parametros = JSON.parse(metodoInfo.parametros || "{}");
-      } catch {
-        setRespuestaAPI("Error: Parámetros JSON inválidos");
-        setCargando(false);
-        return;
-      }
-    
-      try {
-        const response = await fetch(`${API_BASE_URL}/ejecutar/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            codigo,
-            parametros,
-          }),
-        });
-    
-        const data = await response.json();
-    
-        if (!response.ok) {
-          setRespuestaAPI(`Error: ${data.error || "Error desconocido"}`);
-        } else {
-          setRespuestaAPI(JSON.stringify(data, null, 2));
-        }
-      } catch (error) {
-        setRespuestaAPI("Error en la petición: " + error.message);
-      } finally {
-        setCargando(false); // Termina el estado de carga
-      }
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setCargando(true); // Inicia el estado de carga
+    setRespuestaAPI(""); // Limpia el resultado anterior
+
+    const codigo = metodoInfo.requestBody || "";
+    let parametros = {};
+
+    try {
+      parametros = JSON.parse(metodoInfo.parametros || "{}");
+    } catch {
+      setRespuestaAPI("Error: Parámetros JSON inválidos");
+      setCargando(false);
+      return;
     }
-    
-   
 
-    const handleChangeGeneral = (e) => {
-      const { name, value } = e.target;
-      setApiData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    };
-
-    const handleMetodoChange = (metodoActivo, name, value) => {
-      setApiData((prevData) => ({
-        ...prevData,
-        metodos: {
-          ...prevData.metodos,
-          [metodoActivo]: {
-            ...prevData.metodos[metodoActivo],
-            [name]: value,
-          },
+    try {
+      const response = await fetch(`${API_BASE_URL}/ejecutar/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      }));
-    };
-    
+        body: JSON.stringify({
+          codigo,
+          parametros,
+        }),
+      });
 
-    const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState("api");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [usuarioActualId, setUsuarioActualId] = useState(null);
-    const [isOwner, setIsOwner] = useState(false);
-    const allTabs = [
-      { id: "api", label: "API", icon: Code2 },
-      { id: "settings", label: "Configuración", icon: Settings },
-      { id: "colaborators", label: "Colaboradores", icon: Users },
-      { id: "permissions", label: "Permisos", icon: Lock },
-      { id: "consume", label: "Consumir", icon: FileTerminal},
-    ];
-    
-    const metodoInfo = apiData.metodos ? apiData.metodos[metodoActivo] : null;
+      const data = await response.json();
 
-    const metodoSinInfo =
-      metodoInfo &&
-      !metodoInfo.endpoint &&
-      !metodoInfo.parametros &&
-      !metodoInfo.requestBody &&
-      !metodoInfo.respuesta;
-    
-    const visibleTabs = isOwner
-      ? allTabs
-      : allTabs.filter((tab) => tab.id === "api" || tab.id === "consume");
-    
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setApiData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    };
-
-    
-
-    const obtenerUsuarioActual = async () => {
-      try {
-        const tokenSesion = localStorage.getItem("token_sesion");
-    
-        const response = await fetch(`${API_BASE_URL}/usuario_actual/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token_sesion: tokenSesion }),
-        });
-    
-        if (response.ok) {
-          const data = await response.json();
-          setUsuarioActualId(data.usuario_id);
-        } else {
-          console.warn("Token inválido o usuario no autenticado");
-          setUsuarioActualId(null);
-        }
-      } catch (error) {
-        console.error("Error en obtenerUsuarioActual:", error);
+      if (!response.ok) {
+        setRespuestaAPI(`Error: ${data.error || "Error desconocido"}`);
+      } else {
+        setRespuestaAPI(JSON.stringify(data, null, 2));
       }
-    };
+    } catch (error) {
+      setRespuestaAPI("Error en la petición: " + error.message);
+    } finally {
+      setCargando(false); // Termina el estado de carga
+    }
+  }
 
-    const handleGuardarCambios = async (e) => {
-      e.preventDefault();
-    
-      try {
-        const response = await fetch(`${API_BASE_URL}/listarapis/${apiData.id}/`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(apiData),
-        });
-    
-        if (response.ok) {
-          const updatedData = await response.json();
-          setApiData(updatedData);
-          alert("Cambios guardados correctamente.");
-          navigate("/dashboard");
-        } else {
-          const error = await response.json();
-          console.error("Error al guardar cambios:", error);
-          alert("Hubo un error al guardar los cambios.");
-        }
-      } catch (err) {
-        console.error("Error al enviar solicitud:", err);
-        alert("No se pudo conectar con el servidor.");
-      }
-    };
 
-    const handlePublicarAPI = async () => {
-      const nuevaApiData = { ...apiData, permiso: "publico" };
-    
-      try {
-        const response = await fetch(`${API_BASE_URL}/listarapis/${nuevaApiData.id}/`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(nuevaApiData),
-        });
-    
-        if (response.ok) {
-          const updatedData = await response.json();
-          setApiData(updatedData);
-          alert("API publicada correctamente.");
-          navigate("/dashboard"); 
-        } else {
-          const error = await response.json();
-          console.error("Error al publicar:", error);
-          alert("Hubo un error al publicar la API.");
-        }
-      } catch (err) {
-        console.error("Error al enviar solicitud:", err);
-        alert("No se pudo conectar con el servidor.");
-      }
-    };
 
-    const handleEliminarAPI = async () => {
+  const handleChangeGeneral = (e) => {
+    const { name, value } = e.target;
+    setApiData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleMetodoChange = (metodoActivo, name, value) => {
+    setApiData((prevData) => ({
+      ...prevData,
+      metodos: {
+        ...prevData.metodos,
+        [metodoActivo]: {
+          ...prevData.metodos[metodoActivo],
+          [name]: value,
+        },
+      },
+    }));
+  };
+
+
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("api");
+  //const [searchQuery, setSearchQuery] = useState("");
+  const [usuarioActualId, setUsuarioActualId] = useState(null);
+  const [isOwner, setIsOwner] = useState(false);
+  // Estados para la sección de colaboradores
+  const [searchOptions, setSearchOptions] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [collaborators, setCollaborators] = useState([]);
+
+  // Al montar, carga los colaboradores actuales
+  useEffect(() => {
+    if (activeTab === "colaborators") {
+      axios
+        .get(`${API_BASE_URL}/colaboradores/${apiId}/`)
+        .then(res => setCollaborators(res.data))
+        .catch(() => setCollaborators([]));
+    }
+  }, [activeTab, apiId]);
+  
+
+  // Búsqueda de usuarios para autocomplete
+  const handleSearch = async (input) => {
+    if (!input) return;
+    const { data } = await axios.get(
+      `${API_BASE_URL}/usuarios/search/`,
+      { params: { q: input } }
+    );
+    setSearchOptions(data.map(u => ({
+      value: u.id,
+      label: `${u.username} — ${u.nombre_completo} (${u.email})`
+    })));
+  };
+
+  // Añadir colaborador
+  const handleAdd = async () => {
+    await axios.post(`${API_BASE_URL}/colaboradores/${apiId}/agregar/`, { usuario_id: selectedUser.value });
+    setSelectedUser(null);
+    setSearchOptions([]);
+    // refresca lista
+    const { data } = await axios.get(`${API_BASE_URL}/colaboradores/${apiId}/`);
+    setCollaborators(data);
+  };
+
+  // Eliminar colaborador
+  const handleRemove = async (permId) => {
+    await axios.delete(
+      `${API_BASE_URL}/colaboradores/eliminar/${permId}/`
+    );
+    setCollaborators(collaborators.filter(c => c.id !== permId));
+    
+  };
+  const allTabs = [
+    { id: "api", label: "API", icon: Code2 },
+    { id: "settings", label: "Configuración", icon: Settings },
+    { id: "colaborators", label: "Colaboradores", icon: Users },
+    { id: "permissions", label: "Permisos", icon: Lock },
+    { id: "consume", label: "Consumir", icon: FileTerminal },
+  ];
+
+  const metodoInfo = apiData.metodos ? apiData.metodos[metodoActivo] : null;
+
+  const metodoSinInfo =
+    metodoInfo &&
+    !metodoInfo.endpoint &&
+    !metodoInfo.parametros &&
+    !metodoInfo.requestBody &&
+    !metodoInfo.respuesta;
+
+  const visibleTabs = isOwner
+    ? allTabs
+    : allTabs.filter((tab) => tab.id === "api" || tab.id === "consume");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setApiData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+
+
+  const obtenerUsuarioActual = async () => {
+    try {
       const tokenSesion = localStorage.getItem("token_sesion");
 
-      if (!tokenSesion) {
-        alert("No hay token de sesión. Inicia sesión primero.");
-        return;
-      }
+      const response = await fetch(`${API_BASE_URL}/usuario_actual/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token_sesion: tokenSesion }),
+      });
 
-      const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar esta API? Esta acción no se puede deshacer.");
-      if (!confirmacion) return;
-    
-      try {
-        const response = await fetch(`${API_BASE_URL}/eliminarapi/${apiId}/`, {
-          method: "DELETE",
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
-            "Content-Type": "application/json",
-          },
-        });
-    
-        if (response.status === 204) {
-          alert("API eliminada con éxito.");
-          navigate("/dashboard")
-        } else {
-          const data = await response.json();
-          alert(`Error al eliminar API: ${data.detail}`);
-        }
-      } catch (error) {
-        console.error("Error al eliminar API:", error);
-        alert("Error al eliminar la API.");
-      }
-    };
-    
-    useEffect(() => {
-      const token = localStorage.getItem("token_sesion");
-      if (token) 
-        {
-        obtenerUsuarioActual();
-      } 
-      else 
-      {
+      if (response.ok) {
+        const data = await response.json();
+        setUsuarioActualId(data.usuario_id);
+      } else {
+        console.warn("Token inválido o usuario no autenticado");
         setUsuarioActualId(null);
       }
-      obtenerDetalleAPI(apiId);
-    }, [apiId]);
+    } catch (error) {
+      console.error("Error en obtenerUsuarioActual:", error);
+    }
+  };
 
-    const obtenerDetalleAPI = async (apiId) => {
-      try {
-        const url = `${API_BASE_URL}/listarapis/${apiId}/`;
-        const response = await fetch(url);
-    
-        const data = await response.json();
-        if (response.ok) {
-          setApiData(data);
-          setLoading(false);
-          console.log(data);
-        } else {
-          console.error("Error:", data.detail);
-        }
-      } catch (error) {
-        console.error("Error al obtener los datos de la API:", error);
-      }
-    };
-  
-   
-    useEffect(() => {
-      if (
-        apiData.metodos &&
-        !Array.isArray(apiData.metodos) &&
-        typeof apiData.metodos === "object" &&
-        Object.keys(apiData.metodos).length > 0
-      ) {
-        return; 
-      }
-    
-      if (Array.isArray(apiData.metodos)) {
-        const metodosTransformados = {};
-        apiData.metodos.forEach((m) => {
-          metodosTransformados[m.metodo] = {
-            endpoint: m.endpoint || "",
-            parametros: m.parametros || "",
-            requestBody: m.codigo || "",
-            respuesta: m.retorno || "",
-          };
-        });
-    
-        setApiData((prev) => ({
-          ...prev,
-          metodos: metodosTransformados,
-        }));
-    
-        const primeros = Object.keys(metodosTransformados);
-        if (primeros.length > 0) setMetodoActivo(primeros[0]);
-      }
-    }, [apiData.metodos]);
+  const handleGuardarCambios = async (e) => {
+    e.preventDefault();
 
-    useEffect(() => {
-      if (usuarioActualId && apiData?.creado_por) {
-        setIsOwner(usuarioActualId === apiData.creado_por);
+    try {
+      const response = await fetch(`${API_BASE_URL}/listarapis/${apiData.id}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (response.ok) {
+        const updatedData = await response.json();
+        setApiData(updatedData);
+        alert("Cambios guardados correctamente.");
+        navigate("/dashboard");
       } else {
-        setIsOwner(false); 
+        const error = await response.json();
+        console.error("Error al guardar cambios:", error);
+        alert("Hubo un error al guardar los cambios.");
       }
-    }, [usuarioActualId, apiData]);
+    } catch (err) {
+      console.error("Error al enviar solicitud:", err);
+      alert("No se pudo conectar con el servidor.");
+    }
+  };
 
-    if (loading || !apiData) {
-      return (
-        <>
-          <DashboardNavbar />
-          <div className="flex justify-center items-center h-screen">
-            <div className="flex flex-col items-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077ba] mb-4"></div>
-              <p className="text-gray-600 text-sm">Cargando APIs…</p>
-            </div>
-          </div>
-        </>
-      );
+  const handlePublicarAPI = async () => {
+    const nuevaApiData = { ...apiData, permiso: "publico" };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/listarapis/${nuevaApiData.id}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(nuevaApiData),
+      });
+
+      if (response.ok) {
+        const updatedData = await response.json();
+        setApiData(updatedData);
+        alert("API publicada correctamente.");
+        navigate("/dashboard");
+      } else {
+        const error = await response.json();
+        console.error("Error al publicar:", error);
+        alert("Hubo un error al publicar la API.");
+      }
+    } catch (err) {
+      console.error("Error al enviar solicitud:", err);
+      alert("No se pudo conectar con el servidor.");
+    }
+  };
+
+  const handleEliminarAPI = async () => {
+    const tokenSesion = localStorage.getItem("token_sesion");
+
+    if (!tokenSesion) {
+      alert("No hay token de sesión. Inicia sesión primero.");
+      return;
     }
 
+    const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar esta API? Esta acción no se puede deshacer.");
+    if (!confirmacion) return;
 
+    try {
+      const response = await fetch(`${API_BASE_URL}/eliminarapi/${apiId}/`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 204) {
+        alert("API eliminada con éxito.");
+        navigate("/dashboard")
+      } else {
+        const data = await response.json();
+        alert(`Error al eliminar API: ${data.detail}`);
+      }
+    } catch (error) {
+      console.error("Error al eliminar API:", error);
+      alert("Error al eliminar la API.");
+    }
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token_sesion");
+    if (token) {
+      obtenerUsuarioActual();
+    }
+    else {
+      setUsuarioActualId(null);
+    }
+    obtenerDetalleAPI(apiId);
+  }, [apiId]);
+
+  const obtenerDetalleAPI = async (apiId) => {
+    try {
+      const url = `${API_BASE_URL}/listarapis/${apiId}/`;
+      const response = await fetch(url);
+
+      const data = await response.json();
+      if (response.ok) {
+        setApiData(data);
+        setLoading(false);
+        console.log(data);
+      } else {
+        console.error("Error:", data.detail);
+      }
+    } catch (error) {
+      console.error("Error al obtener los datos de la API:", error);
+    }
+  };
+
+
+  useEffect(() => {
+    if (
+      apiData.metodos &&
+      !Array.isArray(apiData.metodos) &&
+      typeof apiData.metodos === "object" &&
+      Object.keys(apiData.metodos).length > 0
+    ) {
+      return;
+    }
+
+    if (Array.isArray(apiData.metodos)) {
+      const metodosTransformados = {};
+      apiData.metodos.forEach((m) => {
+        metodosTransformados[m.metodo] = {
+          endpoint: m.endpoint || "",
+          parametros: m.parametros || "",
+          requestBody: m.codigo || "",
+          respuesta: m.retorno || "",
+        };
+      });
+
+      setApiData((prev) => ({
+        ...prev,
+        metodos: metodosTransformados,
+      }));
+
+      const primeros = Object.keys(metodosTransformados);
+      if (primeros.length > 0) setMetodoActivo(primeros[0]);
+    }
+  }, [apiData.metodos]);
+
+  useEffect(() => {
+    if (usuarioActualId && apiData?.creado_por) {
+      setIsOwner(usuarioActualId === apiData.creado_por);
+    } else {
+      setIsOwner(false);
+    }
+  }, [usuarioActualId, apiData]);
+
+  if (loading || !apiData) {
     return (
       <>
         <DashboardNavbar />
-        <div className="flex min-h-screen bg-gray-100">
-          {/* Sidebar */}
-          <aside className="w-72 bg-white border-r">
-            <div className="p-6 border-b">
-              <h2 className="text-lg font-semibold">Menú</h2>
-            </div>
-            <nav className="flex flex-col">
+        <div className="flex justify-center items-center h-screen">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077ba] mb-4"></div>
+            <p className="text-gray-600 text-sm">Cargando APIs…</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+
+  return (
+    <>
+      <DashboardNavbar />
+      <div className="flex min-h-screen bg-gray-100">
+        {/* Sidebar */}
+        <aside className="w-72 bg-white border-r">
+          <div className="p-6 border-b">
+            <h2 className="text-lg font-semibold">Menú</h2>
+          </div>
+          <nav className="flex flex-col">
             {visibleTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 px-6 py-3 text-left text-sm hover:bg-gray-100 border-l-4 ${
-                  activeTab === tab.id
+                className={`flex items-center gap-3 px-6 py-3 text-left text-sm hover:bg-gray-100 border-l-4 ${activeTab === tab.id
                     ? "font-semibold bg-gray-50 border-blue-500 text-blue-600"
                     : "border-transparent text-gray-700"
-                }`}
+                  }`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
               </button>
             ))}
-            </nav>
-          </aside>
+          </nav>
+        </aside>
 
-          {/* Main content */}
-          <main className="flex-1 p-10">
+        {/* Main content */}
+        <main className="flex-1 p-10">
           {activeTab === "api" && (
             <div className="max-w-4xl mx-auto">
               {/* Nombre, descripción y versión */}
@@ -382,11 +430,10 @@ const APIDetail = () => {
                   <button
                     key={method}
                     onClick={() => setMetodoActivo(method)}
-                    className={`flex-1 py-3 text-sm font-semibold transition-colors duration-300 ${
-                      metodoActivo === method
+                    className={`flex-1 py-3 text-sm font-semibold transition-colors duration-300 ${metodoActivo === method
                         ? "bg-[#0077ba] text-white"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
+                      }`}
                   >
                     {method}
                   </button>
@@ -440,149 +487,148 @@ const APIDetail = () => {
             </div>
           )}
 
-            {activeTab === "settings" && (
-              <div className="max-w-4xl mx-auto space-y-8">
-                {/* Configuración general */}
-                <div className="bg-white p-6 rounded-xl shadow">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Settings className="w-5 h-5" />
-                    Configuración de la API
-                  </h3>
-                  <form className="space-y-4" onSubmit={handleGuardarCambios}>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                      <input
-                        type="text"
-                        name="nombre"
-                        value={apiData.nombre}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Descripción</label>
-                      <textarea
-                        name="descripcion"
-                        value={apiData.descripcion}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        rows={3}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Versión</label>
-                      <input
-                        type="text"
-                        name="documentacion"
-                        value={apiData.documentacion}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      />
-                    </div>
-              
-                    {/* Toggle de métodos HTTP */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Métodos</label>
-                      <div className="flex rounded-lg overflow-hidden border border-gray-300">
-                        {metodosHttp.map((method) => (
-                          <button
-                            type="button"
-                            key={method}
-                            onClick={() => setMetodoActivo(method)}
-                            className={`flex-1 py-2 text-sm font-semibold transition-colors duration-300 ${
-                              metodoActivo === method
-                                ? "bg-[#0077ba] text-white"
-                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          {activeTab === "settings" && (
+            <div className="max-w-4xl mx-auto space-y-8">
+              {/* Configuración general */}
+              <div className="bg-white p-6 rounded-xl shadow">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Settings className="w-5 h-5" />
+                  Configuración de la API
+                </h3>
+                <form className="space-y-4" onSubmit={handleGuardarCambios}>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                    <input
+                      type="text"
+                      name="nombre"
+                      value={apiData.nombre}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Descripción</label>
+                    <textarea
+                      name="descripcion"
+                      value={apiData.descripcion}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Versión</label>
+                    <input
+                      type="text"
+                      name="documentacion"
+                      value={apiData.documentacion}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+
+                  {/* Toggle de métodos HTTP */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Métodos</label>
+                    <div className="flex rounded-lg overflow-hidden border border-gray-300">
+                      {metodosHttp.map((method) => (
+                        <button
+                          type="button"
+                          key={method}
+                          onClick={() => setMetodoActivo(method)}
+                          className={`flex-1 py-2 text-sm font-semibold transition-colors duration-300 ${metodoActivo === method
+                              ? "bg-[#0077ba] text-white"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                             }`}
-                          >
-                            {method}
-                          </button>
-                        ))}
-                      </div>
+                        >
+                          {method}
+                        </button>
+                      ))}
                     </div>
-              
-                    {/* Campos editables del método activo */}
-                    <motion.div
-                      key={metodoActivo}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="space-y-4 mt-6"
+                  </div>
+
+                  {/* Campos editables del método activo */}
+                  <motion.div
+                    key={metodoActivo}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-4 mt-6"
+                  >
+                    {/* Endpoint */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Endpoint</label>
+                      <input
+                        type="text"
+                        value={metodoInfo?.endpoint || ""}
+                        onChange={(e) =>
+                          metodoInfo && handleMetodoChange(metodoActivo, "endpoint", e.target.value)
+                        }
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                        placeholder="/miapi/ejemplo"
+                      />
+                    </div>
+
+                    {/* Parámetros */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
+                      <textarea
+                        value={metodoInfo?.parametros || ""}
+                        onChange={(e) => handleMetodoChange(metodoActivo, "parametros", e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
+                        rows={3}
+                        placeholder={`[\n  { "nombre": "ciudad", "tipo": "string", "requerido": true }\n]`}
+                      />
+                    </div>
+
+                    {/* Body */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Cuerpo (Body - JSON)</label>
+                      <textarea
+                        value={metodoInfo?.requestBody || ""}
+                        onChange={(e) => handleMetodoChange(metodoActivo, "requestBody", e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
+                        rows={3}
+                        placeholder={`{\n  "nombre": "Juan",\n  "edad": 30\n}`}
+                      />
+                    </div>
+
+                    {/* Respuesta esperada */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Respuesta esperada (JSON)</label>
+                      <textarea
+                        value={metodoInfo?.respuesta || ""}
+                        onChange={(e) => handleMetodoChange(metodoActivo, "respuesta", e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
+                        rows={3}
+                        placeholder={`{\n  "mensaje": "Éxito",\n  "resultado": {...}\n}`}
+                      />
+                    </div>
+
+                    {/* Código */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Código</label>
+                      <textarea
+                        value={metodoInfo?.requestBody || ""}
+                        onChange={(e) => handleMetodoChange(metodoActivo, "requestBody", e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
+                        rows={5}
+                        placeholder={"Inserte el código (Python)"}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* Botón guardar */}
+                  <div className="pt-6">
+                    <button
+                      type="submit"
+                      className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                     >
-                      {/* Endpoint */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Endpoint</label>
-                        <input
-                          type="text"
-                          value={metodoInfo?.endpoint || ""}
-                          onChange={(e) =>
-                            metodoInfo && handleMetodoChange(metodoActivo, "endpoint", e.target.value)
-                          }
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
-                          placeholder="/miapi/ejemplo"
-                        />
-                      </div>
-              
-                      {/* Parámetros */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
-                        <textarea
-                          value={metodoInfo?.parametros || ""}
-                          onChange={(e) => handleMetodoChange(metodoActivo, "parametros", e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
-                          rows={3}
-                          placeholder={`[\n  { "nombre": "ciudad", "tipo": "string", "requerido": true }\n]`}
-                        />
-                      </div>
-              
-                      {/* Body */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Cuerpo (Body - JSON)</label>
-                        <textarea
-                          value={metodoInfo?.requestBody || ""}
-                          onChange={(e) => handleMetodoChange(metodoActivo, "requestBody", e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
-                          rows={3}
-                          placeholder={`{\n  "nombre": "Juan",\n  "edad": 30\n}`}
-                        />
-                      </div>
-              
-                      {/* Respuesta esperada */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Respuesta esperada (JSON)</label>
-                        <textarea
-                          value={metodoInfo?.respuesta || ""}
-                          onChange={(e) => handleMetodoChange(metodoActivo, "respuesta", e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
-                          rows={3}
-                          placeholder={`{\n  "mensaje": "Éxito",\n  "resultado": {...}\n}`}
-                        />
-                      </div>
-              
-                      {/* Código */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Código</label>
-                        <textarea
-                          value={metodoInfo?.requestBody || ""}
-                          onChange={(e) => handleMetodoChange(metodoActivo, "requestBody", e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
-                          rows={5}
-                          placeholder={"Inserte el código (Python)"}
-                        />
-                      </div>
-                    </motion.div>
-              
-                    {/* Botón guardar */}
-                    <div className="pt-6">
-                      <button
-                        type="submit"
-                        className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                      >
-                        Guardar cambios
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                      Guardar cambios
+                    </button>
+                  </div>
+                </form>
+              </div>
 
               <div className="bg-white p-6 rounded-xl shadow border border-red-300">
                 <h3 className="text-lg font-semibold text-red-600 mb-2">Zona de peligro</h3>
@@ -602,62 +648,60 @@ const APIDetail = () => {
           {activeTab === "colaborators" && (
             <div className="mx-auto max-w-6xl bg-white p-6 rounded-lg shadow border space-y-6">
               <h3 className="text-lg font-semibold text-gray-800">Colaboradores</h3>
-            
-              {/* Lista de colaboradores */}
-              <div className="space-y-4">
-                {/*{apiData.collaborators.map((collab) => (
-                  <div
-                    key={collab.id}
-                    className="flex items-center justify-between bg-gray-50 border rounded-md p-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-700">
-                        {collab.name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-medium">{collab.name}</p>
-                        <p className="text-sm text-gray-500">{collab.email}</p>
-                      </div>
-                    </div>
-                    {isOwner && (
-                      <button
-                        onClick={null}
-                        className="text-red-600 hover:text-red-800"
-                        title="Eliminar colaborador"
-                      >
-                        Eliminar
-                      </button>
-                    )}
-                  </div>
-                ))}*/}
-              </div>
-            
+
               {/* Añadir colaborador */}
-              <div className="pt-4 border-t space-y-3">
-                <label className="block text-sm font-medium text-gray-700">
-                  Añadir colaborador
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Buscar por nombre o correo"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <Select
+                    placeholder="Search by username, full name, or email"
+                    options={searchOptions}
+                    onInputChange={handleSearch}
+                    onChange={setSelectedUser}
+                    value={selectedUser}
+                    isClearable
                   />
-                  <span className="absolute left-3 top-2.5 text-gray-400">
-                    <Search size={18}/>
-                  </span>
                 </div>
                 <button
-                  onClick={null}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  onClick={handleAdd}
+                  disabled={!selectedUser}
+                  className={`px-6 py-2 rounded-lg font-medium ${selectedUser
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    }`}
                 >
                   Añadir
                 </button>
               </div>
+
+              {/* Listado de colaboradores existentes */}
+              {collaborators.length === 0 ? (
+                <p className="text-gray-500">No hay colaboradores aún.</p>
+              ) : (
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                  {collaborators.map((permiso) => (
+                    <div
+                      key={permiso.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div>
+                        <p className="font-medium">{permiso.usuario.username}</p>
+                        <p className="text-sm text-gray-500">{permiso.usuario.email}</p>
+                      </div>
+                      {isOwner && (
+                        <button
+                          onClick={() => handleRemove(permiso.id)}
+                          className="p-1 hover:text-red-600 text-gray-400"
+                        >
+                          <XCircle size={20} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
+
 
           {activeTab === "permissions" && (
             <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow space-y-6">
@@ -667,7 +711,7 @@ const APIDetail = () => {
               </h3>
 
               <div className="space-y-4">
-              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                   <input
                     type="radio"
                     id="privado"
@@ -752,105 +796,104 @@ const APIDetail = () => {
 
           {activeTab === "consume" && (
             <div className="bg-white p-6 rounded-xl shadow">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <FileTerminal className="w-5 h-5" />
-              Consumir la API
-            </h3>
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              {/* Nombre */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                <input
-                  type="text"
-                  name="nombre"
-                  value={apiData.nombre}
-                  onChange={handleChangeGeneral}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-              </div>
-
-              {/* Versión */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Versión</label>
-                <input
-                  type="text"
-                  name="documentacion"
-                  value={apiData.documentacion}
-                  onChange={handleChangeGeneral}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-              </div>
-
-              <div className="flex space-x-2 mb-4">
-                {metodosHttp.map((metodo) => (
-                  <button
-                    key={metodo}
-                    className={`px-3 py-1 rounded ${
-                      metodoActivo === metodo ? "bg-[#0077ba] text-white" : "bg-gray-200"
-                    }`}
-                    onClick={() => setMetodoActivo(metodo)}
-                    type="button"
-                  >
-                    {metodo}
-                  </button>
-                ))}
-              </div>
-
-              {/* Endpoint */}
-              <div className="grid grid-cols-2 gap-4">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <FileTerminal className="w-5 h-5" />
+                Consumir la API
+              </h3>
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                {/* Nombre */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Endpoint</label>
+                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
                   <input
                     type="text"
-                    value={metodoInfo.endpoint || ""}
-                    onChange={(e) => handleMetodoChange(metodoActivo, "endpoint", e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
-                    placeholder="/ejemplo"
+                    name="nombre"
+                    value={apiData.nombre}
+                    onChange={handleChangeGeneral}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                 </div>
-              </div>
 
-              {/* Body */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
-                <textarea
-                  rows={4}
-                  value={metodoInfo.parametros || ""}
-                  onChange={(e) => handleMetodoChange(metodoActivo, "parametros", e.target.value)}
-                  placeholder={`{\n  "param1": "valor1",\n  "param2": "valor2"\n}`}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm font-mono"
-                />
-              </div>
+                {/* Versión */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Versión</label>
+                  <input
+                    type="text"
+                    name="documentacion"
+                    value={apiData.documentacion}
+                    onChange={handleChangeGeneral}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
 
-              <div>
-  <label className="block text-sm font-medium text-gray-700">Respuesta</label>
-  {cargando ? (
-    <div className="mt-1 p-2 bg-yellow-100 rounded text-sm text-yellow-800 font-mono">
-      Cargando...
-    </div>
-  ) : (
-    <textarea
-      rows={6}
-      value={respuestaAPI}
-      readOnly
-      placeholder="Aquí se mostrará la respuesta de la API..."
-      className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm text-sm font-mono text-gray-700"
-    />
-  )}
-</div>
+                <div className="flex space-x-2 mb-4">
+                  {metodosHttp.map((metodo) => (
+                    <button
+                      key={metodo}
+                      className={`px-3 py-1 rounded ${metodoActivo === metodo ? "bg-[#0077ba] text-white" : "bg-gray-200"
+                        }`}
+                      onClick={() => setMetodoActivo(metodo)}
+                      type="button"
+                    >
+                      {metodo}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Endpoint */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Endpoint</label>
+                    <input
+                      type="text"
+                      value={metodoInfo.endpoint || ""}
+                      onChange={(e) => handleMetodoChange(metodoActivo, "endpoint", e.target.value)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                      placeholder="/ejemplo"
+                    />
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
+                  <textarea
+                    rows={4}
+                    value={metodoInfo.parametros || ""}
+                    onChange={(e) => handleMetodoChange(metodoActivo, "parametros", e.target.value)}
+                    placeholder={`{\n  "param1": "valor1",\n  "param2": "valor2"\n}`}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Respuesta</label>
+                  {cargando ? (
+                    <div className="mt-1 p-2 bg-yellow-100 rounded text-sm text-yellow-800 font-mono">
+                      Cargando...
+                    </div>
+                  ) : (
+                    <textarea
+                      rows={6}
+                      value={respuestaAPI}
+                      readOnly
+                      placeholder="Aquí se mostrará la respuesta de la API..."
+                      className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm text-sm font-mono text-gray-700"
+                    />
+                  )}
+                </div>
 
 
-              {/* Botón */}
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#0077ba] hover:bg-[#003366] transition text-white rounded"
-                >
-                  Consumir API
-                </button>
-              </div>
-            </form>
-          </div>
+                {/* Botón */}
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-[#0077ba] hover:bg-[#003366] transition text-white rounded"
+                  >
+                    Consumir API
+                  </button>
+                </div>
+              </form>
+            </div>
           )}
         </main>
       </div>
