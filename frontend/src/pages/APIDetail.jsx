@@ -13,8 +13,8 @@ import { API_BASE_URL } from "../config";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
-import Select from "react-select";
 import { XCircle } from "lucide-react";
+import AsyncSelect from 'react-select/async';
 
 //import { useRequireAuth } from "../hooks/useRequireAuth";
 
@@ -129,27 +129,36 @@ const APIDetail = () => {
     }
   }, [activeTab, apiId]);
   
-
-  const handleSearch = async (input) => {
-    if (!input) return;
-    const { data } = await axios.get(
-      `${API_BASE_URL}/usuarios/search/`,
-      { params: { q: input } }
-    );
-    setSearchOptions(data.map(u => ({
+  const loadUserOptions = async (inputValue) => {
+    if (!inputValue) return [];
+    const { data } = await axios.get(`${API_BASE_URL}/usuarios/search/`, {
+      params: { q: inputValue }
+    });
+    return data.map((u) => ({
       value: u.id,
-      label: `${u.username} — ${u.nombre_completo} (${u.email})`
-    })));
+      label: `${u.username} — ${u.nombres || ''} ${u.apellidos || ''} (${u.correo || u.email || ''})`,
+    }));
   };
 
-  // Añadir colaborador
   const handleAdd = async () => {
-    await axios.post(`${API_BASE_URL}/colaboradores/${apiId}/agregar/`, { usuario_id: selectedUser.value });
-    setSelectedUser(null);
-    setSearchOptions([]);
-    // refresca lista
-    const { data } = await axios.get(`${API_BASE_URL}/colaboradores/${apiId}/`);
-    setCollaborators(data);
+    if (!selectedUser) return;
+  
+    try {
+      await axios.post(`${API_BASE_URL}/colaborador/agregar`, {
+        api_id: apiId,            // el id actual de la API
+        colaborador_id: selectedUser.value, // id del usuario seleccionado
+      });
+  
+      setSelectedUser(null);
+      setSearchOptions([]);
+  
+      // Refrescar la lista de colaboradores
+      const { data } = await axios.get(`${API_BASE_URL}/colaboradores/${apiId}/`);
+      setCollaborators(data);
+  
+    } catch (error) {
+      alert(error.response?.data?.message || 'Error al añadir colaborador');
+    }
   };
 
   // Eliminar colaborador
@@ -651,14 +660,14 @@ const APIDetail = () => {
               {/* Añadir colaborador */}
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <Select
-                    placeholder="Search by username, full name, or email"
-                    options={searchOptions}
-                    onInputChange={handleSearch}
-                    onChange={setSelectedUser}
-                    value={selectedUser}
-                    isClearable
-                  />
+                <AsyncSelect
+                  cacheOptions
+                  loadOptions={loadUserOptions}
+                  onChange={(option) => setSelectedUser(option)}
+                  value={selectedUser}
+                  placeholder="Búsqueda por usuario, nombres o email."
+                  isClearable
+                />
                 </div>
                 <button
                   onClick={handleAdd}

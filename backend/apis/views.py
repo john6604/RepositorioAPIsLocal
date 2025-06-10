@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import API
 from rest_framework import viewsets
-from .models import API, MetodoApi
+from .models import API, MetodoApi, PermisoApi
 from .serializers import APISerializer, CategoriaSerializer, SubcategoriaSerializer, TematicaSerializer
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
@@ -22,6 +22,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponseBadRequest
 from .models import Categoria, Subcategoria, Tematica
+from django.shortcuts import get_object_or_404
 import requests
 
 import numpy as np
@@ -878,3 +879,53 @@ def search_users(request):
         for u in usuarios
     ]
     return JsonResponse(data, safe=False)
+
+# Vista para añadir colaboradores
+@method_decorator(csrf_exempt, name='dispatch')
+class AddCollaboratorView(View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            api_id = data.get('api_id')
+            colaborador_id = data.get('colaborador_id')
+
+            if not api_id or not colaborador_id:
+                return JsonResponse({'error': 'api_id and colaborador_id are required'}, status=400)
+
+            api = get_object_or_404(API, id=api_id)
+            colaborador = get_object_or_404(Usuario, id=colaborador_id)
+
+            # Verificar si ya existe el permiso para evitar duplicados
+            permiso, created = PermisoApi.objects.get_or_create(api=api, colaborador=colaborador)
+
+            if not created:
+                return JsonResponse({'message': 'El colaborador ya existe para esta API'}, status=400)
+
+            return JsonResponse({'message': 'Colaborador añadido correctamente'}, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'JSON inválido'}, status=400)
+
+# Listar Colaboradores
+def list_collaborators(request, api_id):
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    api = get_object_or_404(API, id=api_id)
+    permisos = PermisoApi.objects.filter(api=api).select_related('colaborador')
+
+    colaboradores = []
+    for permiso in permisos:
+        u = permiso.colaborador
+        colaboradores.append({
+            'id': permiso.id,
+            'usuario': {
+                'id': u.id,
+                'username': u.username,
+                'email': u.correo or getattr(u, 'email', ''),
+                'nombres': u.nombres,
+                'apellidos': u.apellidos,
+            }
+        })
+
+    return JsonResponse(colaboradores, safe=False)
