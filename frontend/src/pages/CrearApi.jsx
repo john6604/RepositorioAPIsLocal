@@ -5,6 +5,8 @@ import { API_BASE_URL } from "../config";
 import { motion } from "framer-motion";
 import { useRequireAuth } from "../hooks/useRequireAuth";
 import axios from "axios";
+import { useRef } from "react";
+import { UploadCloud } from "lucide-react";
 
 
 const metodosHttp = ["GET", "POST", "PUT", "DELETE", "PATCH"];
@@ -22,6 +24,11 @@ const CrearApi = () => {
   const [subcategoria, setSubcategoria] = useState("");
   const [tematica, setTematica] = useState("");
   const [detallesTecnicos, setDetallesTecnicos] = useState("");
+  // → Modo de entrada para detalles técnicos: texto o archivo
+  const [modoDetalle, setModoDetalle] = useState("text");   // 'text' | 'file'
+  const [fileError, setFileError] = useState("");
+  const [fileName, setFileName] = useState("");
+  const fileInputRef = useRef(null);
 
 
   const [datosMetodo, setDatosMetodo] = useState({
@@ -61,7 +68,7 @@ const CrearApi = () => {
             "Content-Type": "application/json",
           },
         });
-  
+
         if (response.ok) {
           const data = await response.json();
           setFormData({
@@ -76,7 +83,7 @@ const CrearApi = () => {
         alert("No se pudo cargar el perfil.");
       }
     };
-  
+
     fetchPerfil();
   }, []);
 
@@ -136,16 +143,59 @@ const CrearApi = () => {
       alert("Error al enviar la solicitud");
     }
   };*/
+  // --- Funciones para leer y validar .txt ---
+  const handleFile = (file) => {
+    // validaciones
+    if (file.type !== "text/plain") {
+      setFileError("Formato inválido: sólo .txt");
+      return;
+    }
+    if (file.size > 50 * 1024) {
+      setFileError("Archivo muy grande (máx. 50KB)");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // RAW: texto con saltos de línea
+      const raw = e.target.result;
+      // FORMATEADO: separa líneas, quita vacíos, une con comas
+      const formatted = raw
+        .split(/\r?\n/)       // separa en líneas
+        .map(l => l.trim())   // quita espacios
+        .filter(Boolean)      // elimina líneas vacías
+        .join(", ");          // une con comas
+      setDetallesTecnicos(formatted);
+      setFileName(file.name);
+      setFileError("");
+    };
+    reader.readAsText(file);
+  };
+
+
+  const onFileChange = (e) => {
+    if (e.target.files.length > 0) {
+      handleFile(e.target.files[0]);
+    }
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length > 0) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  };
+  const onDragOver = (e) => e.preventDefault();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const tokenSesion = localStorage.getItem("token_sesion");
     if (!tokenSesion) {
       alert("No se encontró token de sesión");
       return;
     }
-  
+
     const nuevaApi = {
       nombre,
       descripcion,
@@ -157,27 +207,27 @@ const CrearApi = () => {
       detalles_tecnicos: detallesTecnicos, // <- aquí va el campo nuevo
 
     };
-  
+
     try {
       const response = await fetch(`${API_BASE_URL}/crearapimetodos/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${tokenSesion}`,  
+          "Authorization": `Bearer ${tokenSesion}`,
         },
         body: JSON.stringify(nuevaApi),
       });
-  
+
       const data = await response.json();
       console.log("Respuesta del servidor:", data);
-  
+
       if (response.ok) {
         alert("API creada correctamente");
         navigate("/dashboard");
       } else {
         alert("Error al crear la API: " + data.error);
       }
-  
+
     } catch (error) {
       console.error("Error de red:", error);
       alert("Error al enviar la solicitud");
@@ -253,22 +303,93 @@ const CrearApi = () => {
             />
           </div>
 
-             {/* Detalles técnicos (requerimientos) */}
-             <div>
+          {/* Detalles técnicos (requerimientos) */}
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Detalles técnicos / Requerimientos
             </label>
-            <textarea
-              value={detallesTecnicos}
-              onChange={(e) => setDetallesTecnicos(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
-              rows={2}
-              placeholder="numpy, pandas, scikit-learn"
-            />
+            <div className="flex items-center space-x-4 mb-2">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  className="form-radio"
+                  name="modoDetalle"
+                  value="text"
+                  checked={modoDetalle === "text"}
+                  onChange={() => {
+                    setModoDetalle("text");
+                    setFileError("");
+                    setFileName("");
+                  }}
+                />
+                <span className="ml-2 text-sm">Escribir texto</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  className="form-radio"
+                  name="modoDetalle"
+                  value="file"
+                  checked={modoDetalle === "file"}
+                  onChange={() => {
+                    setModoDetalle("file");
+                    setDetallesTecnicos("");
+                  }}
+                />
+                <span className="ml-2 text-sm">Subir archivo .txt</span>
+              </label>
+            </div>
+
+            {modoDetalle === "text" ? (
+              <textarea
+                value={detallesTecnicos}
+                onChange={(e) => setDetallesTecnicos(e.target.value)}
+                className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
+                rows={2}
+                placeholder="numpy, pandas, scikit-learn"
+              />
+            ) : (
+              <>
+                <div
+                  onDragOver={onDragOver}
+                  onDrop={onDrop}
+                  onClick={() => fileInputRef.current.click()}
+                  className="mt-1 w-full px-4 py-8 border-2 border-dashed rounded-md text-center cursor-pointer text-gray-600 hover:bg-gray-50"
+                >
+                  <UploadCloud className="mx-auto mb-2" size={32} />
+                  <p className="text-sm">
+                    Arrastra tu .txt aquí, o haz clic para seleccionar
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  accept=".txt"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={onFileChange}
+                />
+                {fileError && (
+                  <p className="mt-1 text-sm text-red-500">{fileError}</p>
+                )}
+                {fileName && (
+                  <p className="mt-1 text-sm text-green-600">
+                    Archivo cargado: <strong>{fileName}</strong>
+                  </p>
+                )}
+                <textarea
+                  value={detallesTecnicos}
+                  readOnly
+                  className="mt-2 w-full px-4 py-2 border rounded-md text-sm font-mono bg-gray-100"
+                  rows={3}
+                />
+              </>
+            )}
+
             <p className="text-xs text-gray-500 mt-1">
               Lista de librerías requeridas separadas por comas.
             </p>
           </div>
+
 
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -337,11 +458,10 @@ const CrearApi = () => {
                 <button
                   key={method}
                   onClick={() => setMetodoActivo(method)}
-                  className={`flex-1 py-3 text-sm font-semibold transition-colors duration-300 ${
-                    metodoActivo === method
-                      ? "bg-[#0077ba] text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
+                  className={`flex-1 py-3 text-sm font-semibold transition-colors duration-300 ${metodoActivo === method
+                    ? "bg-[#0077ba] text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
                   type="button"
                 >
                   {method}
@@ -428,7 +548,7 @@ const CrearApi = () => {
             </motion.div>
           </div>
 
-       
+
 
           {/* Botón */}
           <button

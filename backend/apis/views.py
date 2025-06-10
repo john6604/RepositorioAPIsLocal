@@ -884,51 +884,50 @@ def search_users(request):
 import traceback
 
 @api_view(['POST'])
-def agregar_colaborador(request, api_id):
+def agregar_colaborador(request):
+    api_id = request.data.get("api_id")
     colaborador_id = request.data.get("colaborador_id")
 
-    if not colaborador_id:
-        return Response({"error": "El campo 'usuario_id' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+    if not api_id or not colaborador_id:
+        return Response({"message": "Faltan parámetros."}, status=status.HTTP_400_BAD_REQUEST)
 
-    api = get_object_or_404(API, id=api_id)
-    colaborador = get_object_or_404(Usuario, id=colaborador_id)
+    try:
+        api = API.objects.get(id=api_id)
+        colaborador = User.objects.get(id=colaborador_id)
 
-    # Verificar si ya existe el permiso
-    if PermisoApi.objects.filter(api=api, colaborador=colaborador).exists():
-        return Response({"error": "Este colaborador ya está asignado a la API."}, status=status.HTTP_400_BAD_REQUEST)
+        # Evitar duplicados
+        if PermisoAPI.objects.filter(api=api, usuario=colaborador).exists():
+            return Response({"message": "Este usuario ya es colaborador."}, status=status.HTTP_400_BAD_REQUEST)
 
-    permiso = PermisoApi.objects.create(api=api, colaborador=colaborador)
+        PermisoAPI.objects.create(api=api, usuario=colaborador)
+        return Response({"message": "Colaborador agregado."}, status=status.HTTP_201_CREATED)
 
-    return Response({
-        "mensaje": "Colaborador agregado correctamente.",
-        "id": permiso.id,
-        "api": api.id,
-        "colaborador": {
-            "id": colaborador.id,
-            "username": colaborador.username,
-            "correo": colaborador.correo,
-        }
-    }, status=status.HTTP_201_CREATED)
+    except API.DoesNotExist:
+        return Response({"message": "API no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+    except User.DoesNotExist:
+        return Response({"message": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
 # Listar Colaboradores
 @api_view(['GET'])
 def listar_colaboradores(request, api_id):
-    api = get_object_or_404(API, id=api_id)
-    permisos = PermisoApi.objects.filter(api=api).select_related('colaborador')
+    try:
+        api = API.objects.get(id=api_id)
+        permisos = PermisoAPI.objects.filter(api=api).select_related("usuario")
 
-    colaboradores_data = [
-        {
-            "id": permiso.id,
-            "usuario": {
-                "id": permiso.colaborador.id,
-                "username": permiso.colaborador.username,
-                "correo": permiso.colaborador.correo,
-                "nombres": permiso.colaborador.nombres,
-                "apellidos": permiso.colaborador.apellidos,
-            },
-            "creado_en": permiso.creado_en,
-        }
-        for permiso in permisos
-    ]
+        data = [
+            {
+                "id": permiso.id,
+                "usuario": {
+                    "id": permiso.usuario.id,
+                    "username": permiso.usuario.username,
+                    "email": permiso.usuario.email,
+                    "nombre_completo": f"{permiso.usuario.first_name} {permiso.usuario.last_name}".strip()
+                }
+            }
+            for permiso in permisos
+        ]
 
-    return Response(colaboradores_data, status=status.HTTP_200_OK)
+        return Response(data)
+
+    except API.DoesNotExist:
+        return Response({"message": "API no encontrada."}, status=status.HTTP_404_NOT_FOUND)
