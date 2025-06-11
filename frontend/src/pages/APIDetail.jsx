@@ -4,7 +4,6 @@ import {
   Users,
   Lock,
   Code2,
-  Search,
   FileTerminal,
 } from "lucide-react";
 import DashboardNavbar from "../componentes/DashboardNavbar";
@@ -115,11 +114,16 @@ const APIDetail = () => {
   const [usuarioActualId, setUsuarioActualId] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
   // Estados para la sección de colaboradores
-  const [searchOptions, setSearchOptions] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [collaborators, setCollaborators] = useState([]);
 
-  // Al montar, carga los colaboradores actuales
+  useEffect(() => {
+      axios
+        .get(`${API_BASE_URL}/colaboradores/${apiId}/`)
+        .then(res => setCollaborators(res.data))
+        .catch(() => setCollaborators([]));
+  }, [activeTab, apiId]);
+
   useEffect(() => {
     if (activeTab === "colaborators") {
       axios
@@ -150,9 +154,9 @@ const APIDetail = () => {
       });
   
       setSelectedUser(null);
-      setSearchOptions([]);
   
       const { data } = await axios.get(`${API_BASE_URL}/colaboradores/${apiId}/`);
+      console.log(data);
       setCollaborators(data);
   
     } catch (error) {
@@ -374,12 +378,24 @@ const APIDetail = () => {
   }, [apiData.metodos]);
 
   useEffect(() => {
-    if (usuarioActualId && apiData?.creado_por) {
-      setIsOwner(usuarioActualId === apiData.creado_por);
-    } else {
+    if (!usuarioActualId || !apiData) {
       setIsOwner(false);
+      return;
     }
-  }, [usuarioActualId, apiData]);
+  
+    const esOwner = Number(usuarioActualId) === Number(apiData.creado_por);
+    const esColaborador = collaborators.some(
+      (colab) => Number(colab.usuario?.id) === Number(usuarioActualId)
+    );
+  
+    console.log("Usuario actual:", usuarioActualId);
+    console.log("Owner:", apiData?.creado_por);
+    console.log("Colaboradores:", collaborators.map(c => c.usuario?.id));
+    console.log("¿Es owner?", esOwner);
+    console.log("¿Es colaborador?", esColaborador);
+  
+    setIsOwner(esOwner || esColaborador);
+  }, [usuarioActualId, apiData, collaborators]);
 
   if (loading || !apiData) {
     return (

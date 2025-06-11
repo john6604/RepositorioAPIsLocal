@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 const Dashboard = () => {
-  useRequireAuth(); // <- aquí aplicamos la protección
+  useRequireAuth(); 
 
   const [apis, setApis] = useState([]);
   const [stats, setStats] = useState({ total: 0, public: 0, private: 0, draft: 0 });

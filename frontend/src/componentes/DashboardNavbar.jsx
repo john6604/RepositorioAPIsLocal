@@ -83,9 +83,6 @@ const DashboardNavbar = () => {
             bio: data.biografia || "",
             username: data.username || "",
           });
-        } else {
-          const err = await response.json();
-          {/*alert("Error al obtener perfil: " + err.detail);*/}
         }
       } catch (error) {
         console.error("Error:", error);

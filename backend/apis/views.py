@@ -264,7 +264,6 @@ def validar_sesion(request):
 @api_view(['POST'])
 @csrf_exempt
 def apis_por_usuario(request):
-    
     try:
         data = request.data 
         token = data.get("token_sesion")
@@ -272,16 +271,30 @@ def apis_por_usuario(request):
         if not token:
             return Response({'error': 'Token de sesión no proporcionado'}, status=400)
 
+        sesion = Sesion.objects.filter(
+            token_sesion=token,
+            activa=True,
+            expira_en__gt=timezone.now()
+        ).first()
 
-        sesion = Sesion.objects.filter(token_sesion=token, activa=True, expira_en__gt=timezone.now()).first()
         if not sesion:
             return Response({'error': 'Sesión no válida o expirada'}, status=401)
 
-        usuario_id = sesion.usuario.id
+        usuario = sesion.usuario
 
-        apis = API.objects.filter(creado_por_id=usuario_id)
-        data = [
-            {
+        # APIs creadas por el usuario
+        apis_creadas = API.objects.filter(creado_por=usuario).distinct()
+
+        # APIs en las que el usuario es colaborador (excluyendo las ya creadas por él)
+        apis_colaborador = API.objects.filter(
+            permisoapi__colaborador=usuario
+        ).exclude(creado_por=usuario).distinct()
+
+        # Unimos las listas con un flag `es_colaborador`
+        data = []
+
+        for api in apis_creadas:
+            data.append({
                 'id': api.id,
                 'nombre': api.nombre,
                 'permiso': api.permiso,
@@ -290,9 +303,19 @@ def apis_por_usuario(request):
                 "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
                 "username": f"{api.creado_por.username}" if api.creado_por else "Sin autor",
                 "rol": f"{api.creado_por.rol}" if api.creado_por and api.creado_por.rol else "Sin rol",
-            }
-            for api in apis
-        ]
+            })
+
+        for api in apis_colaborador:
+            data.append({
+                'id': api.id,
+                'nombre': api.nombre,
+                'permiso': api.permiso,
+                'estado': api.estado,
+                'descripcion': api.descripcion,
+                "autor": f"{api.creado_por.nombres} {api.creado_por.apellidos}" if api.creado_por else "Sin autor",
+                "username": f"{api.creado_por.username}" if api.creado_por else "Sin autor",
+                "rol": f"{api.creado_por.rol}" if api.creado_por and api.creado_por.rol else "Sin rol",
+            })
 
         return Response(data)
 
