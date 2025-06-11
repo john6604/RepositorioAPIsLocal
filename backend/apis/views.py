@@ -291,10 +291,10 @@ def apis_por_usuario(request):
         ).exclude(creado_por=usuario).distinct()
 
         # Unimos las listas con un flag `es_colaborador`
-        data = []
+        apis_list = []
 
         for api in apis_creadas:
-            data.append({
+            apis_list.append({
                 'id': api.id,
                 'nombre': api.nombre,
                 'permiso': api.permiso,
@@ -306,7 +306,7 @@ def apis_por_usuario(request):
             })
 
         for api in apis_colaborador:
-            data.append({
+            apis_list.append({
                 'id': api.id,
                 'nombre': api.nombre,
                 'permiso': api.permiso,
@@ -317,7 +317,34 @@ def apis_por_usuario(request):
                 "rol": f"{api.creado_por.rol}" if api.creado_por and api.creado_por.rol else "Sin rol",
             })
 
-        return Response(data)
+        # Si no hay APIs, enviamos un objeto especial con solo el rol
+        if not apis_list:
+            apis_list = [{
+                "id": None,
+                "nombre": None,
+                "permiso": None,
+                "estado": None,
+                "descripcion": None,
+                "autor": None,
+                "username": None,
+                "rol": usuario.rol if usuario and usuario.rol else "Sin rol",
+                "es_rol": True  # para que el frontend identifique este objeto especial
+            }]
+        else:
+            # Opcional: añadir el objeto rol al final para que frontend pueda leerlo
+            apis_list.append({
+                "id": None,
+                "nombre": None,
+                "permiso": None,
+                "estado": None,
+                "descripcion": None,
+                "autor": None,
+                "username": None,
+                "rol": usuario.rol if usuario and usuario.rol else "Sin rol",
+                "es_rol": True
+            })
+
+        return Response(apis_list)
 
     except Exception as e:
         print("Error:", str(e))
