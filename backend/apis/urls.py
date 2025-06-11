@@ -33,4 +33,5 @@ urlpatterns = [
     path('colaborador/agregar/', views.agregar_colaborador, name='add-collaborator'),
     path('colaboradores/<int:api_id>/', views.listar_colaboradores, name='list-collaborators'),
     path('colaboradores/eliminar/<int:perm_id>/', views.eliminar_colaborador, name='eliminar_colaborador'),
+    path('rolusuario/', views.rol_por_token, name='rol_por_token'),
 ]

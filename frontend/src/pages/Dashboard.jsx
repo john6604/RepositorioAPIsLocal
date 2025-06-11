@@ -34,6 +34,30 @@ const Dashboard = () => {
   const tokenSesion = localStorage.getItem("token_sesion");
 
   useEffect(() => {
+    const fetchRol = async () => {
+      try {
+        const response = await axios.post(
+          `${API_BASE_URL}/rolusuario/`,
+          { token_sesion: tokenSesion },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        if (response.data.rol) {
+          setRolUsuario(response.data.rol);
+        } else {
+          setRolUsuario("Sin rol");
+        }
+      } catch (error) {
+        console.error("No se pudo obtener el rol:", error);
+        setRolUsuario(null);
+      }
+    };
+
+    if (tokenSesion) {
+      fetchRol();
+    }
+  }, [tokenSesion]);
+  
+  useEffect(() => {
     const fetchApis = async () => {
       try {
         const { data } = await axios.post(

@@ -260,6 +260,38 @@ def validar_sesion(request):
     else:
         return JsonResponse({"error": "Método no permitido."}, status=405)
         
+# Obtener rol
+@api_view(['POST'])
+@csrf_exempt
+def rol_por_token(request):
+    try:
+        data = request.data
+        token = data.get("token_sesion")
+
+        if not token:
+            return Response({'error': 'Token de sesión no proporcionado'}, status=400)
+
+        sesion = Sesion.objects.filter(
+            token_sesion=token,
+            activa=True,
+            expira_en__gt=timezone.now()
+        ).first()
+
+        if not sesion:
+            return Response({'error': 'Sesión no válida o expirada'}, status=401)
+
+        usuario = sesion.usuario
+
+        rol = getattr(usuario, 'rol', None)
+        if not rol:
+            rol = "Sin rol"
+
+        return Response({'rol': rol})
+
+    except Exception as e:
+        print("Error:", str(e))
+        return Response({'error': str(e)}, status=500)
+
 # Filtrar APIs por usuario, vista
 @api_view(['POST'])
 @csrf_exempt
