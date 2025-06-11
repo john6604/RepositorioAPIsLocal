@@ -44,8 +44,10 @@ const Dashboard = () => {
 
         setApis(data);
         if (data.length > 0 && data[0].rol !== undefined) {
+          console.log(data[0].rol);
           setRolUsuario(data[0].rol);
         }
+
         setStats({
           total: data.length,
           public: data.filter(a => a.permiso === "publico").length,
@@ -141,11 +143,13 @@ const Dashboard = () => {
                   <Bookmark className="w-5 h-5 text-gray-600" /> Guardadas
                 </button>
               </li>
-              <li>
-                <Link to="/crear" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
-                  <PlusCircle className="w-5 h-5 text-gray-600" /> Crear API
-                </Link>
-              </li>
+              {(rolUsuario === "Administrador" || rolUsuario === "Desarrollador") && (
+                <li>
+                  <Link to="/crear" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
+                    <PlusCircle className="w-5 h-5 text-gray-600" /> Crear API
+                  </Link>
+                </li>
+              )}
               {rolUsuario === "Administrador" && (
                 <>
                   <li>

@@ -291,10 +291,10 @@ def apis_por_usuario(request):
         ).exclude(creado_por=usuario).distinct()
 
         # Unimos las listas con un flag `es_colaborador`
-        data = []
+        apis_list = []
 
         for api in apis_creadas:
-            data.append({
+            apis_list.append({
                 'id': api.id,
                 'nombre': api.nombre,
                 'permiso': api.permiso,
@@ -306,7 +306,7 @@ def apis_por_usuario(request):
             })
 
         for api in apis_colaborador:
-            data.append({
+            apis_list.append({
                 'id': api.id,
                 'nombre': api.nombre,
                 'permiso': api.permiso,
@@ -317,7 +317,12 @@ def apis_por_usuario(request):
                 "rol": f"{api.creado_por.rol}" if api.creado_por and api.creado_por.rol else "Sin rol",
             })
 
-        return Response(data)
+        response_data = {
+            "rol_usuario": usuario.rol if usuario and usuario.rol else "Sin rol",
+            "apis": apis_list
+        }
+
+        return Response(response_data)
 
     except Exception as e:
         print("Error:", str(e))
