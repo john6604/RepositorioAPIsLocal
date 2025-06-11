@@ -56,7 +56,7 @@ const Dashboard = () => {
       fetchRol();
     }
   }, [tokenSesion]);
-  
+
   useEffect(() => {
     const fetchApis = async () => {
       try {
@@ -67,9 +67,6 @@ const Dashboard = () => {
         );
 
         setApis(data);
-        if (data.length > 0 && data[0].rol !== undefined) {
-          setRolUsuario(data[0].rol);
-        }
 
         setStats({
           total: data.length,

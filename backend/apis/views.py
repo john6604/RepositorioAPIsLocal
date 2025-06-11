@@ -63,7 +63,7 @@ def registrar_usuario(request):
                     nombres         = nombres,
                     apellidos       = None,
                     estado          = "activo",
-                    rol_id          = 2,
+                    rol_id          = 3,
                     creado_en       = timezone.now(),
                     actualizado_en  = timezone.now(),
                     origen          = origen
