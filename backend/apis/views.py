@@ -261,6 +261,7 @@ def validar_sesion(request):
         return JsonResponse({"error": "Método no permitido."}, status=405)
         
 # Obtener rol
+import traceback
 @api_view(['POST'])
 @csrf_exempt
 def rol_por_token(request):
@@ -289,8 +290,10 @@ def rol_por_token(request):
         return Response({'rol': rol})
 
     except Exception as e:
-        print("Error:", str(e))
-        return Response({'error': str(e)}, status=500)
+        # Imprime la traza completa en consola para debug
+        traceback_str = traceback.format_exc()
+        print(traceback_str)
+        return Response({'error': str(e), 'trace': traceback_str}, status=500)
 
 # Filtrar APIs por usuario, vista
 @api_view(['POST'])
