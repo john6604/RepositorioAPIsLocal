@@ -81,7 +81,7 @@ class API(models.Model):
     creado_en         = models.DateTimeField(auto_now_add=True, null=True)
     actualizado_en    = models.DateTimeField(auto_now=True, null=True)
     colaboradores     = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
+        Usuario,
         through='PermisoApi',
         related_name='apis_colaborando',
     )
