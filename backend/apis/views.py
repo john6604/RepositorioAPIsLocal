@@ -124,6 +124,8 @@ def login_usuario(request):
                         contrasena_hash=make_password(clave),  
                         nombres=nombres,
                         apellidos=apellidos,
+                        rol_id=3,
+                        estado="activo",
                         origen="google"
                     )
                 else:
