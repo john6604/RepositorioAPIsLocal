@@ -120,7 +120,7 @@ class PermisoApi(models.Model):
         blank=True,
     )
     colaborador = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        Usuario,
         on_delete=models.CASCADE,
         db_column="colaborador_id",
         null=True,
