@@ -881,8 +881,6 @@ def search_users(request):
     return JsonResponse(data, safe=False)
 
 # Vista para añadir colaboradores
-import traceback
-
 @api_view(['POST'])
 def agregar_colaborador(request):
     api_id = request.data.get("api_id")
@@ -893,41 +891,46 @@ def agregar_colaborador(request):
 
     try:
         api = API.objects.get(id=api_id)
-        colaborador = User.objects.get(id=colaborador_id)
+        colaborador = Usuario.objects.get(id=colaborador_id)
 
-        # Evitar duplicados
-        if PermisoAPI.objects.filter(api=api, usuario=colaborador).exists():
+        if PermisoApi.objects.filter(api=api, colaborador=colaborador).exists():
             return Response({"message": "Este usuario ya es colaborador."}, status=status.HTTP_400_BAD_REQUEST)
 
-        PermisoAPI.objects.create(api=api, usuario=colaborador)
+        PermisoApi.objects.create(api=api, colaborador=colaborador)
         return Response({"message": "Colaborador agregado."}, status=status.HTTP_201_CREATED)
 
     except API.DoesNotExist:
         return Response({"message": "API no encontrada."}, status=status.HTTP_404_NOT_FOUND)
-    except User.DoesNotExist:
+    except Usuario.DoesNotExist:
         return Response({"message": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print("Error inesperado en agregar_colaborador:", e)
+        return Response({"message": "Error interno del servidor."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # Listar Colaboradores
 @api_view(['GET'])
 def listar_colaboradores(request, api_id):
     try:
         api = API.objects.get(id=api_id)
-        permisos = PermisoAPI.objects.filter(api=api).select_related("usuario")
+        permisos = PermisoApi.objects.filter(api=api).select_related("colaborador")
 
-        data = [
-            {
+        data = []
+        for permiso in permisos:
+            colaborador = permiso.colaborador
+            data.append({
                 "id": permiso.id,
                 "usuario": {
-                    "id": permiso.usuario.id,
-                    "username": permiso.usuario.username,
-                    "email": permiso.usuario.email,
-                    "nombre_completo": f"{permiso.usuario.first_name} {permiso.usuario.last_name}".strip()
+                    "id": colaborador.id,
+                    "username": colaborador.username,
+                    "email": colaborador.correo,
+                    "nombre_completo": f"{colaborador.nombres or ''} {colaborador.apellidos or ''}".strip()
                 }
-            }
-            for permiso in permisos
-        ]
+            })
 
-        return Response(data)
+        return Response(data, status=200)
 
     except API.DoesNotExist:
-        return Response({"message": "API no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "API no encontrada."}, status=404)
+    except Exception as e:
+        print("Error inesperado en listar_colaboradores:", e)
+        return Response({"message": "Error interno del servidor."}, status=500)
