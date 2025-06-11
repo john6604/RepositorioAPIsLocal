@@ -890,13 +890,20 @@ def agregar_colaborador(request):
         return Response({"message": "Faltan parámetros."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
+        print(f"Buscando API con id={api_id}")
         api = API.objects.get(id=api_id)
+        
+        print(f"Buscando Usuario con id={colaborador_id}")
         colaborador = Usuario.objects.get(id=colaborador_id)
-
+        
+        print("Verificando duplicados...")
         if PermisoApi.objects.filter(api=api, colaborador=colaborador).exists():
             return Response({"message": "Este usuario ya es colaborador."}, status=status.HTTP_400_BAD_REQUEST)
 
+        print("Creando PermisoApi...")
         PermisoApi.objects.create(api=api, colaborador=colaborador)
+
+        print("Colaborador agregado correctamente.")
         return Response({"message": "Colaborador agregado."}, status=status.HTTP_201_CREATED)
 
     except API.DoesNotExist:
@@ -904,7 +911,8 @@ def agregar_colaborador(request):
     except Usuario.DoesNotExist:
         return Response({"message": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        print("Error inesperado en agregar_colaborador:", e)
+        import traceback
+        traceback.print_exc()
         return Response({"message": "Error interno del servidor."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # Listar Colaboradores
