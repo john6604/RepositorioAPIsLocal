@@ -43,10 +43,7 @@ const Dashboard = () => {
         );
 
         setApis(data);
-        if (data.length > 0 && data[0].rol !== undefined) {
-          console.log(data[0].rol);
-          setRolUsuario(data[0].rol);
-        }
+        setRolUsuario(data[0].rol);
 
         setStats({
           total: data.length,
