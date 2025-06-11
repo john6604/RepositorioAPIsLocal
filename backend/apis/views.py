@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import API
 from rest_framework import viewsets
-from .models import API, MetodoApi
+from .models import API, MetodoApi, PermisoApi
 from .serializers import APISerializer, CategoriaSerializer, SubcategoriaSerializer, TematicaSerializer
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
@@ -22,6 +22,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponseBadRequest
 from .models import Categoria, Subcategoria, Tematica
+from django.shortcuts import get_object_or_404
 import requests
 
 import numpy as np
@@ -854,3 +855,90 @@ class SubcategoriaListView(generics.ListAPIView):
 class TematicaListView(generics.ListAPIView):
     queryset = Tematica.objects.all()
     serializer_class = TematicaSerializer
+
+# Vista para buscar colaboradores
+def search_users(request):
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse([], safe=False)
+
+    usuarios = Usuario.objects.filter(
+        Q(username__icontains=query) |
+        Q(correo__icontains=query) |
+        Q(nombres__icontains=query) |
+        Q(apellidos__icontains=query)
+    )
+
+    data = [
+        {
+            "id": u.id,
+            "username": u.username,
+            "email": u.correo,
+            "nombre_completo": f"{u.nombres or ''} {u.apellidos or ''}".strip()
+        }
+        for u in usuarios
+    ]
+    return JsonResponse(data, safe=False)
+
+# Vista para añadir colaboradores
+@api_view(['POST'])
+def agregar_colaborador(request):
+    api_id = request.data.get("api_id")
+    colaborador_id = request.data.get("colaborador_id")
+
+    if not api_id or not colaborador_id:
+        return Response({"message": "Faltan parámetros."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        print(f"Buscando API con id={api_id}")
+        api = API.objects.get(id=api_id)
+        
+        print(f"Buscando Usuario con id={colaborador_id}")
+        colaborador = Usuario.objects.get(id=colaborador_id)
+        
+        print("Verificando duplicados...")
+        if PermisoApi.objects.filter(api=api, colaborador=colaborador).exists():
+            return Response({"message": "Este usuario ya es colaborador."}, status=status.HTTP_400_BAD_REQUEST)
+
+        print("Creando PermisoApi...")
+        PermisoApi.objects.create(api=api, colaborador=colaborador)
+
+        print("Colaborador agregado correctamente.")
+        return Response({"message": "Colaborador agregado."}, status=status.HTTP_201_CREATED)
+
+    except API.DoesNotExist:
+        return Response({"message": "API no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+    except Usuario.DoesNotExist:
+        return Response({"message": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response({"message": "Error interno del servidor."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Listar Colaboradores
+@api_view(['GET'])
+def listar_colaboradores(request, api_id):
+    try:
+        api = API.objects.get(id=api_id)
+        permisos = PermisoApi.objects.filter(api=api).select_related("colaborador")
+
+        data = []
+        for permiso in permisos:
+            colaborador = permiso.colaborador
+            data.append({
+                "id": permiso.id,
+                "usuario": {
+                    "id": colaborador.id,
+                    "username": colaborador.username,
+                    "email": colaborador.correo,
+                    "nombre_completo": f"{colaborador.nombres or ''} {colaborador.apellidos or ''}".strip()
+                }
+            })
+
+        return Response(data, status=200)
+
+    except API.DoesNotExist:
+        return Response({"message": "API no encontrada."}, status=404)
+    except Exception as e:
+        print("Error inesperado en listar_colaboradores:", e)
+        return Response({"message": "Error interno del servidor."}, status=500)
