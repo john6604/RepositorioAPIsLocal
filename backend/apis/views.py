@@ -261,6 +261,8 @@ def validar_sesion(request):
         return JsonResponse({"error": "Método no permitido."}, status=405)
         
 # Filtrar APIs por usuario, vista
+import traceback
+
 @api_view(['POST'])
 @csrf_exempt
 def apis_por_usuario(request):
@@ -291,10 +293,10 @@ def apis_por_usuario(request):
         ).exclude(creado_por=usuario).distinct()
 
         # Unimos las listas con un flag `es_colaborador`
-        apis_list = []
+        data = []
 
         for api in apis_creadas:
-            apis_list.append({
+            data.append({
                 'id': api.id,
                 'nombre': api.nombre,
                 'permiso': api.permiso,
@@ -306,7 +308,7 @@ def apis_por_usuario(request):
             })
 
         for api in apis_colaborador:
-            apis_list.append({
+            data.append({
                 'id': api.id,
                 'nombre': api.nombre,
                 'permiso': api.permiso,
@@ -318,8 +320,8 @@ def apis_por_usuario(request):
             })
 
         # Si no hay APIs, enviamos un objeto especial con solo el rol
-        if not apis_list:
-            apis_list = [{
+        if not data:
+            data = [{
                 "id": None,
                 "nombre": None,
                 "permiso": None,
@@ -332,7 +334,7 @@ def apis_por_usuario(request):
             }]
         else:
             # Opcional: añadir el objeto rol al final para que frontend pueda leerlo
-            apis_list.append({
+            data.append({
                 "id": None,
                 "nombre": None,
                 "permiso": None,
@@ -344,11 +346,12 @@ def apis_por_usuario(request):
                 "es_rol": True
             })
 
-        return Response(apis_list)
+        return Response(data)
 
     except Exception as e:
-        print("Error:", str(e))
-        return Response({'error': str(e)}, status=500)
+        traceback_str = traceback.format_exc()
+        print(traceback_str)  # Esto imprime la traza completa del error en la consola del servidor
+        return Response({'error': str(e), 'trace': traceback_str}, status=500)
 
 # Obtener el Usuario id de la sesion actual, vista
 @api_view(['POST'])

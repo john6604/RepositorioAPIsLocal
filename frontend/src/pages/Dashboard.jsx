@@ -45,7 +45,7 @@ const Dashboard = () => {
         // Filtrar APIs reales (sin el objeto especial que tiene es_rol)
         const apisReales = data.filter(item => !item.es_rol);
   
-        // Buscar objeto con rol
+        // Buscar objeto con rol 
         const rolObj = data.find(item => item.es_rol);
         const rolUsuario = rolObj ? rolObj.rol : "Sin rol";
   
