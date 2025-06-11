@@ -272,25 +272,21 @@ def rol_por_token(request):
         if not token:
             return Response({'error': 'Token de sesión no proporcionado'}, status=400)
 
-        sesion = Sesion.objects.filter(
+        sesion = Sesion.objects.select_related('usuario__rol').filter(
             token_sesion=token,
             activa=True,
             expira_en__gt=timezone.now()
         ).first()
 
-        if not sesion:
+        if not sesion or not sesion.usuario:
             return Response({'error': 'Sesión no válida o expirada'}, status=401)
 
         usuario = sesion.usuario
-
-        rol = getattr(usuario, 'rol', None)
-        if not rol:
-            rol = "Sin rol"
+        rol = usuario.rol.nombre if usuario.rol else "Sin rol"
 
         return Response({'rol': rol})
 
     except Exception as e:
-        # Imprime la traza completa en consola para debug
         traceback_str = traceback.format_exc()
         print(traceback_str)
         return Response({'error': str(e), 'trace': traceback_str}, status=500)
