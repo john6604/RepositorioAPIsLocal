@@ -161,7 +161,6 @@ const APIDetail = () => {
     }
   };
 
-  // Eliminar colaborador
   const handleRemove = async (permId) => {
     await axios.delete(
       `${API_BASE_URL}/colaboradores/eliminar/${permId}/`

@@ -942,3 +942,15 @@ def listar_colaboradores(request, api_id):
     except Exception as e:
         print("Error inesperado en listar_colaboradores:", e)
         return Response({"message": "Error interno del servidor."}, status=500)
+
+# Eliminar colaborador
+@api_view(['DELETE'])
+def eliminar_colaborador(request, perm_id):
+    try:
+        permiso = PermisoApi.objects.get(id=perm_id)
+        permiso.delete()
+        return Response({"message": "Colaborador eliminado."}, status=status.HTTP_200_OK)
+    except PermisoApi.DoesNotExist:
+        return Response({"message": "Permiso no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"message": f"Error al eliminar: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
