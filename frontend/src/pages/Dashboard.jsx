@@ -41,23 +41,18 @@ const Dashboard = () => {
           { token_sesion: tokenSesion },
           { headers: { "Content-Type": "application/json" } }
         );
-  
-        // Filtrar APIs reales (sin el objeto especial que tiene es_rol)
-        const apisReales = data.filter(item => !item.es_rol);
-  
-        // Buscar objeto con rol 
-        const rolObj = data.find(item => item.es_rol);
-        const rolUsuario = rolObj ? rolObj.rol : "Sin rol";
-  
-        setApis(apisReales);
-        setRolUsuario(rolUsuario);
-  
+
+        setApis(data);
+        if (data.length > 0 && data[0].rol !== undefined) {
+          setRolUsuario(data[0].rol);
+        }
+
         setStats({
-          total: apisReales.length,
-          public: apisReales.filter(a => a.permiso === "publico").length,
-          private: apisReales.filter(a => a.permiso === "privado").length,
-          restricted: apisReales.filter(a => a.permiso === "restringido").length,
-          draft: apisReales.filter(a => a.permiso === "borrador").length
+          total: data.length,
+          public: data.filter(a => a.permiso === "publico").length,
+          private: data.filter(a => a.permiso === "privado").length,
+          restricted: data.filter(a => a.permiso === "restringido").length,
+          draft: data.filter(a => a.permiso === "borrador").length
         });
       } catch (err) {
         console.error("No se pudieron cargar las APIs:", err);
@@ -65,7 +60,7 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-  
+
     if (tokenSesion) {
       fetchApis();
     } else {
