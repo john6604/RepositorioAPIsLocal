@@ -7,14 +7,11 @@ import { API_BASE_URL } from "../config";
 import { useRequireAuth } from "../hooks/useRequireAuth";
 
 import {
-  Star,
-  Eye,
   User,
   Home as HomeIcon,
   Grid,
   List,
   PlusCircle,
-  Bookmark,
   Folder,
   FolderPlus,
   Tags
@@ -147,22 +144,6 @@ const Dashboard = () => {
                   <List className="w-5 h-5 text-gray-600" /> Mis APIs
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => handleCategory('favoritas')}
-                  className={`flex w-full items-center gap-2 px-4 py-2 rounded ${filterCategory === 'favoritas' ? 'bg-gray-100 font-medium' : 'hover:bg-gray-100'}`}
-                >
-                  <Star className="w-5 h-5 text-gray-600" /> Favoritas
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleCategory('guardadas')}
-                  className={`flex w-full items-center gap-2 px-4 py-2 rounded ${filterCategory === 'guardadas' ? 'bg-gray-100 font-medium' : 'hover:bg-gray-100'}`}
-                >
-                  <Bookmark className="w-5 h-5 text-gray-600" /> Guardadas
-                </button>
-              </li>
               {(rolUsuario === "Administrador" || rolUsuario === "Desarrollador") && (
                 <li>
                   <Link to="/crear" className="flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-100">
@@ -260,8 +241,6 @@ const Dashboard = () => {
                   </div>
                   <p className="text-gray-600 mt-2 text-sm">{api.descripcion}</p>
                   <div className="flex items-center justify-between mt-4 text-gray-500 text-sm">
-                    <div className="flex items-center gap-1"><Star className="w-4 h-4" /><span>{api.estrellas}</span></div>
-                    <div className="flex items-center gap-1"><Eye className="w-4 h-4" /><span>{api.vistas}</span></div>
                     <div className="flex items-center gap-1"><User className="w-4 h-4" /><span className="truncate max-w-[80px]">{api.username}</span></div>
                   </div>
                 </Link>
@@ -275,8 +254,6 @@ const Dashboard = () => {
                     {api.nombre}
                   </Link>
                   <div className="flex items-center gap-4 text-gray-500 text-sm">
-                    <div className="flex items-center gap-1"><Star className="w-4 h-4" /><span>{api.estrellas}</span></div>
-                    <div className="flex items-center gap-1"><Eye className="w-4 h-4" /><span>{api.vistas}</span></div>
                     <div className="flex items-center gap-1"><User className="w-4 h-4" /><span className="truncate max-w-[80px]">{api.username}</span></div>
                   </div>
                 </li>

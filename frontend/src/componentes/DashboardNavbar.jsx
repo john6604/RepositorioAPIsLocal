@@ -4,7 +4,6 @@ import {
   House,
   Menu,
   Bell,
-  Plus,
   Users,
   LogOut,
   Star,
@@ -185,9 +184,6 @@ const DashboardNavbar = () => {
             >
               <Users size={20} />
             </button>
-            <Link to="/crear" className="p-2 rounded hover:bg-[#003366] transition flex items-center">
-              <Plus size={20} />
-            </Link>
             <button
               className="p-2 rounded hover:bg-[#003366] transition relative"
               onClick={() => setPanelNotificacionesAbierto(true)}
