@@ -16,8 +16,6 @@ const Footer = () => {
         <div>
           <h4 className="text-lg font-semibold mb-2">Enlaces útiles</h4>
           <ul className="space-y-1">
-            <li><Link to="/apis" className="hover:underline">Ver APIs</Link></li>
-            <li><Link to="/crear" className="hover:underline">Publicar API</Link></li>
             <li><Link to="/registro" className="hover:underline">Registrarse</Link></li>
             <li><Link to="/login" className="hover:underline">Iniciar sesión</Link></li>
           </ul>

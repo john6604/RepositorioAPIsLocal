@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, LogIn, UserPlus } from "lucide-react";
+import { LogIn, UserPlus } from "lucide-react";
 import logoUazuay from "../assets/logoUazuay.png";
 import { useNavigate } from "react-router-dom";
 import logoLidi from "../assets/LIDI_logo2.png";
@@ -17,11 +17,6 @@ const Navbar = () => {
   const refsMap = {
     Servicios: serviciosRef,
     Usuarios: usuariosRef,
-  };
-
-  const toggleMenu = (menu, e) => {
-    e.stopPropagation();
-    setMenuAbierto(prev => (prev === menu ? null : menu));
   };
 
   const manejarBusqueda = (e) => {
@@ -46,33 +41,6 @@ const Navbar = () => {
     window.addEventListener("scroll", manejarScroll);
     return () => window.removeEventListener("scroll", manejarScroll);
   }, []);
-
-  const MenuDropdown = ({ nombre, opciones, dropdownRef }) => (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={(e) => toggleMenu(nombre, e)}
-        className="flex items-center gap-1 px-4 py-2 rounded-md text-white hover:bg-[#005f99] transition"
-      >
-        {nombre} <ChevronDown size={16} />
-      </button>
-      <div
-        className={`absolute top-full right-0 w-56 bg-white rounded-md shadow-lg border transition-all duration-200 overflow-hidden origin-top-right transform ${
-          menuAbierto === nombre ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
-        }`}
-      >
-        {opciones.map((item, idx) => (
-          <Link
-            key={idx}
-            to={item.to}
-            className="block px-4 py-2 text-sm text-gray-800 hover:bg-blue-50 transition"
-            onClick={() => setMenuAbierto(null)}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
 
   return (
     <header
@@ -102,29 +70,6 @@ const Navbar = () => {
               className="h-16 w-auto object-contain"
             />
           </Link>
-        </div>
-
-        <div className="flex gap-4 items-center">
-          <MenuDropdown
-            nombre="Servicios"
-            opciones={[
-              { to: "/apis", label: "Registro de APIs" },
-              /*{ to: "/dashboard", label: "Ver dashboard" },
-              { to: "/crear", label: "Crear API" },
-              { to: "/modificar", label: "Modificar API" },
-              { to: "/eliminar", label: "Eliminar API" },*/
-            ]}
-            dropdownRef={serviciosRef}
-          />
-          <MenuDropdown
-            nombre="Usuarios"
-            opciones={[
-              { to: "/registro", label: "Gestión de Permisos" },
-              /*{ to: "/validar", label: "Validar Usuario" },
-              { to: "/perfil", label: "Mi Perfil" },*/
-            ]}
-            dropdownRef={usuariosRef}
-          />
         </div>
 
         <div className="flex items-center gap-2">

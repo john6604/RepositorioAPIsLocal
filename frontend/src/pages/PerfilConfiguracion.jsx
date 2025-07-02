@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Settings, Bell, Lock, Upload, Trash2, Users } from "lucide-react";
+import { User, Settings, Bell, Lock, Trash2 } from "lucide-react";
 import DashNavbar from "../componentes/DashboardNavbar";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
@@ -10,7 +10,6 @@ const tabs = [
   { id: "account", label: "Cuenta", icon: Settings },
   { id: "notifications", label: "Notificaciones", icon: Bell },
   { id: "password", label: "Contraseñas", icon: Lock },
-  { id: "colaborators", label: "Colaboradores", icon: Users},
 ];
 
 const PerfilConfiguracion = () => {
@@ -199,26 +198,6 @@ const PerfilConfiguracion = () => {
             <div className="p-6">
               {activeTab === "profile" && (
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="flex items-center gap-6">
-                    <img
-                      src="https://avatars.githubusercontent.com/u/9919?s=200&v=4"
-                      alt="Foto de perfil"
-                      className="w-16 h-16 rounded-full border"
-                    />
-                    <div>
-                      <button
-                        type="button"
-                        className="inline-flex items-center px-4 py-2 text-sm border rounded-md hover:bg-gray-100"
-                      >
-                        <Upload className="w-4 h-4 mr-2" />
-                        Subir nueva foto de perfil.
-                      </button>
-                      <p className="text-xs text-gray-500 mt-1">
-                        JPG, GIF or PNG. Max size 1MB.
-                      </p>
-                    </div>
-                  </div>
-
                   <div>
                     <label className="block text-sm font-medium">Nombres</label>
                     <input
@@ -421,41 +400,6 @@ const PerfilConfiguracion = () => {
                   </h3>
 
                   <form onSubmit={(e) => { e.preventDefault(); alert("Contraseña actualizada"); }} className="space-y-6 max-w-md">
-                    
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Nueva contraseña</label>
-                      <input
-                        type="password"
-                        name="newPassword"
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Confirmar nueva contraseña</label>
-                      <input
-                        type="password"
-                        name="confirmPassword"
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-
-                    {/* Recuperación de cuenta */}
-                    <div className="mt-6">
-                      <h4 className="text-md font-semibold mb-2">Recuperación de cuenta</h4>
-                      <p className="text-sm text-gray-600 mb-2">Correo de recuperación configurado:</p>
-                      <div className="flex items-center justify-between bg-gray-100 p-3 rounded">
-                          <input
-                            type="text"
-                            name="username"
-                            value={formData.email}
-                            disabled
-                            className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100 shadow-sm"
-                          />
-                        <button className="text-blue-500 text-sm hover:underline">Cambiar</button>
-                      </div>
-                    </div>
 
                     {/* Sesiones y dispositivos */}
                     <div className="mt-6">
@@ -469,125 +413,7 @@ const PerfilConfiguracion = () => {
                         Cerrar sesión en todos los dispositivos
                       </button>
                     </div>
-
-                    <button
-                      type="submit"
-                      className="mt-6 inline-flex justify-center px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-600"
-                    >
-                      Guardar cambios
-                    </button>
                   </form>
-                </div>
-              )}
-              {activeTab === "colaborators" && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Colaboradores
-                  </h3>
-
-                  {/* Formulario para agregar colaborador */}
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      // Aquí iría la lógica para agregar colaborador
-                      alert("Colaborador agregado");
-                    }}
-                    className="mb-6 space-y-4"
-                  >
-                    <div className="flex gap-4">
-                      <input
-                        type="text"
-                        placeholder="Nombre completo"
-                        className="flex-1 border rounded px-3 py-2 text-sm"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Correo electrónico"
-                        className="flex-1 border rounded px-3 py-2 text-sm"
-                      />
-                      <select className="border rounded px-3 py-2 text-sm">
-                        <option value="viewer">Lector</option>
-                        <option value="editor">Editor</option>
-                        <option value="admin">Administrador</option>
-                      </select>
-                      <button
-                        type="submit"
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
-                      >
-                        Agregar
-                      </button>
-                    </div>
-                  </form>
-
-                  {/* Lista de colaboradores */}
-                  <div className="border rounded-md overflow-hidden shadow-sm">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50 text-sm text-gray-600">
-                        <tr>
-                          <th className="px-6 py-3 text-left">Nombre</th>
-                          <th className="px-6 py-3 text-left">Correo</th>
-                          <th className="px-6 py-3 text-left">Rol</th>
-                          <th className="px-6 py-3 text-left">Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-100 text-sm">
-                        {/* Aquí podrías mapear los colaboradores desde el estado */}
-                        <tr>
-                          <td className="px-6 py-4">María López</td>
-                          <td className="px-6 py-4">maria@ejemplo.com</td>
-                          <td className="px-6 py-4">
-                            <select className="border rounded px-2 py-1">
-                              <option value="viewer">Lector</option>
-                              <option value="editor" selected>Editor</option>
-                              <option value="admin">Administrador</option>
-                            </select>
-                          </td>
-                          <td className="px-6 py-4 flex gap-2">
-                            <button
-                              onClick={() => alert("Invitación reenviada")}
-                              className="text-blue-600 hover:underline"
-                            >
-                              Reenviar invitación
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (window.confirm("¿Eliminar a este colaborador?")) {
-                                  alert("Colaborador eliminado");
-                                }
-                              }}
-                              className="text-red-600 hover:underline"
-                            >
-                              Eliminar
-                            </button>
-                          </td>
-                        </tr>
-                        {/* Repite este bloque por cada colaborador */}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Enlace de invitación */}
-                  <div className="mt-6 flex items-center justify-between bg-gray-50 border rounded p-4">
-                    <p className="text-sm text-gray-700">Invita a nuevos colaboradores con este enlace:</p>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        readOnly
-                        value="https://miapp.com/invitar?token=xyz123"
-                        className="text-sm px-2 py-1 border rounded w-64"
-                      />
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText("https://miapp.com/invitar?token=xyz123");
-                          alert("Enlace copiado");
-                        }}
-                        className="bg-gray-200 hover:bg-gray-300 text-sm px-3 py-1 rounded"
-                      >
-                        Copiar enlace
-                      </button>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
