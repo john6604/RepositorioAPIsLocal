@@ -89,11 +89,26 @@ import os, sys
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 IS_PRODUCTION = os.environ.get("RAILWAY_ENVIRONMENT") == "production"
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age= IS_PRODUCTION    )
-}
+
+if IS_PRODUCTION:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE':   'django.db.backends.postgresql',
+            'NAME':     'railway_locl',     
+            'USER':     'postgres',         
+            'PASSWORD': 'admin',           
+            'HOST':     'localhost',
+            'PORT':     '5432',
+        }
+    }
 #if os.environ.get("RAILWAY_ENVIRONMENT") == "production": //PARA MIGRAR 
 #    DATABASES['default'] = {
 #        'ENGINE':   'django.db.backends.postgresql',
