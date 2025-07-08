@@ -108,12 +108,25 @@ const APIDetail = () => {
 
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("api");
-  //const [searchQuery, setSearchQuery] = useState("");
   const [usuarioActualId, setUsuarioActualId] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
-  // Estados para la sección de colaboradores
   const [selectedUser, setSelectedUser] = useState(null);
   const [collaborators, setCollaborators] = useState([]);
+
+  useEffect(() => {
+    if (activeTab === "api" && apiData.metodos) {
+      for (const method of metodosHttp) {
+        const info = apiData.metodos[method];
+        const tieneInfo =
+          info &&
+          (info.endpoint || info.parametros || info.requestBody || info.respuesta);
+        if (tieneInfo) {
+          setMetodoActivo(method);
+          break;
+        }
+      }
+    }
+  }, [activeTab, apiData]);
 
   useEffect(() => {
       axios
@@ -253,34 +266,6 @@ const APIDetail = () => {
     }
   };
 
-  const handlePublicarAPI = async () => {
-    const nuevaApiData = { ...apiData, permiso: "publico" };
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/listarapis/${nuevaApiData.id}/`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(nuevaApiData),
-      });
-
-      if (response.ok) {
-        const updatedData = await response.json();
-        setApiData(updatedData);
-        alert("API publicada correctamente.");
-        navigate("/dashboard");
-      } else {
-        const error = await response.json();
-        console.error("Error al publicar:", error);
-        alert("Hubo un error al publicar la API.");
-      }
-    } catch (err) {
-      console.error("Error al enviar solicitud:", err);
-      alert("No se pudo conectar con el servidor.");
-    }
-  };
-
   const handleEliminarAPI = async () => {
     const tokenSesion = localStorage.getItem("token_sesion");
 
@@ -385,12 +370,6 @@ const APIDetail = () => {
     const esColaborador = collaborators.some(
       (colab) => Number(colab.usuario?.id) === Number(usuarioActualId)
     );
-  
-    console.log("Usuario actual:", usuarioActualId);
-    console.log("Owner:", apiData?.creado_por);
-    console.log("Colaboradores:", collaborators.map(c => c.usuario?.id));
-    console.log("¿Es owner?", esOwner);
-    console.log("¿Es colaborador?", esColaborador);
   
     setIsOwner(esOwner || esColaborador);
   }, [usuarioActualId, apiData, collaborators]);
@@ -739,6 +718,25 @@ const APIDetail = () => {
                   </label>
                 </div>
 
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    id="publico"
+                    name="permiso"
+                    value="publico"
+                    checked={apiData.permiso === "publico"}
+                    onChange={(e) =>
+                      setApiData({ ...apiData, permiso: e.target.value })
+                    }
+                  />
+                  <label
+                    htmlFor="publico"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Público - Cualquier persona podrá ver la API.
+                  </label>
+                </div>
+
                 {apiData.visibility === "restricted" && (
                   <div className="pt-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -767,7 +765,7 @@ const APIDetail = () => {
               </div>
 
               <div className="pt-4 flex gap-x-4">
-                {(apiData.permiso === "privado" || apiData.permiso === "restringido") && (
+                {(apiData.permiso === "privado" || apiData.permiso === "publico") && (
                   <button
                     className="px-4 py-2 bg-[#0077ba] text-white rounded hover:bg-[#003366] transition"
                     onClick={handleGuardarCambios}
@@ -775,12 +773,6 @@ const APIDetail = () => {
                     Guardar Cambios
                   </button>
                 )}
-                <button
-                  className="px-4 py-2 bg-[#0077ba] text-white rounded hover:bg-[#003366] transition"
-                  onClick={handlePublicarAPI}
-                >
-                  Publicar API
-                </button>
               </div>
             </div>
           )}
