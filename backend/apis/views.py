@@ -485,6 +485,9 @@ class DetalleAPIView(APIView):
             "estado": api.estado,
             "creado_en": api.creado_en,
             "actualizado_en": api.actualizado_en,
+            "categoria": api.id_categoria.nombre if api.id_categoria else None,
+            "subcategoria": api.id_subcategoria.nombre if api.id_subcategoria else None,
+            "tematica": api.id_tematica.nombre if api.id_tematica else None,
             "metodos": metodos_data
         }
         return JsonResponse(data, status=200)
@@ -503,6 +506,24 @@ class DetalleAPIView(APIView):
         api.documentacion = data.get("documentacion", api.documentacion)
         api.permiso = data.get("permiso", api.permiso)
         api.actualizado_en = timezone.now()
+
+        # Actualizar relaciones con categoría, subcategoría y temática (por nombre)
+        nombre_categoria = data.get("categoria")
+        nombre_subcategoria = data.get("subcategoria")
+        nombre_tematica = data.get("tematica")
+
+        if nombre_categoria:
+            categoria_obj = get_object_or_404(Categoria, nombre=nombre_categoria)
+            api.id_categoria = categoria_obj
+
+        if nombre_subcategoria:
+            subcategoria_obj = get_object_or_404(Subcategoria, nombre=nombre_subcategoria)
+            api.id_subcategoria = subcategoria_obj
+
+        if nombre_tematica:
+            tematica_obj = get_object_or_404(Tematica, nombre=nombre_tematica)
+            api.id_tematica = tematica_obj
+
         api.save()
 
         # Actualizar métodos HTTP asociados

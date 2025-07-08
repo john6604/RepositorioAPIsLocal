@@ -24,8 +24,7 @@ const CrearApi = () => {
   const [subcategoria, setSubcategoria] = useState("");
   const [tematica, setTematica] = useState("");
   const [detallesTecnicos, setDetallesTecnicos] = useState("");
-  // → Modo de entrada para detalles técnicos: texto o archivo
-  const [modoDetalle, setModoDetalle] = useState("text");   // 'text' | 'file'
+  const [modoDetalle, setModoDetalle] = useState("text");
   const [fileError, setFileError] = useState("");
   const [fileName, setFileName] = useState("");
   const fileInputRef = useRef(null);

@@ -31,6 +31,9 @@ const APIDetail = () => {
     creado_en: "",
     actualizado_en: "",
     metodos: {},
+    categoria: "",
+    subcategoria: "",
+    tematica: "",
   });
   const [metodoActivo, setMetodoActivo] = useState("GET");
 
@@ -78,7 +81,7 @@ const APIDetail = () => {
     } catch (error) {
       setRespuestaAPI("Error en la petición: " + error.message);
     } finally {
-      setCargando(false); // Termina el estado de carga
+      setCargando(false); 
     }
   }
 
@@ -105,13 +108,18 @@ const APIDetail = () => {
     }));
   };
 
-
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("api");
   const [usuarioActualId, setUsuarioActualId] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [collaborators, setCollaborators] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [subcategorias, setSubcategorias] = useState([]);
+  const [tematicas, setTematicas] = useState([]);
+  const [categoria, setCategoria] = useState("");
+  const [subcategoria, setSubcategoria] = useState("");
+  const [tematica, setTematica] = useState("");
 
   useEffect(() => {
     if (activeTab === "api" && apiData.metodos) {
@@ -143,6 +151,23 @@ const APIDetail = () => {
         .catch(() => setCollaborators([]));
     }
   }, [activeTab, apiId]);
+
+  useEffect(() => {
+    axios.get(`${API_BASE_URL}/categorias/`).then((res) => {
+      setCategorias(res.data);
+      setCategoria(apiData.categoria);
+    });
+
+    axios.get(`${API_BASE_URL}/subcategorias/`).then((res) => {
+      setSubcategorias(res.data);
+      setSubcategoria(apiData.subcategoria);
+    });
+
+    axios.get(`${API_BASE_URL}/tematicas/`).then((res) => {
+      setTematicas(res.data);
+      setTematica(apiData.tematica);
+    });
+  }, [apiData]);
   
   const loadUserOptions = async (inputValue) => {
     if (!inputValue) return [];
@@ -423,6 +448,10 @@ const APIDetail = () => {
               <h2 className="text-2xl font-bold mb-4">{apiData.nombre}</h2>
               <p className="mb-2">{apiData.descripcion}</p>
               <p className="mb-6">Versión: {apiData.documentacion}</p>
+              <p className="mb-2">Dependencias: {apiData.detalles_tecnicos || "No contiene dependencias"}</p>
+              <p className="mb-2">Categoría: {apiData.categoria || "Sin categoría"}</p>
+              <p className="mb-2">Subcategoría: {apiData.subcategoria || "Sin subcategoría"}</p>
+              <p className="mb-6">Temática: {apiData.tematica || "Sin temática"}</p>
 
               {/* Toggle de métodos HTTP */}
               <div className="flex rounded-lg overflow-hidden border border-gray-300 mb-6">
@@ -525,6 +554,85 @@ const APIDetail = () => {
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Categoría
+                      </label>
+                      <select
+                        name="categoria"
+                        value={apiData.categoria}
+                        onChange={(e) => {
+                          const selectedId = e.target.value;
+                          const selectedCategoria = categorias.find((cat) => String(cat.id) === selectedId);
+
+                          if (selectedCategoria) {
+                            setApiData((prev) => ({
+                              ...prev,
+                              categoria: selectedCategoria.nombre,
+                            }));
+                          }
+                        }}
+                        className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
+                      >
+                        <option value={categoria}>{apiData.categoria}</option>
+
+                        {categorias
+                          .filter((cat) => cat.nombre !== apiData.categoria)
+                          .map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.nombre}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Subcategoría
+                      </label>
+                      <select
+                        name="subcategoria"
+                        value={subcategoria}
+                        onChange={handleChange}
+                        className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
+                      >
+                        <option value={subcategoria}>{apiData.subcategoria}</option>
+
+                        {subcategorias
+                          .filter((cat) => cat.nombre !== apiData.subcategoria)
+                          .map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.nombre}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Temática
+                      </label>
+                      <select
+                        name="tematica"
+                        value={tematica}
+                        onChange={handleChange}
+                        required
+                        className="mt-1 w-full px-4 py-2 border rounded-md text-sm"
+                      >
+                        <option value={tematica}>{apiData.tematica}</option>
+
+                        {tematicas
+                          .filter((cat) => cat.nombre !== apiData.tematica)
+                          .map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.nombre}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
                   </div>
 
                   {/* Toggle de métodos HTTP */}
@@ -829,7 +937,7 @@ const APIDetail = () => {
                     <input
                       type="text"
                       value={metodoInfo.endpoint || ""}
-                      onChange={(e) => handleMetodoChange(metodoActivo, "endpoint", e.target.value)}
+                      readOnly
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
                       placeholder="/ejemplo"
                     />
@@ -841,7 +949,6 @@ const APIDetail = () => {
                   <label className="block text-sm font-medium text-gray-700">Parámetros de Entrada (JSON)</label>
                   <textarea
                     rows={4}
-                    value={metodoInfo.parametros || ""}
                     onChange={(e) => handleMetodoChange(metodoActivo, "parametros", e.target.value)}
                     placeholder={`Parámetros de entrada en formato JSON: \n"param1": "valor1",  "param2": "valor2"\n`}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm font-mono"
