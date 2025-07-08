@@ -493,42 +493,28 @@ const CrearApi = () => {
               {/* Parámetros */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Parámetros (JSON)
+                  Parámetros de Entrada (JSON)
                 </label>
                 <textarea
                   value={campos.parametros}
                   onChange={(e) => handleChange("parametros", e.target.value)}
                   className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
                   rows={3}
-                  placeholder={`[\n  { "nombre": "ciudad", "tipo": "string", "requerido": true }\n]`}
-                />
-              </div>
-
-              {/* Cuerpo de la solicitud */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cuerpo de la solicitud (JSON)
-                </label>
-                <textarea
-                  value={campos.requestBody}
-                  onChange={(e) => handleChange("requestBody", e.target.value)}
-                  className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
-                  rows={3}
-                  placeholder={`{\n  "nombre": "Juan",\n  "edad": 30\n}`}
+                  placeholder={`Parámetros de entrada en formato JSON: \n[\n  { "nombre": "ciudad", "tipo": "string", "requerido": true }\n]`}
                 />
               </div>
 
               {/* Respuesta esperada */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Respuesta esperada (JSON)
+                  Salida
                 </label>
                 <textarea
                   value={campos.respuesta}
                   onChange={(e) => handleChange("respuesta", e.target.value)}
                   className="mt-1 w-full px-4 py-2 border rounded-md text-sm font-mono"
                   rows={3}
-                  placeholder={`{\n  "mensaje": "Éxito",\n  "resultado": {...}\n}`}
+                  placeholder={`Salida esperada por el usuario.`}
                 />
               </div>
 

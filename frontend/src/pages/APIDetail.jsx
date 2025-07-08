@@ -15,8 +15,6 @@ import axios from "axios";
 import { XCircle } from "lucide-react";
 import AsyncSelect from 'react-select/async';
 
-//import { useRequireAuth } from "../hooks/useRequireAuth";
-
 const metodosHttp = ["GET", "POST", "PUT", "DELETE", "PATCH"];
 
 const APIDetail = () => {
@@ -44,8 +42,8 @@ const APIDetail = () => {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setCargando(true); // Inicia el estado de carga
-    setRespuestaAPI(""); // Limpia el resultado anterior
+    setCargando(true);
+    setRespuestaAPI(""); 
 
     const codigo = metodoInfo.requestBody || "";
     let parametros = {};
@@ -482,7 +480,7 @@ const APIDetail = () => {
 
                   {/* Parámetros */}
                   <div className="bg-white rounded-xl shadow p-4">
-                    <h3 className="font-semibold mb-2">Parámetros:</h3>
+                    <h3 className="font-semibold mb-2">Parámetros de Entrada:</h3>
                     <pre className="bg-gray-100 p-2 rounded text-sm whitespace-pre-wrap font-mono">
                       {metodoInfo.parametros || "Ninguno"}
                     </pre>
@@ -498,7 +496,7 @@ const APIDetail = () => {
 
                   {/* Respuesta esperada */}
                   <div className="bg-white rounded-xl shadow p-4">
-                    <h3 className="font-semibold mb-2">Respuesta esperada:</h3>
+                    <h3 className="font-semibold mb-2">Salida:</h3>
                     <pre className="bg-gray-100 p-2 rounded text-sm whitespace-pre-wrap font-mono">
                       {metodoInfo.respuesta || "Ninguna"}
                     </pre>
@@ -594,37 +592,25 @@ const APIDetail = () => {
 
                     {/* Parámetros */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
+                      <label className="block text-sm font-medium text-gray-700">Parámetros de Entrada</label>
                       <textarea
                         value={metodoInfo?.parametros || ""}
                         onChange={(e) => handleMetodoChange(metodoActivo, "parametros", e.target.value)}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
                         rows={3}
-                        placeholder={`[\n  { "nombre": "ciudad", "tipo": "string", "requerido": true }\n]`}
-                      />
-                    </div>
-
-                    {/* Body */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Cuerpo (Body - JSON)</label>
-                      <textarea
-                        value={metodoInfo?.requestBody || ""}
-                        onChange={(e) => handleMetodoChange(metodoActivo, "requestBody", e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
-                        rows={3}
-                        placeholder={`{\n  "nombre": "Juan",\n  "edad": 30\n}`}
+                        placeholder={`[\n Parámetros necesarios para el funcionamiento de la API.\n]`}
                       />
                     </div>
 
                     {/* Respuesta esperada */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Respuesta esperada (JSON)</label>
+                      <label className="block text-sm font-medium text-gray-700">Salida</label>
                       <textarea
                         value={metodoInfo?.respuesta || ""}
                         onChange={(e) => handleMetodoChange(metodoActivo, "respuesta", e.target.value)}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm font-mono"
                         rows={3}
-                        placeholder={`{\n  "mensaje": "Éxito",\n  "resultado": {...}\n}`}
+                        placeholder={`{\n  "Salida/Output de la API."\n}`}
                       />
                     </div>
 
@@ -752,24 +738,6 @@ const APIDetail = () => {
                     Privado – Solo tú tienes acceso a la API.
                   </label>
                 </div>
-                {/*<div className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    id="restringido"
-                    name="permiso"
-                    value="restringido"
-                    checked={apiData.permiso === "restringido"}
-                    onChange={(e) =>
-                      setApiData({ ...apiData, permiso: e.target.value })
-                    }
-                  />
-                  <label
-                    htmlFor="restringido"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Restringida – Acceso privado pero se puede compartir con enlace.
-                  </label>
-                </div>*/}
 
                 {apiData.visibility === "restricted" && (
                   <div className="pt-2">
@@ -878,12 +846,12 @@ const APIDetail = () => {
 
                 {/* Body */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Parámetros (JSON)</label>
+                  <label className="block text-sm font-medium text-gray-700">Parámetros de Entrada (JSON)</label>
                   <textarea
                     rows={4}
                     value={metodoInfo.parametros || ""}
                     onChange={(e) => handleMetodoChange(metodoActivo, "parametros", e.target.value)}
-                    placeholder={`{\n  "param1": "valor1",\n  "param2": "valor2"\n}`}
+                    placeholder={`Parámetros de entrada en formato JSON: \n"param1": "valor1",  "param2": "valor2"\n`}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm font-mono"
                   />
                 </div>
