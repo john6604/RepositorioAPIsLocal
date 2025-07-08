@@ -13,6 +13,7 @@ import ResultadosBusqueda from "./pages/Apis";
 import Categoria from "./pages/CrearCategoria";
 import Subcategoria from "./pages/CrearSubcategoria";
 import Tematica from "./pages/CrearTematica";
+import APIVista   from "./pages/APIVista";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
               <Route path="/login"    element={<Login     />} />
               <Route path="/registro" element={<Registro  />} />
               <Route path="/api/:apiId"  element={<APIDetail />} />
+              <Route path="/api/:apiId/vista"  element={<APIVista />} />
               <Route path="/dashboard"element={<Dashboard/>} />
               <Route path="/notificaciones" element={<Notificaciones />} />
               <Route path="/perfilConfig" element={<Configuracion />} />
