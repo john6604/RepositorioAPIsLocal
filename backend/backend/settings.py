@@ -105,7 +105,7 @@ else:
             'NAME':     'railway_locl',     
             'USER':     'postgres',         
             'PASSWORD': 'admin',           
-            'HOST':     'localhost',
+            'HOST':     'db',
             'PORT':     '5432',
         }
     }
