@@ -25,38 +25,49 @@ const PerfilConfiguracion = () => {
   });
   
   useEffect(() => {
-    const fetchPerfil = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/cuenta/perfil/`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true",
-          },
-        });
-  
-        if (response.ok) {
-          const data = await response.json();
-          setFormData({
-            name: data.nombres || "",
-            lastName: data.apellidos || "",
-            email: data.correo || "",
-            bio: data.biografia || "",
-            username: data.username || "",
-          });
-        } else {
-          const err = await response.json();
-          alert("Error al obtener perfil: " + err.detail);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        alert("No se pudo cargar el perfil.");
+  const fetchPerfil = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/cuenta/perfil/`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token_sesion")}`,
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+
+      const contentType = response.headers.get("content-type") || "";
+      const raw = await response.text();
+
+      if (!response.ok) {
+        console.error("Perfil no OK:", response.status, raw.slice(0, 400));
+        alert(`Error al obtener perfil: ${response.status}`);
+        return;
       }
-    };
-  
-    fetchPerfil();
-  }, []);
+
+      if (!contentType.includes("application/json")) {
+        console.error("Perfil devolvió NO-JSON:", contentType, raw.slice(0, 400));
+        alert("El backend devolvió HTML (no JSON). Revisa consola.");
+        return;
+      }
+
+      const data = JSON.parse(raw);
+      setFormData({
+        name: data.nombres || "",
+        lastName: data.apellidos || "",
+        email: data.correo || "",
+        bio: data.biografia || "",
+        username: data.username || "",
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      alert("No se pudo cargar el perfil.");
+    }
+  };
+
+  fetchPerfil();
+}, []);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
