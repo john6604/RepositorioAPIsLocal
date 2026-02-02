@@ -28,7 +28,14 @@ const APIs = () => {
   useEffect(() => {
     const buscar = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/buscar-apis-publicas?q=${encodeURIComponent(termino)}`);
+        const res = await fetch(
+          `${API_BASE_URL}/buscar-apis-publicas?q=${encodeURIComponent(termino)}`,
+          {
+            headers: {
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
+        );
         const data = await res.json();
         setResultados(data.resultados || []);
         setStats({
