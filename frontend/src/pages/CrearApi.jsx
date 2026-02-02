@@ -65,6 +65,7 @@ const CrearApi = () => {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
           },
         });
 
@@ -213,6 +214,7 @@ const CrearApi = () => {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${tokenSesion}`,
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify(nuevaApi),
       });
