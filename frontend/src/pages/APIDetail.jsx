@@ -342,7 +342,11 @@ const APIDetail = () => {
   const obtenerDetalleAPI = async (apiId) => {
     try {
       const url = `${API_BASE_URL}/listarapis/${apiId}/`;
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
 
       const data = await response.json();
       if (response.ok) {
