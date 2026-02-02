@@ -36,7 +36,7 @@ const Dashboard = () => {
         const response = await axios.post(
           `${API_BASE_URL}/rolusuario/`,
           { token_sesion: tokenSesion },
-          { headers: { "Content-Type": "application/json" } }
+          { headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true", } }
         );
         if (response.data.rol) {
           setRolUsuario(response.data.rol);
