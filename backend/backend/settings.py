@@ -159,3 +159,13 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "ngrok-skip-browser-warning",
 ]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.ngrok-free\.dev$",
+    r"^https://.*\.ngrok-free\.app$",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.ngrok-free.dev",
+    "https://*.ngrok-free.app",
+]
