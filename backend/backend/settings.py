@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import dj_database_url
+from corsheaders.defaults import default_headers
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -154,3 +155,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 # ------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_CREDENTIALS = True  
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "ngrok-skip-browser-warning",
+]
