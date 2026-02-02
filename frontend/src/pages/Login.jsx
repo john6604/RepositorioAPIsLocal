@@ -118,7 +118,7 @@ const Login = () => {
 
                 const response = await fetch(`${API_BASE_URL}/login/`, {
                   method: "POST",
-                  headers: { "Content-Type": "application/json" },
+                  headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true", },
                   body: JSON.stringify({
                     correo: email,
                     contrasena: sub,
