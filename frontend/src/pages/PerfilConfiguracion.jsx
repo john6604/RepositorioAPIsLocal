@@ -32,6 +32,7 @@ const PerfilConfiguracion = () => {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
           },
         });
   
@@ -79,6 +80,7 @@ const PerfilConfiguracion = () => {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
           },
         });
   
@@ -104,6 +106,7 @@ const PerfilConfiguracion = () => {
         headers: {
           "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({
           nombres: formData.name,
@@ -141,6 +144,7 @@ const PerfilConfiguracion = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({ token_sesion: token }),
       });
