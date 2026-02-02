@@ -15,7 +15,10 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     "meticulous-perception-production.up.railway.app",
+    ".ngrok-free.dev",
+    ".ngrok-free.app",
 ]
+
 
 # Aplicaciones instaladas
 INSTALLED_APPS = [
