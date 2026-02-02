@@ -64,6 +64,7 @@ const APIDetail = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({
           codigo,
@@ -247,6 +248,7 @@ const APIDetail = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({ token_sesion: tokenSesion }),
       });
@@ -271,6 +273,7 @@ const APIDetail = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify(apiData),
       });
@@ -308,6 +311,7 @@ const APIDetail = () => {
         headers: {
           "Authorization": `Bearer ${localStorage.getItem("token_sesion")}`,
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
       });
 
